@@ -1,0 +1,10 @@
+#LetsBox.gf_upload_box .fileupload-start-button {
+    display: none !important;
+}
+
+#LetsBox .fileupload-header-title,
+#LetsBox .fileupload-add-button button,
+#LetsBox .upload-add-file,
+#LetsBox .upload-add-folder {
+    pointer-events: none;
+}

@@ -1,0 +1,82 @@
+# Copyright (C) 2021 User Avatar For Woocommerce
+# This file is distributed under the same license as the User Avatar For Woocommerce package.
+msgid ""
+msgstr ""
+"Project-Id-Version: User Avatar For Woocommerce 1.0.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/user-avatar-for-"
+"woocommerce\n"
+"POT-Creation-Date: 2021-02-03 13:50:40+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2021-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: user-avatar-for-woocommerce.php:372
+msgid "Local Avatar Permissions"
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:386
+msgid ""
+"Only allow users with file upload capabilities to upload local avatars "
+"(Authors and above)"
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:489
+msgid "Avatar"
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:492
+msgid "Upload Avatar"
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:507 user-avatar-for-woocommerce.php:622
+msgid "No local avatar is set. Use the upload field to add a local avatar."
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:509 user-avatar-for-woocommerce.php:624
+msgid "Delete local avatar"
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:510 iuser-avatar-for-woocommerce.php:625
+msgid ""
+"Replace the local avatar by uploading a new avatar, or erase the local "
+"avatar (falling back to a gravatar) by checking the delete option."
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:515 user-avatar-for-woocommerce.php:630
+msgid "No local avatar is set. Set up your avatar at Gravatar.com."
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:517 user-avatar-for-woocommerce.php:632
+msgid ""
+"You do not have media management permissions. To change your local avatar, "
+"contact the site administrator."
+msgstr ""
+
+#: user-avatar-for-woocommerce.php:636
+msgid "Update Avatar"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "User Avatar For Woocommerce"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/plugins/user-avatar-for-woocommerce"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Aggiunge l'avatar nella sezione account del cliente in woocommece."
+"Viene attivato l'avatar anche nell'admin in wordpress. Puoi anche utilizzarlo dove vuoi con lo shortcode. "
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "4wpbari"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://4wp.it"
+msgstr ""

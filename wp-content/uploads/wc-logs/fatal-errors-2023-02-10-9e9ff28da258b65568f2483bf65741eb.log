@@ -1,0 +1,54 @@
+2023-02-10T04:12:40+00:00 CRITICAL Uncaught Error: Call to a member function set_expired() on null in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php:110
+Stack trace:
+#0 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php(134): TheLion\LetsBox\Client->get_root_folder()
+#1 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Filebrowser.php(29): TheLion\LetsBox\Client->get_folder()
+#2 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Processor.php(252): TheLion\LetsBox\Filebrowser->getFilesList()
+#3 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/lets-box.php(921): TheLion\LetsBox\Processor->start_process()
+#4 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-includes/class-wp-hook.php(308): TheLion\LetsBox\Main->start_process('')
+#5 /homepages/25/d878234082/htdocs/ in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php alla riga 110
+
+2023-02-10T04:13:03+00:00 CRITICAL Uncaught Error: Call to a member function set_expired() on null in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php:110
+Stack trace:
+#0 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php(134): TheLion\LetsBox\Client->get_root_folder()
+#1 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Filebrowser.php(29): TheLion\LetsBox\Client->get_folder()
+#2 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Processor.php(252): TheLion\LetsBox\Filebrowser->getFilesList()
+#3 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/lets-box.php(921): TheLion\LetsBox\Processor->start_process()
+#4 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-includes/class-wp-hook.php(308): TheLion\LetsBox\Main->start_process('')
+#5 /homepages/25/d878234082/htdocs/ in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php alla riga 110
+
+2023-02-10T04:13:03+00:00 CRITICAL Uncaught Error: Call to a member function set_expired() on null in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php:110
+Stack trace:
+#0 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php(134): TheLion\LetsBox\Client->get_root_folder()
+#1 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Filebrowser.php(29): TheLion\LetsBox\Client->get_folder()
+#2 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Processor.php(252): TheLion\LetsBox\Filebrowser->getFilesList()
+#3 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/lets-box.php(921): TheLion\LetsBox\Processor->start_process()
+#4 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-includes/class-wp-hook.php(308): TheLion\LetsBox\Main->start_process('')
+#5 /homepages/25/d878234082/htdocs/ in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php alla riga 110
+
+2023-02-10T04:13:03+00:00 CRITICAL Uncaught Error: Call to a member function set_expired() on null in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php:110
+Stack trace:
+#0 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php(134): TheLion\LetsBox\Client->get_root_folder()
+#1 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Filebrowser.php(29): TheLion\LetsBox\Client->get_folder()
+#2 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Processor.php(252): TheLion\LetsBox\Filebrowser->getFilesList()
+#3 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/lets-box.php(921): TheLion\LetsBox\Processor->start_process()
+#4 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-includes/class-wp-hook.php(308): TheLion\LetsBox\Main->start_process('')
+#5 /homepages/25/d878234082/htdocs/ in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php alla riga 110
+
+2023-02-10T04:13:03+00:00 CRITICAL Uncaught Error: Call to a member function set_expired() on null in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php:110
+Stack trace:
+#0 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php(134): TheLion\LetsBox\Client->get_root_folder()
+#1 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Filebrowser.php(29): TheLion\LetsBox\Client->get_folder()
+#2 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Processor.php(252): TheLion\LetsBox\Filebrowser->getFilesList()
+#3 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/lets-box.php(921): TheLion\LetsBox\Processor->start_process()
+#4 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-includes/class-wp-hook.php(308): TheLion\LetsBox\Main->start_process('')
+#5 /homepages/25/d878234082/htdocs/ in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php alla riga 110
+
+2023-02-10T04:13:04+00:00 CRITICAL Uncaught Error: Call to a member function set_expired() on null in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php:110
+Stack trace:
+#0 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php(134): TheLion\LetsBox\Client->get_root_folder()
+#1 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Filebrowser.php(29): TheLion\LetsBox\Client->get_folder()
+#2 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Processor.php(252): TheLion\LetsBox\Filebrowser->getFilesList()
+#3 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/lets-box.php(921): TheLion\LetsBox\Processor->start_process()
+#4 /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-includes/class-wp-hook.php(308): TheLion\LetsBox\Main->start_process('')
+#5 /homepages/25/d878234082/htdocs/ in /homepages/25/d878234082/htdocs/clickandbuilds/interazioniumane/wp-content/plugins/lets-box/includes/Client.php alla riga 110
+
