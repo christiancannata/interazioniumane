@@ -185,7 +185,7 @@ export interface CartErrorItem {
 	message: string;
 }
 
-export interface Cart {
+export interface Cart extends Record< string, unknown > {
 	coupons: Array< CartCouponItem >;
 	shippingRates: Array< CartShippingRate >;
 	shippingAddress: CartShippingAddress;
@@ -216,6 +216,6 @@ export interface ExtensionCartUpdateArgs {
 }
 
 export interface BillingAddressShippingAddress {
-	billing_address: CartBillingAddress;
-	shipping_address: CartShippingAddress;
+	billing_address: Partial< CartBillingAddress >;
+	shipping_address: Partial< CartShippingAddress >;
 }
