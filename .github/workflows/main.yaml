@@ -11,9 +11,9 @@ jobs:
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: sftp://access878234082.webspace-data.io
+          server: access878234082.webspace-data.io
           port: 22
-          protocol: ftps
+          protocol: sftp
           username: u734623326
           password: ${{ secrets.ftp_password }}
           server-dir: /clickandbuilds/StagingInterazioniUmane/
