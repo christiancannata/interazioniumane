@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'woocommerce/woocommerce',
-        'pretty_version' => '7.4.0',
-        'version' => '7.4.0.0',
+        'pretty_version' => '7.6.1',
+        'version' => '7.6.1.0',
         'reference' => NULL,
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -104,8 +104,8 @@
             'dev_requirement' => false,
         ),
         'woocommerce/woocommerce' => array(
-            'pretty_version' => '7.4.0',
-            'version' => '7.4.0.0',
+            'pretty_version' => '7.6.1',
+            'version' => '7.6.1.0',
             'reference' => NULL,
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
@@ -113,9 +113,9 @@
             'dev_requirement' => false,
         ),
         'woocommerce/woocommerce-blocks' => array(
-            'pretty_version' => 'v9.4.3',
-            'version' => '9.4.3.0',
-            'reference' => '26feae05d65ff38f0277bdb0c19f9d293d3cbfc4',
+            'pretty_version' => '9.8.5',
+            'version' => '9.8.5.0',
+            'reference' => '95587377e1085f6cc09b6d09973bc568eb91be6f',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../packages/woocommerce-blocks',
             'aliases' => array(),
