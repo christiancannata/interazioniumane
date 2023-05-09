@@ -14,7 +14,6 @@ jobs:
           host: access878234082.webspace-data.io      # Recommended to put the credentials in github secrets.
           username: u734623326
           password: ${{ secrets.FTP_PASSWORD }}
-          dryRun: true
           compress: true                             # Compression
           localDir: '.'                              # Required, Absolute or relative to cwd.
           remoteDir: '/clickandbuilds/StagingInterazioniUmane/'                             # Required, Absolute path only.
