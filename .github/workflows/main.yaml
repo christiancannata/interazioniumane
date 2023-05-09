@@ -13,8 +13,9 @@ jobs:
         with:
           server: access878234082.webspace-data.io
           port: 22
-          protocol: ftps-legacy
+          protocol: ftps
           username: u734623326
           password: ${{ secrets.ftp_password }}
           server-dir: /clickandbuilds/StagingInterazioniUmane/
           dry-run: true
+          git-ftp-args: --insecure
