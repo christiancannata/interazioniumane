@@ -6,6 +6,7 @@ if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
 		return array(
 			'activity-panels' => true,
 			'analytics' => true,
+			'block-editor-feature-enabled' => false,
 			'coupons' => true,
 			'customer-effort-score-tracks' => true,
 			'import-products-task' => true,
@@ -18,7 +19,7 @@ if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
 			'minified-js' => false,
 			'mobile-app-banner' => true,
 			'navigation' => true,
-			'new-product-management-experience' => true,
+			'new-product-management-experience' => false,
 			'onboarding' => true,
 			'onboarding-tasks' => true,
 			'product-variation-management' => false,
