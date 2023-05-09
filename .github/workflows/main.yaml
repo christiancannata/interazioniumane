@@ -8,14 +8,14 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v3
 
-      - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: 📂 SFTP uploader                       # Upload to SFTP
+        uses: wangyucode/sftp-upload-action@v2.0.2
         with:
-          server: access878234082.webspace-data.io
-          port: 22
-          protocol: ftp
+          host: access878234082.webspace-data.io      # Recommended to put the credentials in github secrets.
           username: u734623326
-          password: ${{ secrets.ftp_password }}
-          server-dir: /clickandbuilds/StagingInterazioniUmane/
-          dry-run: true
-          security: loose
+          password: ${{ secrets.FTP_PASSWORD }}
+          dryRun: true
+          compress: true                             # Compression
+          localDir: '.'                              # Required, Absolute or relative to cwd.
+          remoteDir: '/clickandbuilds/StagingInterazioniUmane/'                             # Required, Absolute path only.
+          exclude: '.git*,.DS_Store,wp-config.php,uploads'                 # Optional. exclude patterns (glob) like .gitignore, use ',' to split, Default to ''.
