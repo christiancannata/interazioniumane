@@ -15,5 +15,5 @@ jobs:
           port: 22
           username: u133555843
           password: ${{ secrets.ftp_password }}
-          server-dir: /clickandbuilds/StagingInterazioniUmane
+          server-dir: /clickandbuilds/StagingInterazioniUmane/
           dry-run: true
