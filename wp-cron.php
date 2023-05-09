@@ -198,5 +198,4 @@ foreach ( $crons as $timestamp => $cronhooks ) {
 if ( _get_cron_lock() === $doing_wp_cron ) {
 	delete_transient( 'doing_cron' );
 }
-
 die();
