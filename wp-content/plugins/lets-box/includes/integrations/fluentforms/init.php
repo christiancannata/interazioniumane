@@ -9,10 +9,11 @@ if (!defined('ABSPATH')) {
 
 use FluentForm\App\Helpers\Helper;
 use FluentForm\Framework\Helpers\ArrayHelper;
+use TheLion\LetsBox\Processor;
 
 class FluentForms_Field extends \FluentForm\App\Services\FormBuilder\BaseFieldManager
 {
-    public $default_value = '[letsbox class="fluentforms_upload_box" mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
+    public $default_value = '[letsbox mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
     public $field_type = 'wpcp-letsbox';
 
     public function __construct()
@@ -24,9 +25,11 @@ class FluentForms_Field extends \FluentForm\App\Services\FormBuilder\BaseFieldMa
             'general' // where to push general/advanced
         );
 
-        //Load Scripts and CSS in Editor
-
+        // Load Scripts and CSS in Editor
         add_action('admin_enqueue_scripts', [$this, 'enqueueEditorAssets']);
+
+        // Restore original form data for field as FF is stripping data
+        add_filter('fluentform_insert_response_data', [$this, 'restore_original_form_data'], 10, 3);
 
         // Data render
         add_filter('fluentform_response_render_'.$this->key, [$this, 'renderResponse'], 10, 3);
@@ -114,37 +117,37 @@ class FluentForms_Field extends \FluentForm\App\Services\FormBuilder\BaseFieldMa
     public function getPlaceholder()
     {
         ob_start(); ?>
-            <div id="LetsBox" class="light upload">
-                <div class="LetsBox upload"style="width: 100%;">
-                    <div class="fileupload-box -is-formfield -is-required -has-files" style="width:100%;max-width:100%;"">
+<div id="LetsBox" class="light upload">
+    <div class="LetsBox upload" style="width: 100%;">
+        <div class="fileupload-box -is-formfield -is-required -has-files" style="width:100%;max-width:100%;"">
                     <!-- FORM ELEMENTS -->
-                    <div class="fileupload-form" >
-                    <!-- END FORM ELEMENTS -->
+                    <div class=" fileupload-form">
+            <!-- END FORM ELEMENTS -->
 
-                    <!-- UPLOAD BOX HEADER -->
-                    <div class="fileupload-header">
-                        <div class="fileupload-header-title">
-                            <div class="fileupload-empty">
-                                <div class="fileupload-header-text-title upload-add-file"><?php esc_html_e('Add your file', 'wpcloudplugins'); ?></div>
-                                    <div class="fileupload-header-text-subtitle upload-add-folder"><a><?php esc_html_e('Or select a folder', 'wpcloudplugins'); ?></a>
-                                </div>
-                            </div>
+            <!-- UPLOAD BOX HEADER -->
+            <div class="fileupload-header">
+                <div class="fileupload-header-title">
+                    <div class="fileupload-empty">
+                        <div class="fileupload-header-text-title upload-add-file"><?php esc_html_e('Add your file', 'wpcloudplugins'); ?></div>
+                        <div class="fileupload-header-text-subtitle upload-add-folder"><a><?php esc_html_e('Or select a folder', 'wpcloudplugins'); ?></a>
                         </div>
-                    </div>
-                    <!-- END UPLOAD BOX HEADER -->
-
-                    <!-- UPLOAD BOX FOOTER -->
-                    <div class="fileupload-footer">
-                        <div class="fileupload-footer-content">
-                        <button class="fileupload-start-button button"><span> Start upload</span></button>
-                        </div>
-                    </div>
-                    <!-- END UPLOAD BOX FOOTER -->
-
                     </div>
                 </div>
             </div>
-            <?php
+            <!-- END UPLOAD BOX HEADER -->
+
+            <!-- UPLOAD BOX FOOTER -->
+            <div class="fileupload-footer">
+                <div class="fileupload-footer-content">
+                    <button class="fileupload-start-button button"><span> Start upload</span></button>
+                </div>
+            </div>
+            <!-- END UPLOAD BOX FOOTER -->
+
+        </div>
+    </div>
+</div>
+<?php
         return ob_get_clean();
     }
 
@@ -208,12 +211,10 @@ class FluentForms_Field extends \FluentForm\App\Services\FormBuilder\BaseFieldMa
             return;
         }
 
-        global $LetsBox;
+        \TheLion\LetsBox\Core::instance()->load_scripts();
+        \TheLion\LetsBox\Core::instance()->load_styles();
 
-        $LetsBox->load_scripts();
-        $LetsBox->load_styles();
-
-        wp_enqueue_style('LetsBox.CustomStyle');
+        wp_enqueue_style('LetsBox');
         wp_enqueue_script('WPCP-'.$this->field_type.'-FluentForms', plugins_url('FluentForms.js', __FILE__), ['WPCloudplugin.Libraries'], LETSBOX_VERSION, true);
     }
 
@@ -231,7 +232,7 @@ class FluentForms_Field extends \FluentForm\App\Services\FormBuilder\BaseFieldMa
             return $private_folder_name;
         }
 
-        if ('fluentforms_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('fluentforms_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name;
         }
 
@@ -252,11 +253,35 @@ class FluentForms_Field extends \FluentForm\App\Services\FormBuilder\BaseFieldMa
      */
     public function rename_private_folder_names_for_guests($private_folder_name_guest, $processor)
     {
-        if ('fluentforms_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('fluentforms_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name_guest;
         }
 
-        return str_replace(esc_html__('Guests', 'wpcloudplugins').' - ', '', $private_folder_name_guest);
+        $prefix = Processor::instance()->get_setting('userfolder_name_guest_prefix');
+
+        return str_replace($prefix, '', $private_folder_name_guest);
+    }
+
+    /**
+     * Function to restore POST form data for field as FF is applying sanitize_text_field() on the form field.
+     *
+     * @param array $formData
+     * @param int   $formId
+     * @param array $inputConfigs
+     *  */
+    public function restore_original_form_data($formData, $formId, $inputConfigs)
+    {
+        $org_data = \wpFluentForm('request')->get('data');
+
+        foreach ($formData as $key => $value) {
+            if (
+                0 === strpos($key, 'fileupload-filelist_')
+                || 0 === strpos($key, 'wpcp-useyourdrive')) {
+                $formData[$key] = $org_data[$key];
+            }
+        }
+
+        return $formData;
     }
 }
 

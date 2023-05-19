@@ -12,6 +12,7 @@ interface FolderInterface
 {
     public function __construct($options = null);
     public function getId();
+    public function setId();
     public function mapBoxToClass($aData);
     public function getItems();
     public function toArray($syncState = "synced");

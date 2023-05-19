@@ -13,6 +13,7 @@ use ACP\Editing\Editable;
 use ACP\Editing\ListScreen;
 use ACP\Editing\RequestHandler;
 use ACP\Editing\Service;
+use ACP\Editing\Service\Editability;
 use ACP\Editing\Settings;
 
 class InlineValues implements RequestHandler {
@@ -41,7 +42,7 @@ class InlineValues implements RequestHandler {
 			$response->error();
 		}
 
-		$list_screen = $this->storage->find( new ListScreenId( $list_id ) );
+		$list_screen = $this->storage->find_by_user( new ListScreenId( $list_id ), wp_get_current_user() );
 
 		if ( ! $list_screen instanceof ListScreen ) {
 			$response->error();
@@ -50,7 +51,7 @@ class InlineValues implements RequestHandler {
 		$strategy = $list_screen->editing();
 
 		foreach ( $ids as $k => $id ) {
-			if ( ! $strategy->user_has_write_permission( $id ) ) {
+			if ( ! $strategy->user_can_edit_item( (int) $id ) ) {
 				unset( $ids[ $k ] );
 			}
 		}
@@ -108,12 +109,14 @@ class InlineValues implements RequestHandler {
 		$values = [];
 
 		foreach ( $ids as $id ) {
-			$value = $service->get_value( $id );
+			if ( $service instanceof Editability && ! $service->is_editable( $id ) ) {
+				continue;
+			}
 
-			// Apply Filters
-			$value = ( new EditValue( $id, $column ) )->apply_filters( $value );
+			$filter = new EditValue( $id, $column );
+			$value = $filter->apply_filters( $service->get_value( $id ) );
 
-			// Not editable
+			// Not editable. Backwards compatibility.
 			if ( null === $value ) {
 				continue;
 			}

@@ -77,10 +77,15 @@ class WOE_Formatter_Storage_Summary_Session implements WOE_Formatter_Storage {
 		if( !$this->rows_already_sorted )
 			$this->sortByName();
 		do_action('woe_summary_before_output');
-        reset($_SESSION[$this->summaryKey]);
+		if(isset($_SESSION[$this->summaryKey]))
+			reset($_SESSION[$this->summaryKey]);
     }
 
     public function getNextRow() {
+		if( !isset($_SESSION[$this->summaryKey]) ) {
+			return false;
+		}
+			
         $row = current($_SESSION[$this->summaryKey]);
 		if ($row === false) { //all rows were returned
 			unset($_SESSION[$this->summaryKey . '_header']);

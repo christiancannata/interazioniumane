@@ -1,35 +1,27 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class Filebrowser
 {
-    /**
-     * @var \TheLion\LetsBox\Processor
-     */
-    private $_processor;
+    private $_folder;
+    private $_items;
     private $_search = false;
     private $_parentfolders = [];
 
-    public function __construct(Processor $_processor)
-    {
-        $this->_processor = $_processor;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
-    }
-
     public function getFilesList()
     {
-        $this->_folder = $this->get_processor()->get_client()->get_folder();
+        $this->_folder = Client::instance()->get_folder();
 
-        if ((false !== $this->_folder)) {
-            $this->filesarray = $this->createFilesArray();
+        if (false !== $this->_folder) {
+            $this->_items = $this->createItems();
             $this->renderFilelist();
         } else {
             exit('Folder is not received');
@@ -38,19 +30,18 @@ class Filebrowser
 
     public function searchFiles()
     {
-        if ('POST' !== $_SERVER['REQUEST_METHOD']) {
+        if ('POST' !== $_SERVER['REQUEST_METHOD'] || !User::can_search()) {
             exit(-1);
         }
 
         $this->_search = true;
-        $_REQUEST['query'] = esc_attr($_REQUEST['query']);
-        $input = $_REQUEST['query'];
+        $_REQUEST['query'] = wp_kses(stripslashes($_REQUEST['query']), 'strip');
         $this->_folder = [];
-        $this->_folder['folder'] = $this->get_processor()->get_client()->get_entry($this->get_processor()->get_root_folder());
-        $this->_folder['contents'] = $this->get_processor()->get_client()->search($input);
+        $this->_folder['folder'] = Client::instance()->get_entry(Processor::instance()->get_root_folder());
+        $this->_folder['contents'] = Client::instance()->search($_REQUEST['query']);
 
-        if ((false !== $this->_folder)) {
-            $this->filesarray = $this->createFilesArray();
+        if (false !== $this->_folder) {
+            $this->_items = $this->createItems();
 
             $this->renderFilelist();
         }
@@ -63,29 +54,31 @@ class Filebrowser
 
     public function setParentFolder()
     {
+        $this->_parentfolders = [];
+
         if (true === $this->_search) {
             return;
         }
 
         $currentfolder = $this->_folder['folder']->get_entry()->get_id();
-        if ($currentfolder !== $this->get_processor()->get_root_folder()) {
+        if ($currentfolder !== Processor::instance()->get_root_folder()) {
             // Get parent folder from known folder path
-            $cacheparentfolder = $this->get_processor()->get_client()->get_entry($this->get_processor()->get_root_folder());
-            $folder_path = $this->get_processor()->get_folder_path();
+            $cacheparentfolder = Client::instance()->get_entry(Processor::instance()->get_root_folder());
+            $folder_path = Processor::instance()->get_folder_path();
             $parentid = end($folder_path);
             if (false !== $parentid) {
-                $cacheparentfolder = $this->get_processor()->get_client()->get_entry($parentid);
+                $cacheparentfolder = Client::instance()->get_entry($parentid);
             }
 
             /* Check if parent folder indeed is direct parent of entry
              * If not, return all known parents */
             $parentfolders = [];
             if (false !== $cacheparentfolder && $cacheparentfolder->has_children() && array_key_exists($currentfolder, $cacheparentfolder->get_children())) {
-                $parentfolders[] = $cacheparentfolder->get_entry();
+                $parentfolders[$cacheparentfolder->get_id()] = $cacheparentfolder->get_entry();
             } else {
                 if ($this->_folder['folder']->has_parents()) {
                     foreach ($this->_folder['folder']->get_parents() as $parent) {
-                        $parentfolders[] = $parent->get_entry();
+                        $parentfolders[$parent->get_id()] = $parent->get_entry();
                     }
                 }
             }
@@ -98,21 +91,22 @@ class Filebrowser
         // Create HTML Filelist
         $filelist_html = '';
 
-        $breadcrumb_class = ('1' === $this->get_processor()->get_shortcode_option('show_breadcrumb')) ? 'has-breadcrumb' : 'no-breadcrumb';
+        $breadcrumb_class = ('1' === Processor::instance()->get_shortcode_option('show_breadcrumb')) ? 'has-breadcrumb' : 'no-breadcrumb';
+        $fileinfo_class = ('1' === Processor::instance()->get_shortcode_option('fileinfo_on_hover')) ? 'has-fileinfo-on-hover' : '';
 
         $filescount = 0;
         $folderscount = 0;
 
-        $filelist_html = "<div class='files {$breadcrumb_class}'>";
+        $filelist_html = "<div class='files {$breadcrumb_class} {$fileinfo_class}'>";
         $filelist_html .= "<div class='folders-container'>";
 
-        if (count($this->filesarray) > 0) {
+        if (count($this->_items) > 0) {
             // Limit the number of files if needed
-            if ('-1' !== $this->get_processor()->get_shortcode_option('max_files')) {
-                $this->filesarray = array_slice($this->filesarray, 0, $this->get_processor()->get_shortcode_option('max_files'));
+            if ('-1' !== Processor::instance()->get_shortcode_option('max_files')) {
+                $this->_items = array_slice($this->_items, 0, Processor::instance()->get_shortcode_option('max_files'));
             }
 
-            foreach ($this->filesarray as $item) {
+            foreach ($this->_items as $item) {
                 // Render folder div
                 if ($item->is_dir()) {
                     $filelist_html .= $this->renderDir($item);
@@ -132,8 +126,8 @@ class Filebrowser
 
         $filelist_html .= "</div><div class='files-container'>";
 
-        if (count($this->filesarray) > 0) {
-            foreach ($this->filesarray as $item) {
+        if (count($this->_items) > 0) {
+            foreach ($this->_items as $item) {
                 // Render files div
                 if ($item->is_file()) {
                     $filelist_html .= $this->renderFile($item);
@@ -146,23 +140,26 @@ class Filebrowser
 
         // Create HTML Filelist title
         $file_path = '<ol class="wpcp-breadcrumb">';
-        $folder_path = $this->get_processor()->get_folder_path();
-        $root_folder_id = $this->get_processor()->get_root_folder();
+        $folder_path = Processor::instance()->get_folder_path();
+        $root_folder_id = Processor::instance()->get_root_folder();
         if (!isset($this->_folder['folder'])) {
-            $this->_folder['folder'] = $this->get_processor()->get_client()->get_entry($this->get_processor()->get_requested_entry());
+            $this->_folder['folder'] = Client::instance()->get_entry(Processor::instance()->get_requested_entry());
         }
 
         $current_id = $this->_folder['folder']->get_entry()->get_id();
         $current_folder_name = $this->_folder['folder']->get_entry()->get_name();
 
+        $root_folder = Client::instance()->get_folder($root_folder_id);
+        $root_text = '1' === Processor::instance()->get_shortcode_option('use_custom_roottext') ? Processor::instance()->get_shortcode_option('root_text') : $root_folder['folder']->get_entry()->get_name();
+
         if ($root_folder_id === $current_id) {
-            $file_path .= "<li class='first-breadcrumb'><a href='#{$current_id}' class='folder current_folder' data-id='".$current_id."'>".$this->get_processor()->get_shortcode_option('root_text').'</a></li>';
-        } elseif (false === $this->_search || 'parent' === $this->get_processor()->get_shortcode_option('searchfrom')) {
+            $file_path .= "<li class='first-breadcrumb'><a href='#{$current_id}' class='folder current_folder' data-id='".$current_id."'>{$root_text}</a></li>";
+        } elseif (false === $this->_search || 'parent' === Processor::instance()->get_shortcode_option('searchfrom')) {
             foreach ($folder_path as $parent_id) {
                 if ($parent_id === $root_folder_id) {
-                    $file_path .= "<li class='first-breadcrumb'><a href='#{$parent_id}' class='folder' data-id='".$parent_id."'>".$this->get_processor()->get_shortcode_option('root_text').'</a></li>';
+                    $file_path .= "<li class='first-breadcrumb'><a href='#{$parent_id}' class='folder' data-id='".$parent_id."'>{$root_text}</a></li>";
                 } else {
-                    $parent_folder = $this->get_processor()->get_client()->get_folder($parent_id);
+                    $parent_folder = Client::instance()->get_folder($parent_id);
                     $file_path .= "<li><a href='#{$parent_id}'class='folder' data-id='".$parent_id."'>".$parent_folder['folder']->get_name().'</a></li>';
                 }
             }
@@ -170,7 +167,7 @@ class Filebrowser
         }
 
         if (true === $this->_search) {
-            $file_path .= "<li><a href='javascript:void(0)' class='folder'>".sprintf(esc_html__('Results for %s', 'wpcloudplugins'), "'".$_REQUEST['query']."'").'</a></li>';
+            $file_path .= "<li><a href='javascript:void(0)' class='folder'>".sprintf(esc_html__('Results for %s', 'wpcloudplugins'), "'".htmlentities($_REQUEST['query'])."'").'</a></li>';
         }
 
         $file_path .= '</ol>';
@@ -186,7 +183,7 @@ class Filebrowser
         }
 
         if (true === $this->_search) {
-            $lastFolder = $this->get_processor()->get_last_folder();
+            $lastFolder = Processor::instance()->get_last_folder();
         } else {
             $lastFolder = $this->_folder['folder']->get_entry()->get_id();
         }
@@ -205,39 +202,36 @@ class Filebrowser
         ]);
 
         if (false === defined('HAS_CHANGES')) {
-            $cached_request = new CacheRequest($this->get_processor());
+            $cached_request = new CacheRequest();
             $cached_request->add_cached_response($response);
         }
 
         echo $response;
 
-        exit();
+        exit;
     }
 
     public function renderDir(Entry $item)
     {
         $return = '';
 
-        $classmoveable = ($this->get_processor()->get_user()->can_move_folders() || $this->get_processor()->get_user()->can_move_folders()) ? 'moveable' : '';
+        $classmoveable = (User::can_move_folders() || User::can_move_folders()) && !$item->is_virtual_folder() ? 'moveable' : '';
+        $classvirtual = $item->is_virtual_folder() ? ' isvirtual' : '';
+
         $isparent = (isset($this->_folder['folder'])) ? $this->_folder['folder']->is_in_folder($item->get_id()) : false;
 
-        $return .= "<div class='entry {$classmoveable} folder ".($isparent ? 'pf' : '')."' data-id='".$item->get_id()."' data-name='".htmlspecialchars($item->get_basename(), ENT_QUOTES | ENT_HTML401, 'UTF-8')."'>\n";
-        if (!$isparent) {
-            if ('linkto' === $this->get_processor()->get_shortcode_option('mcepopup') || 'linktobackendglobal' === $this->get_processor()->get_shortcode_option('mcepopup')) {
-                $return .= "<div class='entry_linkto'>\n";
-                $return .= '<span>'."<input class='button-secondary' type='submit' title='".esc_html__('Select folder', 'wpcloudplugins')."' value='".esc_html__('Select folder', 'wpcloudplugins')."'>".'</span>';
-                $return .= '</div>';
-            }
-        }
-
+        $return .= "<div class='entry {$classmoveable} {$classvirtual} folder ".($isparent ? 'pf' : '')."' data-id='".$item->get_id()."' data-name='".htmlspecialchars($item->get_basename(), ENT_QUOTES | ENT_HTML401, 'UTF-8')."'>\n";
         $return .= "<div class='entry_block'>\n";
-
         $return .= "<div class='entry-info'>";
+
+        if (!$isparent) {
+            $return .= $this->renderCheckBox($item);
+        }
 
         $thumburl = $isparent ? LETSBOX_ICON_SET.'256x256/prev.png' : $item->get_icon_large();
         $return .= "<div class='entry-info-icon'><div class='preloading'></div><img class='preloading' src='".LETSBOX_ROOTPATH."/css/images/transparant.png' data-src='{$thumburl}' data-src-retina='{$thumburl}'/></div>";
 
-        $return .= "<div class='entry-info-name'>";
+        $return .= "<div href='javascript:void(0);' class='entry-info-name'>";
         $return .= "<a class='entry_link' title='{$item->get_basename()}'>";
         $return .= '<span>';
         $return .= (($isparent) ? '<strong>'.esc_html__('Previous folder', 'wpcloudplugins').'</strong>' : $item->get_name()).' </span>';
@@ -245,11 +239,12 @@ class Filebrowser
         $return .= '</a></div>';
 
         if (!$isparent) {
+            $return .= $this->renderItemSelect($item);
             $return .= $this->renderTags($item);
+            $return .= $this->renderDownload($item);
 
             $return .= $this->renderDescription($item);
             $return .= $this->renderActionMenu($item);
-            $return .= $this->renderCheckBox($item);
         }
 
         $return .= "</div>\n";
@@ -263,50 +258,59 @@ class Filebrowser
     public function renderFile(Entry $item)
     {
         $link = $this->renderFileNameLink($item);
-        $title = $link['filename'].((('1' === $this->get_processor()->get_shortcode_option('show_filesize')) && ($item->get_size() > 0)) ? ' ('.Helpers::bytes_to_size_1024($item->get_size()).')' : '&nbsp;');
+        $title = $link['filename'].((('1' === Processor::instance()->get_shortcode_option('show_filesize')) && ($item->get_size() > 0)) ? ' ('.Helpers::bytes_to_size_1024($item->get_size()).')' : '');
 
-        $classmoveable = ($this->get_processor()->get_user()->can_move_files()) ? 'moveable' : '';
+        $classmoveable = (User::can_move_files()) ? 'moveable' : '';
 
         if ($item->get_size() < 5242880) {
-            $thumbnail_medium = $this->get_processor()->get_client()->get_thumbnail($item, true, 500, 500, false, true);
+            $thumbnail_medium = Client::instance()->get_thumbnail($item, true, 500, 500, false, true);
         } else {
-            $thumbnail_medium = $this->get_processor()->get_client()->get_thumbnail($item, true, 500, 500, false, false);
+            $thumbnail_medium = Client::instance()->get_thumbnail($item, true, 500, 500, false, false);
         }
 
-        $has_tooltip = ($item->has_own_thumbnail() && !empty($thumbnail_medium) && ('shortcode' !== $this->get_processor()->get_shortcode_option('mcepopup')) && ('1' === $this->get_processor()->get_shortcode_option('hover_thumbs'))) ? "data-tooltip=''" : '';
-
         $return = '';
-        $return .= "<div class='entry file {$classmoveable}' data-id='".$item->get_id()."' data-name='".htmlspecialchars($item->get_basename(), ENT_QUOTES | ENT_HTML401, 'UTF-8')."' {$has_tooltip}>\n";
+        $return .= "<div class='entry file {$classmoveable}' data-id='".$item->get_id()."' data-name='".htmlspecialchars($item->get_basename(), ENT_QUOTES | ENT_HTML401, 'UTF-8')."'>\n";
         $return .= "<div class='entry_block'>\n";
 
         $return .= "<div class='entry_thumbnail'><div class='entry_thumbnail-view-bottom'><div class='entry_thumbnail-view-center'>\n";
 
         $return .= "<div class='preloading'></div>";
-        $return .= "<img referrerPolicy='no-referrer' class='preloading' src='".LETSBOX_ROOTPATH."/css/images/transparant.png' data-src='".$thumbnail_medium."' data-src-retina='".$thumbnail_medium."' data-src-backup='".$item->get_icon_large()."'/>";
+        $return .= "<img referrerPolicy='no-referrer' class='preloading' alt='' src='".LETSBOX_ROOTPATH."/css/images/transparant.png' data-src='".$thumbnail_medium."' data-src-retina='".$thumbnail_medium."' data-src-backup='".$item->get_icon_large()."'/>";
         $return .= "</div></div></div>\n";
 
+        // Audio files can play inline without lightbox
+        $inline_player = '';
+        if (User::can_preview() && in_array($item->get_extension(), ['mp3', 'm4a', 'ogg', 'oga', 'flac', 'wav'])) {
+            if (empty($stream_url = Cache::instance()->get_node_by_id($item->get_id())->get_temporarily_link())) {
+                $stream_url = LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&listtoken='.Processor::instance()->get_listtoken();
+            }
+
+            $inline_player .= "<div class='entry-inline-player' data-src='{$stream_url}' type='{$item->get_mimetype()}'><i class='eva eva-play-circle-outline eva-lg'></i> <i class='eva eva-pause-circle-outline eva-lg'></i> <i class='eva eva-volume-up-outline eva-lg eva-pulse'></i>";
+            $inline_player .= '</div>';
+        }
+
         $return .= "<div class='entry-info'>";
-        $return .= "<div class='entry-info-icon'><img src='".$item->get_icon()."'/></div>";
+        $return .= $this->renderCheckBox($item);
+        $return .= "<div class='entry-info-icon ".(!empty($inline_player) ? 'entry-info-icon-has-player' : '')."'><img src='".$item->get_icon()."'/>{$inline_player}</div>";
         $return .= "<div class='entry-info-name'>";
         $return .= '<a '.$link['url'].' '.$link['target']." class='entry_link ".$link['class']."' ".$link['onclick']." title='".$title."' ".$link['lightbox']." data-name='".$link['filename']."' data-entry-id='{$item->get_id()}'>";
 
         $return .= '<span>'.$link['filename'].'</span>';
 
         $return .= '</a>';
-
-        if (('shortcode' === $this->get_processor()->get_shortcode_option('mcepopup')) && (in_array($item->get_extension(), ['mp4', 'm4v', 'ogg', 'ogv', 'webmv', 'mp3', 'm4a', 'oga', 'wav', 'webm']))) {
-            $return .= "&nbsp;<a class='entry_media_shortcode'><i class='eva eva-code'></i></a>";
-        }
-
         $return .= '</div>';
 
+        $return .= $this->renderItemEmbed($item);
+        $return .= $this->renderItemSelect($item);
         $return .= $this->renderDescriptionText($item);
         $return .= $this->renderModifiedDate($item);
         $return .= $this->renderSize($item);
         $return .= $this->renderTags($item);
+        $return .= $this->renderThumbnailHover($item);
+        $return .= $this->renderDownload($item);
         $return .= $this->renderDescription($item);
         $return .= $this->renderActionMenu($item);
-        $return .= $this->renderCheckBox($item);
+
         $return .= "</div>\n";
 
         $return .= $link['lightbox_inline'];
@@ -319,7 +323,7 @@ class Filebrowser
 
     public function renderSize(EntryAbstract $item)
     {
-        if ('1' === $this->get_processor()->get_shortcode_option('show_filesize')) {
+        if ('1' === Processor::instance()->get_shortcode_option('show_filesize')) {
             $size = ($item->get_size() > 0) ? Helpers::bytes_to_size_1024($item->get_size()) : '&nbsp;';
 
             return "<div class='entry-info-size entry-info-metadata'>".$size.'</div>';
@@ -328,14 +332,14 @@ class Filebrowser
 
     public function renderModifiedDate(EntryAbstract $item)
     {
-        if ('1' === $this->get_processor()->get_shortcode_option('show_filedate')) {
+        if ('1' === Processor::instance()->get_shortcode_option('show_filedate')) {
             return "<div class='entry-info-modified-date entry-info-metadata'>".$item->get_last_edited_str().'</div>';
         }
     }
 
     public function renderDescriptionText(EntryAbstract $item)
     {
-        if ('1' === $this->get_processor()->get_shortcode_option('show_description')) {
+        if ('1' === Processor::instance()->get_shortcode_option('show_description')) {
             return "<div class='entry-info-entry-description-text entry-info-metadata'>".$item->get_description().'</div>';
         }
     }
@@ -345,20 +349,24 @@ class Filebrowser
         $checkbox = '';
 
         if ($item->is_dir()) {
-            if ($this->get_processor()->get_user()->can_download_zip() || $this->get_processor()->get_user()->can_delete_folders() || $this->get_processor()->get_user()->can_move_folders()) {
-                $checkbox .= "<div class='entry-info-button entry_checkbox'><input type='checkbox' name='selected-files[]' class='selected-files' value='".$item->get_id()."' id='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'/><label for='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'></label></div>";
-            }
-
-            if ((in_array($this->get_processor()->get_shortcode_option('mcepopup'), ['links', 'embedded']))) {
-                $checkbox .= "<div class='entry-info-button entry_checkbox'><input type='checkbox' name='selected-files[]' class='selected-files' value='".$item->get_id()."' id='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'/><label for='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'></label></div>";
+            if (
+                in_array(Processor::instance()->get_shortcode_option('popup'), ['links', 'embedded', 'woocommerce'])
+                || User::can_download_zip()
+                 || User::can_delete_folders()
+                  || User::can_move_folders()
+                  || User::can_copy_folders()
+            ) {
+                $checkbox .= "<div class='entry-info-button entry_checkbox'><input type='checkbox' name='selected-files[]' class='selected-files' value='".$item->get_id()."' id='checkbox-".Processor::instance()->get_listtoken()."-{$item->get_id()}'/><label for='checkbox-".Processor::instance()->get_listtoken()."-{$item->get_id()}'></label></div>";
             }
         } else {
-            if ($this->get_processor()->get_user()->can_download_zip() || $this->get_processor()->get_user()->can_delete_files() || $this->get_processor()->get_user()->can_move_files()) {
-                $checkbox .= "<div class='entry-info-button entry_checkbox'><input type='checkbox' name='selected-files[]' class='selected-files' value='".$item->get_id()."' id='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'/><label for='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'></label></div>";
-            }
-
-            if ((in_array($this->get_processor()->get_shortcode_option('mcepopup'), ['links', 'embedded']))) {
-                $checkbox .= "<div class='entry-info-button entry_checkbox'><input type='checkbox' name='selected-files[]' class='selected-files' value='".$item->get_id()."' id='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'/><label for='checkbox-{$this->get_processor()->get_listtoken()}-{$item->get_id()}'></label></div>";
+            if (
+                in_array(Processor::instance()->get_shortcode_option('popup'), ['links', 'embedded', 'woocommerce'])
+                || User::can_download_zip()
+                 || User::can_delete_files()
+                  || User::can_move_files()
+                  || User::can_copy_files()
+            ) {
+                $checkbox .= "<div class='entry-info-button entry_checkbox'><input type='checkbox' name='selected-files[]' class='selected-files' value='".$item->get_id()."' id='checkbox-".Processor::instance()->get_listtoken()."-{$item->get_id()}'/><label for='checkbox-".Processor::instance()->get_listtoken()."-{$item->get_id()}'></label></div>";
             }
         }
 
@@ -374,53 +382,53 @@ class Filebrowser
         $lightbox = '';
         $lightbox_inline = '';
         $datatype = 'iframe';
-        $filename = ('1' === $this->get_processor()->get_shortcode_option('show_ext')) ? $item->get_name() : $item->get_basename();
+        $filename = ('1' === Processor::instance()->get_shortcode_option('show_ext')) ? $item->get_name() : $item->get_basename();
 
         // Check if user is allowed to preview the file
-        $usercanpreview = $this->get_processor()->get_user()->can_preview() && '1' === $this->get_processor()->get_shortcode_option('allow_preview');
+        $usercanpreview = User::can_preview();
 
         if (
-                $item->is_dir()
-                || false === $item->get_can_preview_by_cloud()
-                || 'zip' === $item->get_extension()
-                || false === $this->get_processor()->get_user()->can_view()
+            $item->is_dir()
+            || false === $item->get_can_preview_by_cloud()
+            || 'zip' === $item->get_extension()
+            || false === User::can_view()
         ) {
             $usercanpreview = false;
         }
 
-        if ($usercanpreview && ('0' === $this->get_processor()->get_shortcode_option('mcepopup'))) {
-            $url = LETSBOX_ADMIN_URL.'?action=letsbox-preview&id='.($item->get_id()).'&listtoken='.$this->get_processor()->get_listtoken();
+        if ($usercanpreview && ('0' === Processor::instance()->get_shortcode_option('popup'))) {
+            $url = LETSBOX_ADMIN_URL.'?action=letsbox-preview&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&listtoken='.Processor::instance()->get_listtoken();
 
             // Check if we need to preview inline
-            if ('1' === $this->get_processor()->get_shortcode_option('previewinline')) {
-                $class = 'entry_link ilightbox-group';
+            if ('1' === Processor::instance()->get_shortcode_option('previewinline')) {
+                $class = 'ilightbox-group';
                 $onclick = "sendAnalyticsLB('Preview', '{$item->get_name()}');";
 
-                if (in_array($item->get_extension(), ['mp4', 'm4v', 'ogg', 'ogv', 'webmv', 'mp3', 'm4a', 'ogg', 'oga']) && 'personal' === $this->get_processor()->get_app()->get_account_type()) {
+                if (in_array($item->get_extension(), ['mp4', 'm4v', 'ogg', 'ogv', 'webmv', 'mp3', 'm4a', 'ogg', 'oga', 'flac']) && 'personal' === App::get_current_account()->get_type()) {
                     $datatype = 'inline';
-                    $url = LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.($item->get_id()).'&listtoken='.$this->get_processor()->get_listtoken();
 
-                    if ($this->get_processor()->get_client()->has_temporarily_link($item)) {
-                        $url = $this->get_processor()->get_client()->get_temporarily_link($item);
+                    if (empty($url = Cache::instance()->get_node_by_id($item->get_id())->get_temporarily_link())) {
+                        $url = LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&listtoken='.Processor::instance()->get_listtoken();
                     }
                 }
 
                 // Lightbox Settings
-                $lightbox = "rel='ilightbox[".$this->get_processor()->get_listtoken()."]' ";
+                $lightbox = "rel='ilightbox[".Processor::instance()->get_listtoken()."]' ";
                 $lightbox .= 'data-type="'.$datatype.'"';
 
                 switch ($datatype) {
                     case 'image':
+                        $thumbnail = Client::instance()->get_thumbnail($item, true, 320, 320, false, false);
+                        $lightbox .= ' data-options="thumbnail: \''.$thumbnail.'\'"';
+
                         break;
 
                     case 'inline':
-                        $id = 'ilightbox_'.$this->get_processor()->get_listtoken().'_'.md5($item->get_id());
+                        $id = 'ilightbox_'.Processor::instance()->get_listtoken().'_'.md5($item->get_id());
                         $html5_element = (false === strpos($item->get_mimetype(), 'video')) ? 'audio' : 'video';
-                        $icon = $this->get_processor()->get_client()->get_thumbnail($item, true, 160, 160, false, false);
-                        $thumbnail = $this->get_processor()->get_client()->get_thumbnail($item, true, 320, 320, false, false);
-
-                        $lightbox_size = (false !== strpos($item->get_mimetype(), 'audio')) ? 'width: \'85%\',' : 'width: \'85%\', height: \'85%\',';
-                        $lightbox .= ' data-options="mousewheel: false, swipe:false, '.$lightbox_size.' thumbnail: \''.$thumbnail.'\'"';
+                        $icon = Client::instance()->get_thumbnail($item, true, 160, 160, false, false);
+                        $thumbnail = Client::instance()->get_thumbnail($item, true, 320, 320, false, false);
+                        $lightbox .= ' data-options="mousewheel: false, swipe:false, thumbnail: \''.$thumbnail.'\'"';
 
                         $download = 'controlsList="nodownload"';
                         $lightbox_inline = '<div id="'.$id.'" class="html5_player" style="display:none;"><'.$html5_element.' controls '.$download.' preload="metadata"  poster="'.$thumbnail.'"> <source data-src="'.$url.'" type="'.$item->get_mimetype().'">'.esc_html__('Your browser does not support HTML5. You can only download this file', 'wpcloudplugins').'</'.$html5_element.'></div>';
@@ -429,21 +437,28 @@ class Filebrowser
                         break;
 
                     case 'iframe':
-                        $lightbox .= ' data-options="mousewheel: false, width: \'85%\', height: \'80%\'"';
+                        $thumbnail = Client::instance()->get_thumbnail($item, true, 320, 320, false, false);
+                        $lightbox .= ' data-options="mousewheel: false, swipe:false, thumbnail: \''.$thumbnail.'\'"';
                         // no break
                     default:
                         break;
                 }
             } else {
                 $url .= '&inline=0';
-                $class = 'entry_action_external_view';
-                $target = '_blank';
-                $onclick = "sendAnalyticsLB('Preview  (new window)', '{$item->get_name()}');";
+
+                if (!in_array($item->get_extension(), ['mp3', 'm4a', 'ogg', 'oga', 'flac', 'wav'])) {
+                    $class = 'entry_action_external_view';
+                    $target = '_blank';
+                    $onclick = "sendAnalyticsLB('Preview  (new window)', '{$item->get_name()}');";
+                } else {
+                    $url = '#';
+                    $class = 'use_inline_player';
+                }
             }
-        } elseif (('0' === $this->get_processor()->get_shortcode_option('mcepopup')) && $this->get_processor()->get_user()->can_download()) {
+        } elseif (('0' === Processor::instance()->get_shortcode_option('popup')) && User::can_download()) {
             // Check if user is allowed to download file
 
-            $url = LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.($item->get_id()).'&listtoken='.$this->get_processor()->get_listtoken();
+            $url = LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&listtoken='.Processor::instance()->get_listtoken();
             $class = 'entry_action_download';
 
             // Weblinks/Bookmarks
@@ -454,15 +469,15 @@ class Filebrowser
         }
         // No Url
 
-        if ('woocommerce' === $this->get_processor()->get_shortcode_option('mcepopup')) {
-            $class = 'entry_woocommerce_link';
+        if ('woocommerce' === Processor::instance()->get_shortcode_option('popup')) {
+            $class = 'entry-select-item';
         }
 
-        if ('shortcode' === $this->get_processor()->get_shortcode_option('mcepopup')) {
+        if ('shortcode_buider' === Processor::instance()->get_shortcode_option('popup')) {
             $url = '';
         }
 
-        /* if ($this->get_processor()->is_mobile() && $datatype === 'iframe') {
+        /* if (Processor::instance()->is_mobile() && $datatype === 'iframe') {
           $lightbox = '';
           $class = 'entry_action_external_view';
           $target = '_blank';
@@ -482,6 +497,52 @@ class Filebrowser
         return ['filename' => htmlspecialchars($filename, ENT_COMPAT | ENT_HTML401 | ENT_QUOTES, 'UTF-8'), 'class' => $class, 'url' => $url, 'lightbox' => $lightbox, 'lightbox_inline' => $lightbox_inline, 'target' => $target, 'onclick' => $onclick];
     }
 
+    public function renderThumbnailHover(Entry $item)
+    {
+        if ($item->get_size() < 5242880) {
+            $thumbnail_url = Client::instance()->get_thumbnail($item, true, 500, 500, false, true);
+        } else {
+            $thumbnail_url = Client::instance()->get_thumbnail($item, true, 500, 500, false, false);
+        }
+
+        if (
+            false === $item->has_own_thumbnail()
+            || empty($thumbnail_url)
+            || ('0' === Processor::instance()->get_shortcode_option('hover_thumbs'))) {
+            return '';
+        }
+
+        $html = "<div class='entry-info-button entry-thumbnail-button  tabindex='0'><i class='eva eva-eye-outline eva-lg'></i>\n";
+        $html .= "<div class='tippy-content-holder'>";
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderDownload(Entry $item)
+    {
+        $html = '';
+
+        $usercanread = User::can_download() && ($item->is_file() || '1' === Processor::instance()->get_shortcode_option('can_download_zip'));
+
+        if ($item->is_virtual_folder() || !$usercanread || null !== $item->url) {
+            return $html;
+        }
+
+        $url = '';
+        if ($item->is_file()) {
+            $url = LETSBOX_ADMIN_URL.'?action=letsbox-download&dl=1&&id='.$item->get_id().'&account_id='.App::get_current_account()->get_id().'&listtoken='.Processor::instance()->get_listtoken();
+        }
+
+        $html .= "<div class='entry-info-button entry-download-button' tabindex='0'>
+            <a class='entry_action_download' ".(!empty($url) ? "href='{$url}'" : '')." download='".$item->get_name()."' data-name='".$item->get_name()."' title='".esc_html__('Download', 'wpcloudplugins')."'><i class='eva eva-download eva-lg'></i></a>\n";
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public function renderDescription(Entry $item)
     {
         $html = '';
@@ -493,13 +554,14 @@ class Filebrowser
         $has_description = (false === empty($item->description));
 
         $metadata = [
-            'modified' => "<i class='eva eva-clock-outline'></i> ".$item->get_last_edited_str(),
+            'modified' => "<i class='eva eva-clock-outline'></i> ".$item->get_last_edited_str(false),
             'size' => ($item->get_size() > 0) ? Helpers::bytes_to_size_1024($item->get_size()) : '',
         ];
 
         $html .= "<div class='entry-info-button entry-description-button ".(($has_description) ? '-visible' : '')."' tabindex='0'><i class='eva eva-info-outline eva-lg'></i>\n";
         $html .= "<div class='tippy-content-holder'>";
         $html .= "<div class='description-textbox'>";
+        $html .= "<div class='description-file-name'>".htmlspecialchars($item->get_name(), ENT_COMPAT | ENT_HTML401 | ENT_QUOTES, 'UTF-8').'</div>';
         $html .= ($has_description) ? "<div class='description-text'>".nl2br($item->get_description()).'</div>' : '';
         $html .= "<div class='description-file-info'>".implode(' &bull; ', array_filter($metadata)).'</div>';
 
@@ -535,41 +597,64 @@ class Filebrowser
         return $html;
     }
 
+    public function renderItemEmbed(Entry $item)
+    {
+        if (
+            'shortcode_buider' === Processor::instance()->get_shortcode_option('popup')
+            && in_array($item->get_extension(), ['mp4', 'm4v', 'ogg', 'ogv', 'webmv', 'mp3', 'm4a', 'oga', 'wav', 'webm'])
+        ) {
+            return "<a class='entry-info-button entry-embed-item'><i class='eva eva-code eva-lg'></i></a>";
+        }
+
+        return '';
+    }
+
+    public function renderItemSelect(Entry $item)
+    {
+        $html = '';
+
+        if (in_array(Processor::instance()->get_shortcode_option('popup'), ['private_folders_selector', 'private_folders_backend', 'woocommerce'])) {
+            $html .= "<div class='entry-info-button entry-select-item' title='".esc_html__('Select this item', 'wpcloudplugins')."'><i class='eva eva-checkmark-outline eva-lg'></i></div>";
+        }
+
+        return $html;
+    }
+
     public function renderActionMenu(Entry $item)
     {
         $html = '';
 
-        $usercanpreview = $this->get_processor()->get_user()->can_preview() && '1' === $this->get_processor()->get_shortcode_option('allow_preview');
+        $usercanpreview = User::can_preview();
 
         if (
-                $item->is_dir()
-                || false === $item->get_can_preview_by_cloud()
-                || 'zip' === $item->get_extension()
-                || false === $this->get_processor()->get_user()->can_view()
+            $item->is_dir()
+            || false === $item->get_can_preview_by_cloud()
+            || 'zip' === $item->get_extension()
+            || false === User::can_view()
         ) {
             $usercanpreview = false;
         }
 
-        $usercanread = $this->get_processor()->get_user()->can_download() && ($item->is_file() || '1' === $this->get_processor()->get_shortcode_option('can_download_zip'));
-        $usercanshare = $this->get_processor()->get_user()->can_share();
-        $usercanedit = $this->get_processor()->get_user()->can_edit();
-        $usercaneditdescription = $this->get_processor()->get_user()->can_edit_description();
+        $usercanread = User::can_download() && ($item->is_file() || '1' === Processor::instance()->get_shortcode_option('can_download_zip'));
+        $usercanshare = User::can_share();
+        $usercanedit = User::can_edit();
+        $usercaneditdescription = User::can_edit_description();
 
-        $usercandeeplink = $this->get_processor()->get_user()->can_deeplink();
-        $usercanrename = ($item->is_dir()) ? $this->get_processor()->get_user()->can_rename_folders() : $this->get_processor()->get_user()->can_rename_files();
-        $usercanmove = ($item->is_dir()) ? $this->get_processor()->get_user()->can_move_folders() : $this->get_processor()->get_user()->can_move_files();
-        $usercancopy = (($item->is_dir()) ? $this->get_processor()->get_user()->can_copy_folders() : $this->get_processor()->get_user()->can_copy_files());
-        $usercandelete = ($item->is_dir()) ? $this->get_processor()->get_user()->can_delete_folders() : $this->get_processor()->get_user()->can_delete_files();
+        $usercandeeplink = User::can_deeplink();
+        $usercanrename = ($item->is_dir()) ? User::can_rename_folders() : User::can_rename_files();
+        $usercanmove = ($item->is_dir()) ? User::can_move_folders() : User::can_move_files();
+        $usercancopy = (($item->is_dir()) ? User::can_copy_folders() : User::can_copy_files());
+        $usercandelete = ($item->is_dir()) ? User::can_delete_folders() : User::can_delete_files();
 
         $filename = $item->get_basename();
-        $filename .= (('1' === $this->get_processor()->get_shortcode_option('show_ext') && !empty($item->extension)) ? '.'.$item->get_extension() : '');
+        $filename .= (('1' === Processor::instance()->get_shortcode_option('show_ext') && !empty($item->extension)) ? '.'.$item->get_extension() : '');
 
         // View
         if ($usercanpreview) {
-            if (('1' === $this->get_processor()->get_shortcode_option('previewinline'))) {
+            if ('1' === Processor::instance()->get_shortcode_option('previewinline')) {
                 $html .= "<li><a class='entry_action_view' title='".esc_html__('Preview', 'wpcloudplugins')."'><i class='eva eva-eye-outline eva-lg'></i>&nbsp;".esc_html__('Preview', 'wpcloudplugins').'</a></li>';
             }
-            $url = LETSBOX_ADMIN_URL.'?action=letsbox-preview&inline=0&id='.urlencode($item->get_id()).'&listtoken='.$this->get_processor()->get_listtoken();
+            $url = LETSBOX_ADMIN_URL.'?action=letsbox-preview&inline=0&id='.urlencode($item->get_id()).'&account_id='.$this->_folder['folder']->get_account_id().'&listtoken='.Processor::instance()->get_listtoken();
             $onclick = "sendAnalyticsLB('Preview (new window)', '".$item->get_basename().((!empty($item->extension)) ? '.'.$item->get_extension() : '')."');";
             $html .= "<li><a href='{$url}' target='_blank' class='entry_action_external_view' onclick=\"{$onclick}\" title='".esc_html__('Preview in new window', 'wpcloudplugins')."'><i class='eva eva-monitor-outline eva-lg'></i>&nbsp;".esc_html__('Preview in new window', 'wpcloudplugins').'</a></li>';
         }
@@ -585,19 +670,19 @@ class Filebrowser
         }
 
         // Download
-        if (($usercanread) && ($item->is_file()) && null === $item->url) {
-            $html .= "<li><a href='".LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$item->get_id().'&dl=1&listtoken='.$this->get_processor()->get_listtoken()."' class='entry_action_download' download='".$filename."' data-name='".$filename."' title='".esc_html__('Download', 'wpcloudplugins')."'><i class='eva eva-download eva-lg'></i>&nbsp;".esc_html__('Download', 'wpcloudplugins').'</a></li>';
+        if ($usercanread && $item->is_file() && null === $item->url) {
+            $html .= "<li><a href='".LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&dl=1&listtoken='.Processor::instance()->get_listtoken()."' class='entry_action_download' download='".$filename."' data-name='".$filename."' title='".esc_html__('Download', 'wpcloudplugins')."'><i class='eva eva-download eva-lg'></i>&nbsp;".esc_html__('Download', 'wpcloudplugins').'</a></li>';
         }
 
-        if ($usercanread && $item->is_dir() && '1' === $this->get_processor()->get_shortcode_option('can_download_zip')) {
+        if ($usercanread && $item->is_dir() && '1' === Processor::instance()->get_shortcode_option('can_download_zip')) {
             $html .= "<li><a class='entry_action_download' download='".$item->get_name()."' data-name='".$filename."' title='".esc_html__('Download', 'wpcloudplugins')."'><i class='eva eva-download eva-lg'></i>&nbsp;".esc_html__('Download', 'wpcloudplugins').'</a></li>';
         }
 
         // Exportformats
-        if (($usercanread) && ($item->is_file()) && (count($item->get_save_as()) > 0)) {
+        if ($usercanread && $item->is_file() && (count($item->get_save_as()) > 0)) {
             $html .= "<li class='has-menu'><a><i class='eva eva-download eva-lg'></i>&nbsp;".esc_html__('Download as', 'wpcloudplugins').'<i class="eva eva-chevron-right eva-lg"></i></a><ul>';
             foreach ($item->get_save_as() as $name => $exportlinks) {
-                $html .= "<li><a href='".LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$item->get_id().'&dl=1&extension='.$exportlinks['extension'].'&listtoken='.$this->get_processor()->get_listtoken()."' target='_blank' class='entry_action_export' download='".$filename."' data-name='".$filename."'><i class='eva eva-file-outline eva-lg'></i>&nbsp;".' '.$name.'</a>';
+                $html .= "<li><a href='".LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&dl=1&extension='.$exportlinks['extension'].'&listtoken='.Processor::instance()->get_listtoken()."' target='_blank' class='entry_action_export' download='".$filename."' data-name='".$filename."'><i class='eva eva-file-outline eva-lg'></i>&nbsp;".' '.$name.'</a>';
             }
             $html .= '</ul>';
         }
@@ -618,8 +703,8 @@ class Filebrowser
         }
 
         // Edit
-        if (($usercanedit) && ($item->is_file()) && $item->get_can_edit_by_cloud()) {
-            $html .= "<li><a href='".LETSBOX_ADMIN_URL.'?action=letsbox-edit&id='.$item->get_id().'&listtoken='.$this->get_processor()->get_listtoken()."' target='_blank' class='entry_action_edit' data-name='".$filename."' title='".esc_html__('Edit (new window)', 'wpcloudplugins')."'><i class='eva eva-edit-outline eva-lg'></i>&nbsp;".esc_html__('Edit (new window)', 'wpcloudplugins').'</a></li>';
+        if ($usercanedit && $item->is_file() && $item->get_can_edit_by_cloud()) {
+            $html .= "<li><a href='".LETSBOX_ADMIN_URL.'?action=letsbox-edit&id='.$item->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&listtoken='.Processor::instance()->get_listtoken()."' target='_blank' class='entry_action_edit' data-name='".$filename."' title='".esc_html__('Edit (new window)', 'wpcloudplugins')."'><i class='eva eva-edit-outline eva-lg'></i>&nbsp;".esc_html__('Edit (new window)', 'wpcloudplugins').'</a></li>';
         }
 
         // Rename
@@ -643,6 +728,8 @@ class Filebrowser
             $html .= "<li><a class='entry_action_delete' title='".esc_html__('Delete', 'wpcloudplugins')."'><i class='eva eva-trash-2-outline eva-lg'></i>&nbsp;".esc_html__('Delete', 'wpcloudplugins').'</a></li>';
         }
 
+        $html = apply_filters('letsbox_set_action_menu', $html, $item);
+
         if ('' !== $html) {
             return "<div class='entry-info-button entry-action-menu-button' title='".esc_html__('More actions', 'wpcloudplugins')."' tabindex='0'><i class='eva eva-more-vertical-outline'></i><div id='menu-".$item->get_id()."' class='entry-action-menu-button-content tippy-content-holder'><ul data-id='".$item->get_id()."' data-name='".$item->get_basename()."'>".$html."</ul></div></div>\n";
         }
@@ -655,14 +742,14 @@ class Filebrowser
         $return = '';
 
         if (
-            false === $this->get_processor()->get_user()->can_add_folders()
+            false === User::can_add_folders()
             || true === $this->_search
-            || '1' === $this->get_processor()->get_shortcode_option('show_breadcrumb')
-            ) {
+            || '1' === Processor::instance()->get_shortcode_option('show_breadcrumb')
+        ) {
             return $return;
         }
 
-        $icon_set = $this->get_processor()->get_setting('icon_set');
+        $icon_set = Processor::instance()->get_setting('icon_set');
 
         $return .= "<div class='entry folder newfolder'>\n";
         $return .= "<div class='entry_block'>\n";
@@ -672,7 +759,7 @@ class Filebrowser
 
         $return .= "<div class='entry-info'>";
         $return .= "<div class='entry-info-name'>";
-        $return .= "<a class='entry_link' title='".esc_html__('Add folder', 'wpcloudplugins')."'><div class='entry-name-view'>";
+        $return .= "<a href='javascript:void(0);' class='entry_link' title='".esc_html__('Add folder', 'wpcloudplugins')."'><div class='entry-name-view'>";
         $return .= '<span>'.esc_html__('Add folder', 'wpcloudplugins').'</span>';
         $return .= '</div></a>';
         $return .= "</div>\n";
@@ -684,24 +771,31 @@ class Filebrowser
         return $return;
     }
 
-    public function createFilesArray()
+    public function createItems()
     {
-        $filesarray = [];
+        $items = [];
 
         $this->setParentFolder();
 
-        //Add folders and files to filelist
+        // Don't return any results for empty searches in the Search Box
+        if ('search' === Processor::instance()->get_shortcode_option('mode') && empty($_REQUEST['query']) && $this->_folder['folder']->get_id() === Processor::instance()->get_root_folder()) {
+            return $this->_folder['contents'] = [];
+        }
+
+        // Add folders and files to filelist
         if (count($this->_folder['contents']) > 0) {
             foreach ($this->_folder['contents'] as $node) {
                 // Check if entry is allowed
-                if (!$this->get_processor()->_is_entry_authorized($node)) {
+                if (!Processor::instance()->_is_entry_authorized($node)) {
                     continue;
                 }
-                $filesarray[] = $node->get_entry();
+                $items[] = $node->get_entry();
             }
 
             if (false === $this->_search || false === apply_filters('letsbox_use_search_order', true)) {
-                $filesarray = $this->get_processor()->sort_filelist($filesarray);
+                $items = Processor::instance()->sort_filelist($items);
+            } else {
+                $items = apply_filters('letsbox_sort_filelist', $items, null, null, Processor::instance());
             }
         }
 
@@ -710,17 +804,17 @@ class Filebrowser
             $folder = $this->_folder['folder']->get_entry();
             $add_parent_folder_item = true;
 
-            if ($this->_search || $folder->get_id() === $this->get_processor()->get_root_folder()) {
+            if ($this->_search || $folder->get_id() === Processor::instance()->get_root_folder()) {
                 $add_parent_folder_item = false;
             }
 
             if ($add_parent_folder_item) {
                 foreach ($this->_parentfolders as $parentfolder) {
-                    array_unshift($filesarray, $parentfolder);
+                    array_unshift($items, $parentfolder);
                 }
             }
         }
 
-        return $filesarray;
+        return $items;
     }
 }

@@ -2017,24 +2017,24 @@
     animation-name: eva-spin;
     -webkit-animation-delay: 0;
     animation-delay: 0;
-    -webkit-animation-delay: var(--fa-animation-delay, 0);
-    animation-delay: var(--fa-animation-delay, 0);
+    -webkit-animation-delay: 0;
+    animation-delay: 0;
     -webkit-animation-direction: normal;
     animation-direction: normal;
-    -webkit-animation-direction: var(--fa-animation-direction, normal);
-    animation-direction: var(--fa-animation-direction, normal);
+    -webkit-animation-direction: normal;
+    animation-direction: normal;
     -webkit-animation-duration: 2s;
     animation-duration: 2s;
-    -webkit-animation-duration: var(--fa-animation-duration, 2s);
-    animation-duration: var(--fa-animation-duration, 2s);
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
     -webkit-animation-iteration-count: infinite;
     animation-iteration-count: infinite;
-    -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
-    animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
     -webkit-animation-timing-function: linear;
     animation-timing-function: linear;
-    -webkit-animation-timing-function: var(--fa-animation-timing, linear);
-    animation-timing-function: var(--fa-animation-timing, linear);
+    -webkit-animation-timing-function: linear;
+    animation-timing-function: linear;
 }
 
 @-webkit-keyframes eva-spin {
@@ -2087,5 +2087,44 @@
     100% {
         -webkit-transform: translate(-50%, -50%) rotate(360deg);
         transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.eva-pulse {
+    -webkit-animation-name: eva-pulse;
+    animation-name: eva-pulse;
+    -webkit-animation-delay: 0;
+    animation-delay: 0;
+    -webkit-animation-delay: 0;
+    animation-delay: 0;
+    -webkit-animation-direction: normal;
+    animation-direction: normal;
+    -webkit-animation-direction: normal;
+    animation-direction: normal;
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    animation-timing-function: linear;
+    -webkit-animation-timing-function: linear;
+    animation-timing-function: linear;
+}
+
+@keyframes eva-pulse {
+    from {
+        transform: scale3d(1, 1, 1);
+    }
+
+    50% {
+        transform: scale3d(1.2, 1.2, 1.2);
+    }
+
+    to {
+        transform: scale3d(1, 1, 1);
     }
 }

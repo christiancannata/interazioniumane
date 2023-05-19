@@ -38,7 +38,7 @@ class WOE_Formatter_Csv extends WOE_Formatter_sv {
 	}
 
     protected function remove_linebreaks_callback( $value ) {
-        return preg_replace( "/([\r,\n])+/", " ", $value);
+        return preg_replace( "/([\r\n])+/", " ", $value);
     }
 
 	protected function delete_linebreaks_callback( $value ) {

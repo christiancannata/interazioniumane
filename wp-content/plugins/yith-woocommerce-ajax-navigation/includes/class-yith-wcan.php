@@ -85,12 +85,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 
 			// register assets needed both on backend and frontend.
 			add_action( 'init', array( $this, 'register_assets' ) );
-
-			// register plugin to licence/update system.
-			if ( defined( 'YITH_WCAN_INIT' ) ) {
-				add_action( 'wp_loaded', array( $this, 'register_plugin_for_activation' ), 99 );
-				add_action( 'admin_init', array( $this, 'register_plugin_for_updates' ) );
-			}
 		}
 
 		/**
@@ -300,6 +294,10 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 
 			wp_register_style( 'yith-wcan-shortcodes', YITH_WCAN_URL . 'assets/css/shortcodes.css', array(), YITH_WCAN_VERSION );
 			wp_register_script( 'yith-wcan-shortcodes', YITH_WCAN_URL . 'assets/js/yith-wcan-shortcodes' . $suffix . '.js', array( 'jquery', 'accounting', 'selectWoo' ), YITH_WCAN_VERSION, true );
+
+			if ( is_admin() ) {
+				wp_localize_script( 'yith-wcan-shortcodes', 'yith_wcan_shortcodes', array() );
+			}
 		}
 
 		/**
@@ -311,36 +309,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 */
 		public function get_layered_nav_chosen_attributes() {
 			return WC_Query::get_layered_nav_chosen_attributes();
-		}
-
-		/**
-		 * Register plugins for activation tab
-		 *
-		 * @return void
-		 * @since  2.0.0
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
-		 */
-		public function register_plugin_for_activation() {
-			if ( ! class_exists( 'YIT_Plugin_Licence' ) ) {
-				require_once YITH_WCAN_DIR . 'plugin-fw/lib/yit-plugin-licence.php';
-			}
-
-			YIT_Plugin_Licence()->register( YITH_WCAN_INIT, YITH_WCAN_SECRET_KEY, YITH_WCAN_SLUG );
-		}
-
-		/**
-		 * Register plugins for update tab
-		 *
-		 * @return void
-		 * @since  2.0.0
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
-		 */
-		public function register_plugin_for_updates() {
-			if ( ! class_exists( 'YIT_Upgrade' ) ) {
-				require_once YITH_WCAN_DIR . 'plugin-fw/lib/yit-upgrade.php';
-			}
-
-			YIT_Upgrade()->register( YITH_WCAN_SLUG, YITH_WCAN_INIT );
 		}
 
 		/**
@@ -382,9 +350,10 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public static function instance() {
-
 			if ( class_exists( 'YITH_WCAN_Premium' ) ) {
 				return YITH_WCAN_Premium::instance();
+			} elseif ( class_exists( 'YITH_WCAN_Extended' ) ) {
+				return YITH_WCAN_Extended::instance();
 			} else {
 				if ( is_null( self::$instance ) ) {
 					self::$instance = new self();

@@ -2,25 +2,13 @@
 
 namespace AC;
 
-use AC\Column\Placeholder;
 use AC\Sanitize\Kses;
 use AC\Type\ListScreenId;
 use AC\Type\Url\Editor;
 use DateTime;
 use LogicException;
-use ReflectionClass;
-use ReflectionException;
 
-/**
- * List Screen
- * @since 2.0
- */
 abstract class ListScreen {
-
-	/**
-	 * @deprecated 4.0
-	 */
-	const OPTIONS_KEY = 'cpac_options_';
 
 	/**
 	 * Unique Identifier for List Screen.
@@ -119,7 +107,9 @@ abstract class ListScreen {
 	 */
 	private $network_only = false;
 
-	/** @var string */
+	/**
+	 * @var string
+	 */
 	private $title;
 
 	/**
@@ -156,6 +146,17 @@ abstract class ListScreen {
 	 * @return void
 	 */
 	abstract protected function register_column_types();
+
+	/**
+	 * Register column types from a list with (fully qualified) class names
+	 *
+	 * @param string[] $list
+	 */
+	protected function register_column_types_from_list( array $list ): void {
+		foreach ( $list as $column ) {
+			$this->register_column_type( new $column );
+		}
+	}
 
 	/**
 	 * @return string
@@ -378,16 +379,6 @@ abstract class ListScreen {
 	}
 
 	/**
-	 * @param $wp_screen
-	 *
-	 * @return boolean
-	 * @since 2.0.3
-	 */
-	public function is_current_screen( $wp_screen ) {
-		return $wp_screen && $wp_screen->id === $this->get_screen_id() && $wp_screen->base === $this->get_screen_base();
-	}
-
-	/**
 	 * Settings can not be overwritten
 	 */
 	public function is_read_only() {
@@ -501,7 +492,7 @@ abstract class ListScreen {
 		$columns = $this->get_columns();
 
 		foreach ( $columns as $column ) {
-			// Do not do a strict comparision. All column names are stored as strings, even integers.
+			// Do not do a strict comparison. All column names are stored as strings, even integers.
 			if ( $column->get_name() == $name ) {
 				return $column;
 			}
@@ -601,37 +592,16 @@ abstract class ListScreen {
 
 		// Register default columns
 		foreach ( $this->get_original_columns() as $type => $label ) {
-
 			// Ignore the mandatory checkbox column
 			if ( 'cb' === $type ) {
 				continue;
 			}
 
-			$column = new Column();
-
-			$column
-				->set_type( $type )
-				->set_original( true );
+			$column = new Column;
+			$column->set_type( $type )
+			       ->set_original( true );
 
 			$this->register_column_type( $column );
-		}
-
-		$integrations = new IntegrationRepository();
-
-		// Placeholder columns
-		foreach ( $integrations->find_all() as $integration ) {
-			if ( ! $integration->show_placeholder( $this ) ) {
-				continue;
-			}
-
-			$plugin_info = new PluginInformation( $integration->get_basename() );
-
-			if ( $integration->is_plugin_active() && ! $plugin_info->is_active() ) {
-				$column = new Placeholder();
-				$column->set_integration( $integration );
-
-				$this->register_column_type( $column );
-			}
 		}
 
 		// Load Custom columns
@@ -643,23 +613,6 @@ abstract class ListScreen {
 		 * @param ListScreen $this
 		 */
 		do_action( 'ac/column_types', $this );
-	}
-
-	/**
-	 * @param string $namespace Namespace from the current path
-	 *
-	 * @throws ReflectionException
-	 */
-	public function register_column_types_from_dir( $namespace ) {
-		$classes = Autoloader::instance()->get_class_names_from_dir( $namespace );
-
-		foreach ( $classes as $class ) {
-			$reflection = new ReflectionClass( $class );
-
-			if ( $reflection->isInstantiable() ) {
-				$this->register_column_type( new $class );
-			}
-		}
 	}
 
 	/**
@@ -702,7 +655,9 @@ abstract class ListScreen {
 			return false;
 		}
 
-		/* @var Column $column */
+		/**
+		 * @var Column $column
+		 */
 		$column = new $class();
 		$column->set_list_screen( $this )
 		       ->set_type( $settings['type'] );
@@ -734,7 +689,7 @@ abstract class ListScreen {
 		 * Fires when a column is registered to a list screen, i.e. when it is created. Can be used
 		 * to attach additional functionality to a column, such as exporting, sorting or filtering
 		 *
-		 * @param Column $column Column type object
+		 * @param Column     $column      Column type object
 		 * @param ListScreen $list_screen List screen object to which the column was registered
 		 *
 		 * @since 3.0.5
@@ -815,19 +770,25 @@ abstract class ListScreen {
 
 	/**
 	 * @param string $column_name
-	 * @param int $id
-	 * @param null $original_value
+	 * @param int    $id
+	 * @param null   $original_value
 	 *
 	 * @return string
 	 */
 	public function get_display_value_by_column_name( $column_name, $id, $original_value = null ) {
+		$id = (int) $id;
+
 		$column = $this->get_column_by_name( $column_name );
 
 		if ( ! $column ) {
 			return $original_value;
 		}
 
-		$value = ( new Kses() )->sanitize( $column->get_value( $id ) );
+		$value = $column->get_value( $id );
+
+		if ( is_scalar( $value ) && apply_filters( 'ac/column/value/sanitize', true, $column, $id )  ) {
+			$value = ( new Kses() )->sanitize( (string) $value );
+		}
 
 		// You can overwrite the display value for original columns by making sure get_value() does not return an empty string.
 		if ( $column->is_original() && ac_helper()->string->is_empty( $value ) ) {
@@ -837,114 +798,13 @@ abstract class ListScreen {
 		/**
 		 * Column display value
 		 *
-		 * @param string $value Column display value
-		 * @param int $id Object ID
+		 * @param string $value  Column display value
+		 * @param int    $id     Object ID
 		 * @param Column $column Column object
 		 *
 		 * @since 3.0
 		 */
-		$value = apply_filters( 'ac/column/value', $value, $id, $column );
-
-		return $value;
-	}
-
-	/**
-	 * @param array $columns
-	 *
-	 * @deprecated 4.0
-	 */
-	public function save_default_headings( $columns ) {
-		_deprecated_function( __METHOD__, '4.0', 'AC\DefaultColumns::update( $key, $columns )' );
-
-		( new DefaultColumnsRepository() )->update( $this->get_key(), $columns && is_array( $columns ) ? $columns : [] );
-	}
-
-	/**
-	 * @return array
-	 * @deprecated 4.0
-	 */
-	public function get_stored_default_headings() {
-		_deprecated_function( __METHOD__, '4.0', 'AC\DefaultColumnsRepository()::get( $key )' );
-
-		return ( new DefaultColumnsRepository() )->get( $this->get_key() );
-	}
-
-	/**
-	 * @return void
-	 */
-	public function delete_default_headings() {
-		_deprecated_function( __METHOD__, '4.0', 'AC\DefaultColumnsRepository()::delete( $key )' );
-
-		( new DefaultColumnsRepository() )->delete( $this->get_key() );
-	}
-
-	/**
-	 * @return bool
-	 * @deprecated 4.0
-	 */
-	public function delete() {
-		_deprecated_function( __METHOD__, '4.0' );
-
-		return false;
-	}
-
-	/**
-	 * Get default column headers
-	 * @return array
-	 * @deprecated 4.0
-	 */
-	public function get_default_column_headers() {
-		_deprecated_function( __METHOD__, '4.0' );
-
-		return [];
-	}
-
-	/**
-	 * Clears columns variable, which allow it to be repopulated by get_columns().
-	 * @deprecated 4.0
-	 * @since      2.5
-	 */
-	public function reset() {
-		_deprecated_function( __METHOD__, '4.0' );
-	}
-
-	/**
-	 * @deprecated 4.0
-	 */
-	public function populate_settings() {
-		_deprecated_function( __METHOD__, '4.0' );
-	}
-
-	/**
-	 * Reset original columns
-	 * @deprecated 4.0
-	 */
-	public function reset_original_columns() {
-		_deprecated_function( __METHOD__, '4.0' );
-
-		$this->original_columns = null;
-	}
-
-	/**
-	 * Store column data
-	 *
-	 * @param array $column_data
-	 *
-	 * @deprecated 4.0
-	 */
-	public function store( $column_data ) {
-		_deprecated_function( __METHOD__, '4.0' );
-	}
-
-	/**
-	 * @param array $columns
-	 *
-	 * @deprecated 4.3
-	 */
-	public function set_original_columns( $columns ) {
-		_deprecated_function( __METHOD__, '4.3' );
-
-		$this->original_columns = (array) $columns;
+		return (string) apply_filters( 'ac/column/value', $value, $id, $column );
 	}
 
 }

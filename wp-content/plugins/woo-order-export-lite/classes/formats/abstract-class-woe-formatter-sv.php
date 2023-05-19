@@ -12,6 +12,7 @@ abstract class WOE_Formatter_sv extends WOE_Formatter_Plain_Format {
 	var $enclosure;
 	var $linebreak;
 	var $delimiter;
+	var $stream_filter;
 
 	public function __construct(
 		$mode,
@@ -33,7 +34,7 @@ abstract class WOE_Formatter_sv extends WOE_Formatter_Plain_Format {
 		WOE_Formatter_sv_crlf_filter::set_linebreak( $this->linebreak );
 		stream_filter_register( "WOE_Formatter_{$this->format}_crlf", 'WOE_Formatter_sv_crlf_filter' );
 		// attach to stream
-		stream_filter_append( $this->handle, "WOE_Formatter_{$this->format}_crlf" );
+		$this->stream_filter = stream_filter_append( $this->handle, "WOE_Formatter_{$this->format}_crlf" );
 	}
 
 	public function start( $data = '' ) {
@@ -118,6 +119,7 @@ abstract class WOE_Formatter_sv extends WOE_Formatter_Plain_Format {
 		} else {
 			do_action( "woe_{$this->format}_print_footer", $this->handle, $this );
 		}
+		stream_filter_remove( $this->stream_filter );
 		parent::finish();
 	}
 

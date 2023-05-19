@@ -101,6 +101,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 	margin-bottom: 0;
 	padding: 4px 15px 3px;
 	position: relative;
+	text-decoration: none;
 }
 
 @mixin tooltip {
@@ -139,7 +140,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 	display: inline-block;
 	margin: 0 5px 10px;
 	vertical-align: top;
-	width: calc(#{100 / $columns_number}% - 10px);
+	width: calc(#{calc(100 / $columns_number)}% - 10px);
 }
 
 @mixin columns {
@@ -166,7 +167,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 		margin-bottom: 30px;
 
 		// filter area titles
-		h4 {
+		.filter-title {
 			color: var( --yith-wcan-filters_colors_titles, #434343 );
 
 			&.collapsable {
@@ -202,16 +203,9 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 				margin: 0 -5px;
 			}
 
-			&.filter-label.with-images {
+			&.filter-label {
 				font-size: 0;
 				margin: 0 -5px;
-			}
-
-			&.filter-label:not(.with-images) {
-				.filter-item {
-					margin-right: 5px;
-					margin-bottom: 10px;
-				}
 			}
 
 			&.filter-dropdown {
@@ -370,6 +364,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 					box-shadow: 0 0 0 1px $border-color;
 					border-radius: $border-radius;
 					display: inline-block;
+					margin: 0 5px 10px;
 					padding: 7px;
 					text-align: center;
 
@@ -422,7 +417,6 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 						background: none;
 						box-shadow: none;
 						display: block;
-						margin: 0 0 10px;
 						padding: 0;
 						text-align: left;
 						width: 100%;
@@ -550,6 +544,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 			.yith-wcan-tooltip {
 				bottom: calc(100% + 15px);
 				top: auto;
+				white-space: nowrap;
 			}
 		}
 
@@ -567,7 +562,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 				border-left: 5px solid transparent;
 				border-right: 5px solid transparent;
 				border-top: 5px solid $accent-color;
-				left: calc(50% - 2px);
+				left: calc(50% - 5px);
 				top: 100%;
 			}
 		}
@@ -913,7 +908,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 			margin-bottom: 15px;
 			padding: 15px;
 
-			h4 {
+			.filter-title {
 				margin: 0;
 
 				&.collapsable:after{
@@ -980,7 +975,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 			position: relative;
 			vertical-align: top;
 
-			h4.collapsable {
+			.filter-title.collapsable {
 				border: 1px solid $border-color;
 				border-radius: $border-radius;
 				font-weight: 400;
@@ -999,41 +994,41 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 					font-size: .8em;
 					margin: 0 10px;
 				}
-			}
 
-			h4.collapsable.opened,
-			h4.collapsable.opened + .filter-content {
-				border: 1px solid rgba( var( --yith-wcan-filters_colors_accent_r, 73 ), var( --yith-wcan-filters_colors_accent_g, 139 ), var( --yith-wcan-filters_colors_accent_b, 162 ), .3 );
-				box-shadow: 0 0 7px 0 rgba( var( --yith-wcan-filters_colors_accent_r, 73 ), var( --yith-wcan-filters_colors_accent_g, 139 ), var( --yith-wcan-filters_colors_accent_b, 162 ), .3 );
-			}
+				&.opened,
+				&.opened + .filter-content {
+					border: 1px solid rgba( var( --yith-wcan-filters_colors_accent_r, 73 ), var( --yith-wcan-filters_colors_accent_g, 139 ), var( --yith-wcan-filters_colors_accent_b, 162 ), .3 );
+					box-shadow: 0 0 7px 0 rgba( var( --yith-wcan-filters_colors_accent_r, 73 ), var( --yith-wcan-filters_colors_accent_g, 139 ), var( --yith-wcan-filters_colors_accent_b, 162 ), .3 );
+				}
 
-			h4.collapsable + .filter-content {
-				background-color: #fff;
-				border: 1px solid $border-color;
-				border-radius: $border-radius;
-				min-width: 300px;
-				position: absolute;
-				padding: 20px;
-				width: 100%;
-				z-index: $z-index;
+				& + .filter-content {
+					background-color: #fff;
+					border: 1px solid $border-color;
+					border-radius: $border-radius;
+					min-width: 300px;
+					position: absolute;
+					padding: 20px;
+					width: 100%;
+					z-index: $z-index;
 
-				.filter-content-footer {
-					background-color: $background-gray;
-					margin: 20px -20px -20px;
-					padding: 15px 20px;
-					text-align: right;
+					.filter-content-footer {
+						background-color: $background-gray;
+						margin: 20px -20px -20px;
+						padding: 15px 20px;
+						text-align: right;
 
-					.apply-filters {
-						margin: 0;
-					}
+						.apply-filters {
+							margin: 0;
+						}
 
-					.clear-selection {
-						background: #CBCBCB; // To be removed
-						border-color: #CBCBCB; // To be removed
-						color: #434343; // To be removed
+						.clear-selection {
+							background: #CBCBCB; // To be removed
+							border-color: #CBCBCB; // To be removed
+							color: #434343; // To be removed
 
-						margin-bottom: 0;
-						margin-right: 15px;
+							margin-bottom: 0;
+							margin-right: 15px;
+						}
 					}
 				}
 			}
@@ -1107,6 +1102,10 @@ body.rtl .yith-wcan-filters {
 				}
 			}
 		}
+		.filter-title.collapsable:after{
+            left: 5px;
+            right: auto;
+        }
 	}
 }
 

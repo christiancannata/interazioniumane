@@ -1,13 +1,22 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class App
 {
     /**
-     * @var string
+     * The single instance of the class.
+     *
+     * @var App
      */
-    private $_account_type;
+    protected static $_instance;
 
     /**
      * @var bool
@@ -27,108 +36,103 @@ class App
     /**
      * @var \Box\Model\Client\Client
      */
-    private $_client;
+    private static $_sdk_client;
+
+    /**
+     * @var \TheLion\LetsBox\Account
+     */
+    private static $_current_account;
 
     /**
      * We don't save your data or share it.
-     * This script just simply creates a redirect with your id and secret to Box and returns the created token.
-     * It is exactly the same script as the _authorizeApp.php file in the includes folder of the plugin,
-     * and is used for an easy and one-click authorization process that will always work!
-     *
-     * If you use your own Box App, you can use your own auth_url in case you are using HTTPS.
-     * The plugin will show you this on the Advanced Tab on the Settings page
+     * It is used for an easy and one-click authorization process that will always work!
      *
      * @var string
      */
     private $_auth_url = 'https://www.wpcloudplugins.com/lets-box/authorizeApp.php';
 
-    /**
-     * @var string
-     */
-    private $_redirect_uri;
-
-    /**
-     * Contains the location to the token file.
-     *
-     * @var string
-     */
-    private $_token_location;
-
-    /**
-     * Contains the file handle for the token file.
-     *
-     * @var type
-     */
-    private $_token_file_handle;
-
-    /**
-     * @var \TheLion\LetsBox\Processor
-     */
-    private $_processor;
-
-    public function __construct(Processor $processor)
+    public function __construct()
     {
-        $this->_processor = $processor;
-
-        $this->_token_location = LETSBOX_CACHEDIR.get_current_blog_id().'.access_token';
-        if ($this->_processor->is_network_authorized()) {
-            $this->_token_location = LETSBOX_CACHEDIR.'/network.access_token';
-        }
-
         // Call back for refresh token function in SDK client
-        add_action('lets-box-refresh-token', [$this, 'start_client']);
+        add_action('lets-box-refresh-token', [$this, 'refresh_token'], 10, 1);
 
         if (!function_exists('\Box\autoload')) {
             require_once LETSBOX_ROOTDIR.'/vendors/API/autoload.php';
         }
 
-        $own_key = $this->get_processor()->get_setting('box_app_client_id');
-        $own_secret = $this->get_processor()->get_setting('box_app_client_secret');
+        $own_key = Processor::instance()->get_setting('box_app_client_id');
+        $own_secret = Processor::instance()->get_setting('box_app_client_secret');
 
         if (
-                (!empty($own_key))
-                && (!empty($own_secret))
+            (!empty($own_key))
+            && (!empty($own_secret))
         ) {
-            $this->_app_key = $this->get_processor()->get_setting('box_app_client_id');
-            $this->_app_secret = $this->get_processor()->get_setting('box_app_client_secret');
+            $this->_app_key = Processor::instance()->get_setting('box_app_client_id');
+            $this->_app_secret = Processor::instance()->get_setting('box_app_client_secret');
             $this->_own_app = true;
         }
+    }
 
-        $this->_account_type = $this->get_processor()->get_setting('box_account_type');
-
-        // Set right redirect URL
-        $this->set_redirect_uri();
-
-        if ($this->has_plugin_own_app() && $this->can_do_own_auth()) {
-            $this->_auth_url = LETSBOX_ROOTPATH.'/includes/_authorizeApp.php';
+    /**
+     * App Instance.
+     *
+     * Ensures only one instance is loaded or can be loaded.
+     *
+     * @return App - App instance
+     *
+     * @static
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            $app = new self();
+        } else {
+            $app = self::$_instance;
         }
+
+        if (empty($app::$_sdk_client)) {
+            try {
+                $app->start_sdk_client(App::get_current_account());
+            } catch (\Exception $ex) {
+                self::$_instance = $app;
+
+                return self::$_instance;
+            }
+        }
+
+        self::$_instance = $app;
+
+        if (null !== App::get_current_account()) {
+            $app->get_sdk_client(App::get_current_account());
+        }
+
+        return self::$_instance;
     }
 
     public function process_authorization()
     {
-        $this->get_processor()->reset_complete_cache();
+        Processor::reset_complete_cache();
+
+        $redirect = admin_url('admin.php?page=LetsBox_settings');
+        if (isset($_GET['network']) || Processor::instance()->is_network_authorized()) {
+            $redirect = network_admin_url('admin.php?page=LetsBox_network_settings');
+        }
+
+        if (empty($_GET['ver'])) {
+            // Close oAuth popup and refresh admin page. Only possible with inline javascript.
+            echo '<script type="text/javascript">window.opener.parent.location.href = "'.$redirect.'"; window.close();</script>';
+
+            exit;
+        }
 
         if (isset($_GET['code'])) {
-            $access_token = $this->create_access_token();
+            $this->create_access_token();
         }
-
-        if (isset($_GET['_token'])) {
-            $new_access_token = $_GET['_token'];
-            $access_token = $this->set_access_token($new_access_token);
-        }
-        
 
         // Close oAuth popup and refresh admin page. Only possible with inline javascript.
-        echo '<script type="text/javascript">window.opener.parent.location.href = "'.$this->get_redirect_uri().'"; window.close();</script>';
+        echo '<script type="text/javascript">window.opener.parent.location.href = "'.$redirect.'"; window.close();</script>';
 
-        exit();
-    }
-
-    public function can_do_own_auth()
-    {
-        $blog_url = parse_url(admin_url());
-
-        return 'https' === $blog_url['scheme'];
+        exit;
     }
 
     public function has_plugin_own_app()
@@ -143,54 +147,78 @@ class App
 
     public function build_auth_url()
     {
-        return $this->get_client()->buildAuthQuery();
+        return self::get_sdk_client()->buildAuthQuery();
     }
 
     /**
      * @return \Box_Client
      */
-    public function start_client()
+    public function start_sdk_client(Account $account = null)
     {
         try {
-            $this->_client = new \Box\Model\Client\Client();
+            self::$_sdk_client = new \Box\Model\Client\Client();
         } catch (\Exception $ex) {
             return $ex;
         }
 
-        $this->_client->setClientId($this->get_app_key());
-        $this->_client->setClientSecret($this->get_app_secret());
+        self::$_sdk_client->setClientId($this->get_app_key());
+        self::$_sdk_client->setClientSecret($this->get_app_secret());
+        self::$_sdk_client->setRedirectUri($this->get_auth_url());
 
-        $this->_client->setRedirectUri($this->get_auth_url());
+        $scopes = [
+            'root_readwrite',
+        ];
 
-        $state = $this->get_redirect_uri().'&action=letsbox_authorization';
-        $state .= '&license='.(string) $this->get_processor()->get_main()->get_purchase_code();
-        $this->_client->setState(strtr(base64_encode($state), '+/=', '-_~'));
+        $scopes = apply_filters('letsbox_app_scopes', $scopes);
 
-        if (false === $this->has_access_token()) {
-            return $this->_client;
+        self::$_sdk_client->setScopes($scopes);
+
+        if (Processor::instance()->is_network_authorized() || is_network_admin()) {
+            $state = network_admin_url('admin.php?page=LetsBox_network_settings&action=letsbox_authorization');
+        } else {
+            $state = admin_url('admin.php?page=LetsBox_settings&action=letsbox_authorization');
         }
 
-        $access_token = $this->get_access_token();
-        $access_token = $this->get_client()->setTokenData(new \Box\Model\Connection\Token\Token(), (array) json_decode($access_token));
+        $state .= '&license='.(string) License::get();
+        self::$_sdk_client->setState(strtr(base64_encode($state), '+/=', '-_~'));
+
+        $this->set_logger();
+
+        if (null === $account) {
+            return self::$_sdk_client;
+        }
+
+        self::set_current_account($account);
+
+        $authorization = $account->get_authorization();
+
+        if (false === $authorization->has_access_token()) {
+            return self::$_sdk_client;
+        }
+
+        $access_token = $authorization->get_access_token();
 
         if (empty($access_token)) {
-            $this->_unlock_token_file();
-
-            return $this->_client;
+            return self::$_sdk_client;
         }
 
-        if (!empty($access_token)) {
-            $this->_client->setToken($access_token);
+        self::$_sdk_client->setToken($access_token);
 
-            // Check if the AccessToken is still valid
-            if (false === $this->_client->isAccessTokenExpired()) {
-                $this->_unlock_token_file();
-
-                return $this->_client;
-            }
+        // Check if the AccessToken is still valid
+        if (false === self::$_sdk_client->isAccessTokenExpired()) {
+            return self::$_sdk_client;
         }
 
-        if (!flock($this->_get_token_file_handle(), LOCK_EX | LOCK_NB)) {
+        // If we end up here, we have to refresh the token
+        return $this->refresh_token($account);
+    }
+
+    public function refresh_token(Account $account = null)
+    {
+        $authorization = $account->get_authorization();
+        $access_token = $authorization->get_access_token();
+
+        if (!flock($authorization->get_token_file_handle(), LOCK_EX | LOCK_NB)) {
             error_log('[WP Cloud Plugin message]: '.sprintf('Wait till another process has renewed the Authorization Token'));
 
             /*
@@ -198,7 +226,7 @@ class App
              * it was modified was 1 minute, assume that
              * the previous process died and unlock the file manually
              */
-            $requires_unlock = ((filemtime($this->get_token_location()) + 60) < (time()));
+            $requires_unlock = ((filemtime($authorization->get_token_location()) + 60) < time());
 
             // Temporarily workaround when flock is disabled. Can cause problems when plugin is used in multiple processes
             if (false !== strpos(ini_get('disable_functions'), 'flock')) {
@@ -206,62 +234,60 @@ class App
             }
 
             if ($requires_unlock) {
-                $this->_unlock_token_file();
+                $authorization->unlock_token_file();
             }
 
-            if (flock($this->_get_token_file_handle(), LOCK_SH)) {
+            if (flock($authorization->get_token_file_handle(), LOCK_SH)) {
                 clearstatcache();
-                rewind($this->_get_token_file_handle());
-                $token = fread($this->_get_token_file_handle(), filesize($this->get_token_location()));
-                error_log('[WP Cloud Plugin message]: '.sprintf('New Authorization Token has been received by another process'));
-                $this->_client->setToken($access_token);
-                $this->_unlock_token_file();
+                rewind($authorization->get_token_file_handle());
+                $access_token = fread($authorization->get_token_file_handle(), filesize($authorization->get_token_location()));
+                error_log('[WP Cloud Plugin message]: '.sprintf('New Authorization Token has been received by another process.'));
+                self::$_sdk_client->setToken($access_token);
+                $authorization->unlock_token_file();
 
-                return $this->_client;
+                return self::$_sdk_client;
             }
         }
 
         // Stop if we need to get a new AccessToken but somehow ended up without a refreshtoken
-        $refresh_token = $access_token->getRefreshToken();
+        $refresh_token = self::$_sdk_client->getToken()->getRefreshToken();
 
         if (empty($refresh_token)) {
             error_log('[WP Cloud Plugin message]: '.sprintf('No Refresh Token found during the renewing of the current token. We will stop the authorization completely.'));
-            $this->_unlock_token_file();
-            $this->revoke_token();
+            $authorization->set_is_valid(false);
+            $authorization->unlock_token_file();
+            $this->revoke_token($account);
 
             return false;
         }
 
         // Refresh token
         try {
-            $this->_client->refreshToken($refresh_token);
+            self::$_sdk_client->refreshToken($refresh_token);
 
             // Store the new token
-            $new_accesstoken = $this->_client->getToken();
-            $this->set_access_token($new_accesstoken);
+            $new_accestoken = self::$_sdk_client->getToken();
+            $authorization->set_access_token($new_accestoken);
+            $authorization->unlock_token_file();
 
-            $this->_unlock_token_file();
-
-            if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification'))) {
-                wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification');
+            if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification', ['account_id' => $account->get_id()]))) {
+                wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification', ['account_id' => $account->get_id()]);
             }
         } catch (\Exception $ex) {
-            $this->_unlock_token_file();
+            $authorization->set_is_valid(false);
+            $authorization->unlock_token_file();
             error_log('[WP Cloud Plugin message]: '.sprintf('Cannot refresh Authorization Token'));
 
-            if (!wp_next_scheduled('letsbox_lost_authorisation_notification')) {
-                wp_schedule_event(time(), 'daily', 'letsbox_lost_authorisation_notification');
+            if (!wp_next_scheduled('letsbox_lost_authorisation_notification', ['account_id' => $account->get_id()])) {
+                wp_schedule_event(time(), 'daily', 'letsbox_lost_authorisation_notification', ['account_id' => $account->get_id()]);
             }
+
+            Processor::reset_complete_cache(true);
 
             throw $ex;
         }
 
-        return $this->_client;
-    }
-
-    public function set_approval_prompt($approval_prompt = 'none')
-    {
-        //$this->get_client()->setApprovalPrompt($approval_prompt);
+        return self::$_sdk_client;
     }
 
     public function set_logger()
@@ -270,19 +296,38 @@ class App
 
     public function create_access_token()
     {
-        $this->get_processor()->reset_complete_cache();
+        Processor::reset_complete_cache();
 
         try {
             $code = $_REQUEST['code'];
+            $state = $_REQUEST['state'];
 
-            //Fetch the AccessToken
-            $this->get_client()->setAuthorizationCode($code);
-            $access_token = $this->get_client()->getAccessToken();
-            $this->set_access_token($access_token);
+            // Fetch the AccessToken
+            self::get_sdk_client()->setAuthorizationCode($code);
+            $access_token = self::get_sdk_client()->getAccessToken();
 
-            $user = $this->get_client()->getUserInfo();
-            $enterprise = $user->getEnterprise();
-            $this->set_account_type((empty($enterprise) ? 'personal' : 'business'));
+            // Get & Update User Information
+            $account_data = self::get_sdk_client()->getUserInfo();
+            $enterprise = $account_data->getEnterprise();
+
+            $account = new Account(
+                $account_data->getId(),
+                $account_data->getName(),
+                $account_data->getLogin(),
+                empty($enterprise) ? 'personal' : 'business'
+            );
+
+            // Box will set an empty 1x1 pixel for users without profile image.
+            $profile_image = wp_remote_retrieve_body(wp_remote_get($account_data->getAvatarUrl()));
+            if (strlen($profile_image) > 100) {
+                $account->set_image($account_data->getAvatarUrl());
+            }
+
+            $account->get_authorization()->set_access_token($access_token);
+            $account->get_authorization()->unlock_token_file();
+            Accounts::instance()->add_account($account);
+
+            delete_transient('letsbox_'.$account->get_id().'_is_authorized');
         } catch (\Exception $ex) {
             error_log('[WP Cloud Plugin message]: '.sprintf('Cannot generate Access Token: %s', $ex->getMessage()));
 
@@ -292,29 +337,33 @@ class App
         return true;
     }
 
-    public function revoke_token()
+    public function revoke_token(Account $account)
     {
+        error_log('[WP Cloud Plugin message]: Lost authorization');
+
+        // Reset Private Folders Back-End if the account it is pointing to is deleted
+        $private_folders_data = Processor::instance()->get_setting('userfolder_backend_auto_root', []);
+        if (is_array($private_folders_data) && isset($private_folders_data['account']) && $private_folders_data['account'] === $account->get_id()) {
+            Processor::instance()->set_setting('userfolder_backend_auto_root', []);
+        }
+
+        Processor::reset_complete_cache(true);
+
+        if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification', ['account_id' => $account->get_id()]))) {
+            wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification', ['account_id' => $account->get_id()]);
+        }
+
+        Core::instance()->send_lost_authorisation_notification($account->get_id());
+
         try {
-            // No Endpoint in the BOX API to revoke tokens
-            $this->get_client()->destroyToken($this->get_client()->getToken());
+            self::get_sdk_client()->destroyToken($account->get_authorization()->get_access_token());
         } catch (\Exception $ex) {
             error_log('[WP Cloud Plugin message]: '.$ex->getMessage());
         }
 
-        error_log('[WP Cloud Plugin message]: '.'Lost authorization');
+        Accounts::instance()->remove_account($account->get_id());
 
-        unlink($this->get_token_location());
-
-        $this->get_processor()->set_setting('userfolder_backend_auto_root', null);
-        $this->set_account_type(null);
-
-        $this->get_processor()->reset_complete_cache();
-
-        if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification'))) {
-            wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification');
-        }
-
-        $this->get_processor()->get_main()->send_lost_authorisation_notification();
+        delete_transient('letsbox_'.$account->get_id().'_is_authorized');
 
         return true;
     }
@@ -339,202 +388,91 @@ class App
         $this->_app_secret = $_app_secret;
     }
 
-    public function get_access_token()
-    {
-        $this->_get_lock();
-        clearstatcache();
-        rewind($this->_get_token_file_handle());
-
-        $filesize = filesize($this->get_token_location());
-        if ($filesize > 0) {
-            $token = fread($this->_get_token_file_handle(), filesize($this->get_token_location()));
-        } else {
-            $token = '';
-        }
-
-        $this->_unlock_token_file();
-
-        if (empty($token)) {
-            return null;
-        }
-
-        // Update function to encrypt tokens
-        $token = $this->update_from_plain_token($token);
-
-        return Helpers::decrypt($token);
-    }
-
-    public function set_access_token($_access_token)
-    {
-        // Remove Lost Authorisation message
-        if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification'))) {
-            wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification');
-        }
-
-        if (is_object($_access_token)) {
-            $_access_token = json_encode($_access_token->toArray());
-        }
-
-        ftruncate($this->_get_token_file_handle(), 0);
-        rewind($this->_get_token_file_handle());
-
-        $access_token = Helpers::encrypt($_access_token);
-        fwrite($this->_get_token_file_handle(), $access_token);
-
-        return $access_token;
-    }
-
-    public function has_access_token()
-    {
-        $access_token = $this->get_access_token();
-
-        return !empty($access_token);
-    }
-
-    public function get_account_type()
-    {
-        return $this->_account_type;
-    }
-
-    public function set_account_type($_account_type)
-    {
-        $this->_account_type = $_account_type;
-
-        if ($this->get_processor()->is_network_authorized()) {
-            $settings = get_site_option('letsbox_network_settings', []);
-            $settings['box_account_type'] = $_account_type;
-            update_site_option('letsbox_network_settings', $settings);
-        }
-
-        return $this->get_processor()->set_setting('box_account_type', $_account_type);
-    }
-
-    public function _get_lock($type = LOCK_SH)
-    {
-        if (!flock($this->_get_token_file_handle(), $type)) {
-            /*
-             * If the file cannot be unlocked and the last time
-             * it was modified was 1 minute, assume that
-             * the previous process died and unlock the file manually
-             */
-            $requires_unlock = ((filemtime($this->get_token_location()) + 60) < (time()));
-
-            // Temporarily workaround when flock is disabled. Can cause problems when plugin is used in multiple processes
-            if (false !== strpos(ini_get('disable_functions'), 'flock')) {
-                $requires_unlock = false;
-            }
-
-            if ($requires_unlock) {
-                $this->_unlock_token_file();
-            }
-            // Try to lock the file again
-            flock($this->_get_token_file_handle(), $type);
-        }
-
-        return $this->_get_token_file_handle();
-    }
-
-    public function get_token_location()
-    {
-        return $this->_token_location;
-    }
-
     /**
-     * @return \TheLion\LetsBox\Processor
+     * @param null|\TheLion\LetsBox\Account $account
+     *
+     * @return \Box\Model\Client\Client
      */
-    public function get_processor()
+    public static function get_sdk_client($account = null)
     {
-        return $this->_processor;
+        if (empty(self::$_sdk_client)) {
+            self::$_sdk_client = self::instance()->start_sdk_client();
+        }
+
+        if (!empty($account)) {
+            self::set_current_account($account);
+        }
+
+        return self::$_sdk_client;
     }
 
     /**
+     * @deprecated
+     *
      * @return \Box\Model\Client\Client
      */
     public function get_client()
     {
-        if (empty($this->_client)) {
-            $this->_client = $this->start_client();
-        }
+        Helpers::is_deprecated('function', 'get_client()', 'get_sdk_client($account = null)');
 
-        return $this->_client;
+        return self::get_sdk_client();
     }
 
-    public function get_redirect_uri()
+    /**
+     * @return \TheLion\LetsBox\Account
+     */
+    public static function get_current_account()
     {
-        return $this->_redirect_uri;
-    }
-
-    public function set_redirect_uri()
-    {
-        $this->_redirect_uri = admin_url('admin.php?page=LetsBox_settings');
-        if ($this->get_processor()->is_network_authorized()) {
-            $this->_redirect_uri = network_admin_url('admin.php?page=LetsBox_network_settings');
-        }
-
-        return $this->_redirect_uri;
-    }
-
-    public function update_from_plain_token($token)
-    {
-        $decrypted_token = Helpers::decrypt($token);
-        if (false === $decrypted_token) {
-            return $this->set_access_token($token);
-        }
-
-        return $token;
-    }
-
-    protected function _unlock_token_file()
-    {
-        $handle = $this->_get_token_file_handle();
-        if (!empty($handle)) {
-            flock($this->_get_token_file_handle(), LOCK_UN);
-            fclose($this->_get_token_file_handle());
-            $this->_set_token_file_handle(null);
-        }
-
-        clearstatcache();
-
-        return true;
-    }
-
-    protected function _set_token_file_handle($handle)
-    {
-        return $this->_token_file_handle = $handle;
-    }
-
-    protected function _get_token_file_handle()
-    {
-        if (empty($this->_token_file_handle)) {
-            // Check if cache dir is writeable
-            // Moving from DB storage to file storage
-            if (!file_exists($this->get_token_location())) {
-                $token = $this->get_processor()->get_setting('box_app_current_token');
-                $this->get_processor()->set_setting('box_app_current_token', null);
-                $this->get_processor()->set_setting('box_app_refresh_token', null);
-                file_put_contents($this->get_token_location(), $token);
+        if (empty(self::$_current_account)) {
+            if (null !== Processor::instance()->get_shortcode()) {
+                $account = Accounts::instance()->get_account_by_id(Processor::instance()->get_shortcode_option('account'));
+                if (!empty($account)) {
+                    self::set_current_account($account);
+                }
             }
+        }
 
-            if (!is_writable($this->get_token_location())) {
-                @chmod($this->get_token_location(), 0755);
+        return self::$_current_account;
+    }
 
-                if (!is_writable($this->get_token_location())) {
-                    error_log('[WP Cloud Plugin message]: '.sprintf('Cache file (%s) is not writable', $this->get_token_location()));
+    public static function set_current_account(Account $account)
+    {
+        if (self::$_current_account !== $account) {
+            self::$_current_account = $account;
+            Cache::instance_unload();
 
-                    exit(sprintf('Cache file (%s) is not writable', $this->get_token_location()));
+            if ($account->get_authorization()->has_access_token()) {
+                if (empty(self::$_sdk_client)) {
+                    self::instance();
                 }
 
-                file_put_contents($this->get_token_location(), $token);
-            }
-
-            $this->_token_file_handle = fopen($this->get_token_location(), 'c+');
-            if (!is_resource($this->_token_file_handle)) {
-                error_log('[WP Cloud Plugin message]: '.sprintf('Cache file (%s) is not writable', $this->get_token_location()));
-
-                exit(sprintf('Cache file (%s) is not writable', $this->get_token_location()));
+                self::$_sdk_client->setToken($account->get_authorization()->get_access_token());
             }
         }
 
-        return $this->_token_file_handle;
+        return self::$_current_account;
+    }
+
+    public static function set_current_account_by_id($account_id)
+    {
+        $account = Accounts::instance()->get_account_by_id($account_id);
+
+        if (empty($account)) {
+            error_log(sprintf('[WP Cloud Plugin message]: APP Error on line %s: Cannot use the requested account (ID: %s) as it is not linked with the plugin. Plugin falls back to primary account.', __LINE__, $account_id));
+            $account = Accounts::instance()->get_primary_account();
+        }
+
+        return self::set_current_account($account);
+    }
+
+    public static function clear_current_account()
+    {
+        self::$_current_account = null;
+        Cache::instance_unload();
+    }
+
+    public function get_auth_uri()
+    {
+        return $this->_auth_url;
     }
 }

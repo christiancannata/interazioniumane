@@ -37,6 +37,7 @@ jQuery.fn.extend( {
 							method: ajax_method,
 							action: "order_exporter",
 							tab: script_data.active_tab,
+							woe_nonce: settings_form.woe_nonce
 						};
 					},
 					processResults: function ( data, page ) {

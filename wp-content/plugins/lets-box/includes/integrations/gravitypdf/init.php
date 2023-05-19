@@ -2,6 +2,12 @@
 
 namespace TheLion\LetsBox\Integrations;
 
+use TheLion\LetsBox\Accounts;
+use TheLion\LetsBox\API;
+use TheLion\LetsBox\App;
+use TheLion\LetsBox\Client;
+use TheLion\LetsBox\Processor;
+
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
@@ -46,6 +52,22 @@ class GravityPDF
             ],
             'std' => esc_html__('No'),
         ];
+
+        $main_account = Accounts::instance()->get_primary_account();
+
+        $account_id = '';
+        if (!empty($main_account)) {
+            $account_id = $main_account->get_id();
+        }
+
+        $fields['letsbox_save_to_account_id'] = [
+            'id' => 'letsbox_save_to_account_id',
+            'name' => '[BOX] Account ID',
+            'desc' => 'Account ID where the PDFs need to be stored. E.g. <code>'.$account_id.'</code>. Or use <code>%upload_account_id%</code> for the Account ID for the upload location of the plugin Upload Box field.',
+            'type' => 'text',
+            'std' => $account_id,
+        ];
+
         $fields['letsbox_save_to_box_id'] = [
             'id' => 'letsbox_save_to_box_id',
             'name' => '[BOX] Folder ID',
@@ -66,33 +88,62 @@ class GravityPDF
         $file = (object) [
             'tmp_path' => $pdf_path,
             'type' => mime_content_type($pdf_path),
-            'name' => $entry['id'].'-'.$filename,
+            'name' => $filename,
+            'size' => filesize($pdf_path),
         ];
 
-        // Placeholders
-        $upload_folder_id = $this->get_upload_location($entry, $form);
+        if (!isset($settings['letsbox_save_to_account_id'])) {
+            // Fall back for older PDF configurations
+            $settings['letsbox_save_to_account_id'] = Accounts::instance()->get_primary_account()->get_id();
+        }
 
-        if ((false !== strpos($settings['letsbox_save_to_box_id'], '%upload_folder_id%'))) {
+        // Placeholders
+        list($upload_account_id, $upload_folder_id) = $this->get_upload_location($entry, $form);
+
+        if (false !== strpos($settings['letsbox_save_to_account_id'], '%upload_account_id%')) {
+            $settings['letsbox_save_to_account_id'] = $upload_account_id;
+        }
+
+        if (false !== strpos($settings['letsbox_save_to_box_id'], '%upload_folder_id%')) {
             $settings['letsbox_save_to_box_id'] = $upload_folder_id;
         }
 
-        $folder_id = apply_filters('letsbox_gravitypdf_set_folder_id', $settings['letsbox_save_to_box_id'], $settings, $entry, $form, $this->get_processor());
+        $account_id = apply_filters('letsbox_gravitypdf_set_account_id', $settings['letsbox_save_to_account_id'], $settings, $entry, $form, Processor::instance());
+        $folder_id = apply_filters('letsbox_gravitypdf_set_folder_id', $settings['letsbox_save_to_box_id'], $settings, $entry, $form, Processor::instance());
+
+        $requested_account = Accounts::instance()->get_account_by_id($account_id);
+        if (null !== $requested_account) {
+            App::set_current_account($requested_account);
+        } else {
+            error_log(sprintf("[WP Cloud Plugin message]: Box account (ID: %s) as it isn't linked with the plugin", $account_id));
+
+            exit;
+        }
 
         try {
-            return $this->get_processor()->get_app()->get_client()->uploadFileToBox($file, $folder_id);
+            $uploaded_entry = API::upload_file($file, $folder_id);
         } catch (\Exception $ex) {
-            error_log('[WP Cloud Plugin message]: '.sprintf('API Error on line %s: %s', __LINE__, $ex->getMessage()));
-
             return false;
+        }
+
+        // Add url to PDF file in cloud
+        $pdfs = \GPDFAPI::get_entry_pdfs($entry['id']);
+
+        foreach ($pdfs as $pid => $pdf) {
+            if ('Yes' === $pdf['letsbox_save_to_box']) {
+                $pdf['letsbox_pdf_url'] = 'https://app.box.com/'.($uploaded_entry->get_entry()->is_dir() ? 'folder' : 'file').'/'.$uploaded_entry->get_id();
+                \GPDFAPI::update_pdf($form['id'], $pid, $pdf);
+            }
         }
     }
 
     public function get_upload_location($entry, $form)
     {
+        $account_id = '';
         $folder_id = '';
 
         if (!is_array($form['fields'])) {
-            return $folder_id;
+            return [$account_id, $folder_id];
         }
 
         foreach ($form['fields'] as $field) {
@@ -108,35 +159,19 @@ class GravityPDF
 
             if ((null !== $uploadedfiles) && (count((array) $uploadedfiles) > 0)) {
                 $first_entry = reset($uploadedfiles);
-                $cached_entry = $this->get_processor()->get_client()->get_entry($first_entry->hash, false);
+
+                $account_id = $first_entry->account_id;
+                $requested_account = Accounts::instance()->get_account_by_id($account_id);
+                App::set_current_account($requested_account);
+
+                $cached_entry = Client::instance()->get_entry($first_entry->hash, false);
                 $parents = $cached_entry->get_parents();
                 $folder_id = reset($parents)->get_id();
             }
         }
 
-        return $folder_id;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->get_main()->get_processor();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Main
-     */
-    public function get_main()
-    {
-        if (empty($this->_main)) {
-            global $LetsBox;
-            $this->_main = $LetsBox;
-        }
-
-        return $this->_main;
+        return [$account_id, $folder_id];
     }
 }
 
- new GravityPDF();
+new GravityPDF();

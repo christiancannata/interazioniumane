@@ -3,10 +3,10 @@ Contributors: code4life
 Tags: WooCommerce, disable cart, single product buy, redirect to checkout
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=code4lifeitalia@gmail.com&item_name=Donazione&item_number=Contributo+libero¤cy_code=EUR&lc=it_IT
 Requires at least: 4.6
-Tested up to: 5.9
-Stable tag: 1.2.5
+Tested up to: 6.1
+Stable tag: 1.2.6
 WC requires at least: 2.0
-WC tested up to: 6.1
+WC tested up to: 7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -51,6 +51,9 @@ Plugin take care to empty cart before another product is added
 
 == Changelog ==
 For more information, see [Official page](https://code4life.it/shop/plugins/disable-cart-page-for-woocommerce/).
+
+= v1.2.6 =
+* Compatibility check for WP v6.1 and WC v7.0
 
 = v1.2.5 =
 * Added "pre_option_woocommerce_cart_redirect_after_add" hook to force WooCommerce to redirect after product added to cart

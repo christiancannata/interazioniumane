@@ -51,7 +51,7 @@ if ( true == $responsive_check ) {
 										<br/><?php echo wc_make_phone_clickable( $order->get_billing_phone() ); ?>
 									<?php endif; ?>
 									<?php if ( $order->get_billing_email() ) : ?>
-										<a href="mailto:<?php echo esc_attr( $order->get_billing_email() ); ?>"><?php echo esc_html( $order->get_billing_email() ); ?></a>
+										<br/><a href="mailto:<?php echo esc_attr( $order->get_billing_email() ); ?>"><?php echo esc_html( $order->get_billing_email() ); ?></a>
 										<?php
 									endif;
 								}
@@ -104,7 +104,7 @@ if ( true == $responsive_check ) {
 									<br/><?php echo wc_make_phone_clickable( $order->get_billing_phone() ); ?>
 								<?php endif; ?>
 								<?php if ( $order->get_billing_email() ) : ?>
-									<a href="mailto:<?php echo esc_attr( $order->get_billing_email() ); ?>"><?php echo esc_html( $order->get_billing_email() ); ?></a>
+									<br/><a href="mailto:<?php echo esc_attr( $order->get_billing_email() ); ?>"><?php echo esc_html( $order->get_billing_email() ); ?></a>
 									<?php
 								endif;
 							}

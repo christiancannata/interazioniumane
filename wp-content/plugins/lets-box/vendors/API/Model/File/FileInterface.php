@@ -16,5 +16,6 @@ interface FileInterface
 {
     public function __construct($options = null);
     public function getId();
+    public function setId();
 
 }

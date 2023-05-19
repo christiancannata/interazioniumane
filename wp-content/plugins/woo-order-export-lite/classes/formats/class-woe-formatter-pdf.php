@@ -204,7 +204,7 @@ class WOE_Formatter_PDF extends WOE_Formatter_Plain_Format {
 					foreach($this->settings['global_job_settings']['order_fields'] as $order_field) {
 						if ( isset($order_field['key']) && ($column === $order_field['key'] || $order_field['key'] === 'plain_orders_'. $column)) {
 							if (!empty ($order_field['sum'])) {
-								$summary_row[$column] = (isset($summary_row[$column]) ? $summary_row[$column] : 0) + floatval(str_replace(',', '.', $cell));
+								$summary_row[$column] = (isset($summary_row[$column]) ? $summary_row[$column] : 0) + apply_filters("woe_summary_row_prepare_value", floatval(str_replace(',', '.', $cell)), $cell);
 							} else {
 								$summary_row[$column] = '';
 							}
@@ -214,6 +214,7 @@ class WOE_Formatter_PDF extends WOE_Formatter_Plain_Format {
 			}
 
 			if (!empty( array_keys($summary_row) ) && array_filter($summary_row, function ($row) { return $row !== ''; })) {
+				$summary_row = WOE_Formatter::output( $summary_row );
 				$summary_row[array_keys($summary_row)[apply_filters("woe_summary_row_title_pos",0)]] = $this->settings['global_job_settings']['summary_row_title'];
 				fwrite( $this->handle,
 					'<tr style="font-weight:bold"><td>' . join( '</td><td>', $summary_row ) . "</td><tr>\n" );
@@ -385,7 +386,7 @@ class WOE_Formatter_PDF extends WOE_Formatter_Plain_Format {
 					foreach($this->settings['global_job_settings']['order_fields'] as $order_field) {
 						if (isset($order_field['key']) && ($key === $order_field['key'] || $order_field['key'] === 'plain_orders_'. $key)) {
 							if (!empty ($order_field['sum'])) {
-								$summary_row[$key] = (isset($summary_row[$key]) ? $summary_row[$key] : 0) + floatval(str_replace(',', '.', $item));
+								$summary_row[$key] = (isset($summary_row[$key]) ? $summary_row[$key] : 0) + apply_filters("woe_summary_row_prepare_value", floatval(str_replace(',', '.', $item)), $item);
 							} else {
 								$summary_row[$key] = '';
 							}
@@ -429,11 +430,13 @@ class WOE_Formatter_PDF extends WOE_Formatter_Plain_Format {
 			}
 
                         if (!empty( array_keys($summary_row) ) && array_filter($summary_row, function ($row) { return $row !== ''; })) {
+                            $summary_row = WOE_Formatter::output( $summary_row );
                             $summary_row[array_keys($summary_row)[0]] = $this->settings['global_job_settings']['summary_row_title'];
+                            $summary_row = apply_filters( 'woe_pdf_prepare_row', array_values($summary_row) );
                             if ( $pageBreakOrderLines ) {
-                                $orderRows[] = array( array_values($summary_row), $row_style, $row_height );
+                                $orderRows[] = array( $summary_row, $row_style, $row_height );
                             } else {
-                                $this->pdf->addRow( array_values($summary_row), null, $row_height, $row_style );
+                                $this->pdf->addRow( $summary_row, null, $row_height, $row_style );
                             }
                         }
 

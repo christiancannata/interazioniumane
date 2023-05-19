@@ -267,7 +267,7 @@ class WC_Order_Export_Order_Fields {
 		} elseif ( $field == 'order_shipping_refunded' ) {
 			$row[$field] = $this->order->get_total_shipping_refunded();
 		} elseif ( $field == 'order_shipping_minus_refund' ) {
-			$row[$field] = ( method_exists($this->order,"get_shipping_total") ? $this->order->get_shipping_total() : $this->order->get_total_shipping() ) - $this->order->get_total_shipping_refunded();
+			$row[$field] = floatval( method_exists($this->order,"get_shipping_total") ? $this->order->get_shipping_total() : $this->order->get_total_shipping() ) - $this->order->get_total_shipping_refunded();
 			//shipping tax
 		} elseif ( $field == 'order_shipping_tax_refunded' ) {
 			$row[$field] = WC_Order_Export_Data_Extractor::get_order_shipping_tax_refunded( $this->order_id );
@@ -295,8 +295,11 @@ class WC_Order_Export_Order_Fields {
 		} elseif ( $field == 'user_role' ) {
 			$roles         = $wp_roles->roles;
 			$row[$field] =  !isset( $this->user->roles[0] ) ? "" :  ( isset( $roles[ $this->user->roles[0] ] ) ? $roles[ $this->user->roles[0] ]['name'] : $this->user->roles[0] ); // take first role Name
+			$row[$field] =  translate_user_role( $row[$field] );
 		} elseif ( $field == 'customer_total_orders' ) {
 			$row[$field] = ( isset( $this->user->ID ) ) ? wc_get_customer_order_count( $this->user->ID ) : WC_Order_Export_Data_Extractor::get_customer_order_count_by_email( $this->order_meta["_billing_email"] );
+		} elseif ( $field == 'customer_paid_orders' ) {
+			$row[$field] = WC_Order_Export_Data_Extractor::get_customer_paid_orders_count( $this->order_meta['_customer_user'], $this->order_meta["_billing_email"] );
 		} elseif ( $field == 'customer_total_spent' ) {
 			$row[$field] = ( isset( $this->user->ID ) ) ? wc_get_customer_total_spent( $this->user->ID ) : WC_Order_Export_Data_Extractor::get_customer_total_spent_by_email( $this->order_meta["_billing_email"] );
 		} elseif ( $field == 'customer_first_order_date' ) {
@@ -419,11 +422,15 @@ class WC_Order_Export_Order_Fields {
 			}
 			$row[$field] = implode( "\n", array_filter( $comments ) );
 		} elseif ( $field == 'embedded_edit_order_link' ) {
-			$row[$field] = sprintf(
+			$post_type_object = get_post_type_object( $this->post->post_type );
+			if ( $post_type_object AND $post_type_object->_edit_link){
+				$edit_link = admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=edit', $this->post->ID ) );
+				$row[$field] = sprintf(
 				'<a href="%s" target="_blank">%s</a>',
-				get_edit_post_link($this->order_id),
+				$edit_link,
 				__( 'Edit order', 'woo-order-export-lite' )
-			);
+				);
+			}
 		} elseif ( $field == 'subscription_relationship' AND function_exists("wcs_order_contains_subscription")) {
 			//copied logic from class WC_Subscriptions_Order
 			if ( wcs_order_contains_subscription( $this->post->ID, 'renewal' ) ) {

@@ -24,11 +24,29 @@ a.woocommerce-button.wpcp-wc-open-box {
 }
 
 .woocommerce-order-upload-box #LetsBox {
-    overflow-y: auto;
     height: 100%;
     flex: 1 0 500px;
 }
 
 .woocommerce-order-upload-box #LetsBox .ajax-filelist {
+    background-image: none !important;
     min-height: unset;
+}
+
+ul.wpcp-uploads-list {
+    list-style-type: disc;
+    list-style-type: disclosure-closed;
+    list-style-position: inside;
+    margin: 10px 0;
+    padding: 0;
+    display: none;
+}
+
+ul.wpcp-uploads-list li {
+    padding: 0;
+    margin: 0;
+}
+
+ul.wpcp-uploads-list.wpcp-uploads-list-small {
+    font-size: 70%;
 }

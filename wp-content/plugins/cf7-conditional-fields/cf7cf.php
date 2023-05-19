@@ -8,15 +8,6 @@ class CF7CF {
 
     function __construct() {
 
-	    // can't use wpcf7_enqueue_scripts hook, because it's possible that people
-	    // want to disable the CF7 scripts. but in this case Conditional fields should still work.
-        // add_action('wpcf7_enqueue_scripts', array(__CLASS__, 'enqueue_js')); // <-- don't use this
-
-	    // Enqueue_scripts moved to function outside class.
-
-//	    add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_js'), 20);
-//	    add_action('wpcf7_enqueue_styles', array(__CLASS__, 'enqueue_css'));
-
         // Register shortcodes
         add_action('wpcf7_init', array(__CLASS__, 'add_shortcodes'));
 
@@ -35,9 +26,14 @@ class CF7CF {
         add_filter( 'wpcf7_validate_file*', array($this, 'skip_validation_for_hidden_file_field'), 30, 3);
         add_filter( 'wpcf7_validate_multifile*', array($this, 'skip_validation_for_hidden_file_field'), 30, 3);
 
+        // If acceptance_as_validation is on, then Acceptance fields inside hidden groups should not trigger an error
+        add_filter( 'wpcf7_acceptance', function($accepted, $submission) {
+            $acceptance_as_validation = $submission->get_contact_form()->additional_setting('acceptance_as_validation');
+            return $accepted || (is_array($acceptance_as_validation) && in_array('on', $acceptance_as_validation));
+        }, 20, 2 );
+
 	    // validation messages
 	    add_action('wpcf7_config_validator_validate', array($this,'wpcf7cf_config_validator_validate'));
-
 
 	    add_action("wpcf7_before_send_mail", [$this, 'hide_hidden_mail_fields'], 10, 3);
 
@@ -109,10 +105,12 @@ class CF7CF {
         }
     }
 
+    // TODO: check if we can remove this function. Doesn't seem to be called.
     function group_shortcode_handler( $atts, $content = "" ) {
         return $content;
     }
 
+    // TODO: check if we can remove this function. Doesn't seem to be called.
     public static function shortcode_handler($tag) {
         //$tag = new WPCF7_Shortcode($tag);
         $tag = new WPCF7_FormTag($tag);
@@ -148,8 +146,13 @@ class CF7CF {
     /**
      * Remove validation requirements for fields that are hidden at the time of form submission.
      * Required/invalid fields should never trigger validation errors if they are inside a hidden group during submission.
-     * Called using add_filter( 'wpcf7_validate_[tag_type]', array($this, 'skip_validation_for_hidden_fields'), 2, 2 );
+     * Called using add_filter( 'wpcf7_validate', array($this, 'skip_validation_for_hidden_fields'), 2, 2 );
      * where the priority of 2 causes this to kill any validations with a priority higher than 2
+     * 
+     * NOTE: CF7 is weirdly designed when it comes to validating a form with files.
+     *       Only the non-file fields are considered during the wpcf7_validate filter.
+     *       When validation passes for all fields (except the file fields), the files fields are validated individually.
+     *       ( see skip_validation_for_hidden_file_field )
      *
      * @param $result
      * @param $tag
@@ -170,7 +173,11 @@ class CF7CF {
         } else {
             foreach ($invalid_fields as $invalid_field_key => $invalid_field_data) {
                 if (!in_array($invalid_field_key, $this->hidden_fields)) {
-                    $return_result->invalidate($invalid_field_key, $invalid_field_data['reason']);
+                    foreach ($tags as $tag) {
+                        if ($tag['name'] === $invalid_field_key) {
+                           $return_result->invalidate($tag, $invalid_field_data['reason']);
+                        }
+                    }
                 }
             }
         }
@@ -185,7 +192,24 @@ class CF7CF {
      * so we need to skip validation a second time for individual file fields
      */
     function skip_validation_for_hidden_file_field($result, $tag, $args=[]) {
-        return $this->skip_validation_for_hidden_fields( $result, [ $tag ] );
+
+        if (!count($result->get_invalid_fields())) {
+            return $result;
+        }
+        if(isset($_POST)) {
+            $this->set_hidden_fields_arrays($_POST);
+        }
+
+        $invalid_field_keys = array_keys($result->get_invalid_fields());
+
+        // if the current file is the only invalid tag in the result AND if the file is hidden: return a valid (blank) object
+        if (isset($this->hidden_fields) && is_array($this->hidden_fields) && in_array($tag->name, $this->hidden_fields) && count($invalid_field_keys) == 1) {
+            return new WPCF7_Validation();
+        }
+
+        // if the current file is not hidden, we'll just return the result (keep it invalid).
+        // (Note that this might also return the hidden files as invalid, but that shouldn't matter because the form is invalid, and the notification will be inside a hidden group)
+        return $result;
     }
 
     function cf7msm_merge_post_with_cookie($posted_data) {
@@ -255,13 +279,16 @@ class CF7CF {
             if (!is_array($props[$mail])) { continue; }
 			foreach ($props[$mail] as $key=>$val) {
 
-                $parser = new Wpcf7cfMailParser($val, $this->visible_groups, $this->hidden_groups, $this->repeaters, $_POST);
+                // remove unwanted whitespace between closing and opening groups from email
+                $count = 1;
+                while ($count) {
+                    $val = preg_replace(WPCF7CF_REGEX_MAIL_UNWANTED_WHITESPACE, '$1$2', $val, -1, $count);
+                }
 
-				// $props[$mail][$key] = preg_replace_callback(WPCF7CF_REGEX_MAIL_GROUP, array($this, 'hide_hidden_mail_fields_regex_callback'), $val );
+                // remove hiddden groups from email
+                $parser = new Wpcf7cfMailParser($val, $this->visible_groups, $this->hidden_groups, $this->repeaters, $_POST);
 				$props[$mail][$key] = $parser->getParsedMail();
             }
-
-
         }
 
 
@@ -363,9 +390,9 @@ class CF7CF {
                 $if_value = $rule['if_value'];
 
                 if ($i == 0) {
-                    $lines[] = "show [${then_field}] if [${if_field}] ${operator} \"${if_value}\"";
+                    $lines[] = "show [$then_field] if [$if_field] $operator \"$if_value\"";
                 } else {
-                    $lines[] = str_repeat(' ',$indent)."and if [${if_field}] ${operator} \"${if_value}\"";
+                    $lines[] = str_repeat(' ',$indent)."and if [$if_field] $operator \"$if_value\"";
                 }
             }
         }
@@ -410,10 +437,12 @@ function wpcf7cf_properties($properties, $wpcf7form) {
 	    		$tag_html_data = array();
 
 	    		foreach ($tag_parts as $i => $tag_part) {
-	    			if ($i==0) continue;
-					else if ($tag_part == 'inline') $tag_html_type = 'span';
-					else if ($tag_part == 'clear_on_hide') $tag_html_data[] = 'data-clear_on_hide';
-					else if ($tag_part == 'disable_on_hide' && WPCF7CF_IS_PRO) $tag_html_data[] = 'data-disable_on_hide';
+                    if ($i==0) continue;
+                    $tag_part = explode(':',$tag_part);
+					if ($tag_part[0] == 'inline') $tag_html_type = 'span';
+					else if ($tag_part[0] == 'clear_on_hide') $tag_html_data[] = 'data-clear_on_hide';
+					else if ($tag_part[0] == 'disable_on_hide' && WPCF7CF_IS_PRO) $tag_html_data[] = 'data-disable_on_hide';
+                    else if ($tag_part[0] == 'class') $tag_html_data[] = 'class="'.($tag_part[1]??'').'"';
 			    }
 
 			    array_push($stack,$tag_html_type);
@@ -431,7 +460,7 @@ function wpcf7cf_properties($properties, $wpcf7form) {
     return $properties;
 }
 
-add_action('wpcf7_form_hidden_fields', 'wpcf7cf_form_hidden_fields',10,1);
+add_filter('wpcf7_form_hidden_fields', 'wpcf7cf_form_hidden_fields',10,1);
 
 function wpcf7cf_form_hidden_fields($hidden_fields) {
 
@@ -512,7 +541,9 @@ function wpcf7cf_enqueue_styles() {
 // (HTML standard: "disabled fields don't get submitted", so no need to validate them)
 add_filter( 'wpcf7_feedback_response', function($response, $result) {
     foreach ($response['invalid_fields'] as $i => $inv) {
-        $response['invalid_fields'][$i]['into'] .= ':not(.wpcf7cf-disabled)';
+        if (isset($response['invalid_fields'][$i]['into'])) {
+            $response['invalid_fields'][$i]['into'] .= ':not(.wpcf7cf-disabled)';
+        }
     }
     return $response;
 }, 2, 10 );

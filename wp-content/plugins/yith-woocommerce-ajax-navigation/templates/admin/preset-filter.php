@@ -22,7 +22,7 @@ if ( ! defined( 'YITH_WCAN' ) ) {
 
 <div id="filter_<?php echo esc_attr( $filter_id ); ?>" class="yith-toggle-row ui-sortable-handle" data-item_key="<?php echo esc_attr( $filter_id ); ?>">
 	<div class="yith-toggle-title">
-		<span class="title-arrow material-icons">keyboard_arrow_right</span>
+		<i class="title-arrow yith-icon yith-icon-arrow-right-alt"></i>
 		<h3 class="title">
 				<?php
 				$filter_title = $filter->get_title();
@@ -46,7 +46,7 @@ if ( ! defined( 'YITH_WCAN' ) ) {
 		);
 		?>
 		<span class="show-on-hover delete yith-icon-trash"></span>
-		<span class="show-on-hover clone yith-icon-edit"></span>
+		<span class="show-on-hover clone yith-icon-clone"></span>
 	</div>
 	<div class="yith-toggle-content">
 		<?php
@@ -70,7 +70,7 @@ if ( ! defined( 'YITH_WCAN' ) ) {
 
 				// special case for terms.
 				if ( 'term_ids' === $field_slug ) {
-					$field_args['options'] = $filter->get_terms( 'id=>name' );
+					$field_args['options'] = $filter->get_terms( 'id=>name', 'edit' );
 				}
 
 				?>

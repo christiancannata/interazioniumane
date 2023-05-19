@@ -74,6 +74,7 @@ if ( ! class_exists( 'YITH_WCAN_Elementor_Filters' ) ) {
 			return array( 'general', 'yith' );
 		}
 
+
 		/**
 		 * Register YITH_WCAN_Elementor_Filters widget controls.
 		 *
@@ -82,7 +83,7 @@ if ( ! class_exists( 'YITH_WCAN_Elementor_Filters' ) ) {
 		 * @since  1.0.0
 		 * @access protected
 		 */
-		protected function register_controls() { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		protected function register_controls() {
 			$presets         = YITH_WCAN_Preset_Factory::list_presets();
 			$presets_options = array_merge(
 				array(

@@ -1,188 +1,266 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class User
 {
     /**
-     * @var \TheLion\LetsBox\Processor
+     * The single instance of the class.
+     *
+     * @var User
      */
-    private $_processor;
-    private $_can_view = false;
-    private $_can_preview = false;
-    private $_can_download = false;
-    private $_can_download_zip = false;
-    private $_can_delete_files = false;
-    private $_can_delete_folders = false;
-    private $_can_rename_files = false;
-    private $_can_rename_folders = false;
-    private $_can_add_folders = false;
-    private $_can_create_document = false;
-    private $_can_upload = false;
-    private $_can_move_files = false;
-    private $_can_move_folders = false;
-    private $_can_copy_files = false;
-    private $_can_copy_folders = false;
-    private $_can_share = false;
-    private $_can_edit_description = false;
-    private $_can_edit = false;
-    private $_can_deeplink = false;
+    protected static $_instance;
 
-    public function __construct(Processor $_processor = null)
+    private static $_can_view = false;
+    private static $_can_preview = false;
+    private static $_can_download = false;
+    private static $_can_download_zip = false;
+    private static $_can_delete_files = false;
+    private static $_can_delete_folders = false;
+    private static $_can_rename_files = false;
+    private static $_can_rename_folders = false;
+    private static $_can_add_folders = false;
+    private static $_can_create_document = false;
+    private static $_can_upload = false;
+    private static $_can_move_files = false;
+    private static $_can_move_folders = false;
+    private static $_can_copy_files = false;
+    private static $_can_copy_folders = false;
+    private static $_can_share = false;
+    private static $_can_edit_description = false;
+    private static $_can_edit = false;
+    private static $_can_deeplink = false;
+    private static $_can_search = false;
+
+    public function __construct()
     {
-        $this->_processor = $_processor;
-        $this->_can_view = Helpers::check_user_role($this->get_processor()->get_shortcode_option('view_role'));
+        self::init();
+    }
 
-        if (false === $this->can_view()) {
-            return;
+    public static function reset()
+    {
+        self::$_instance = new self();
+
+        return self::$_instance;
+    }
+
+    /**
+     * User Instance.
+     *
+     * Ensures only one instance is loaded or can be loaded.
+     *
+     * @return User - User instance
+     *
+     * @static
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
         }
 
-        $this->_can_preview = Helpers::check_user_role($this->get_processor()->get_shortcode_option('preview_role'));
-
-        $this->_can_download = Helpers::check_user_role($this->get_processor()->get_shortcode_option('download_role'));
-        $this->_can_download_zip = ('1' === $this->get_processor()->get_shortcode_option('can_download_zip')) && $this->can_download();
-
-        if ('1' === $this->get_processor()->get_shortcode_option('delete')) {
-            $this->_can_delete_files = Helpers::check_user_role($this->get_processor()->get_shortcode_option('delete_role'));
-            $this->_can_delete_folders = Helpers::check_user_role($this->get_processor()->get_shortcode_option('delete_role'));
-        }
-
-        if ('1' === $this->get_processor()->get_shortcode_option('rename')) {
-            $this->_can_rename_files = Helpers::check_user_role($this->get_processor()->get_shortcode_option('rename_role'));
-            $this->_can_rename_folders = Helpers::check_user_role($this->get_processor()->get_shortcode_option('rename_role'));
-        }
-
-        $this->_can_add_folders = ('1' === $this->get_processor()->get_shortcode_option('addfolder')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('addfolder_role'));
-        $this->_can_create_document = ('1' === $this->get_processor()->get_shortcode_option('create_document')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('create_document_role'));
-        $this->_can_upload = ('1' === $this->get_processor()->get_shortcode_option('upload')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('upload_role'));
-
-        if ('1' === $this->get_processor()->get_shortcode_option('move')) {
-            $this->_can_move_files = Helpers::check_user_role($this->get_processor()->get_shortcode_option('move_role'));
-            $this->_can_move_folders = Helpers::check_user_role($this->get_processor()->get_shortcode_option('move_role'));
-        }
-
-        if ('1' === $this->get_processor()->get_shortcode_option('copy')) {
-            $this->_can_copy_files = Helpers::check_user_role($this->get_processor()->get_shortcode_option('copy_files_role'));
-            $this->_can_copy_folders = Helpers::check_user_role($this->get_processor()->get_shortcode_option('copy_folders_role'));
-        }
-
-        $this->_can_share = ('1' === $this->get_processor()->get_shortcode_option('show_sharelink')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('share_role'));
-        $this->_can_edit_description = ('1' === $this->get_processor()->get_shortcode_option('editdescription')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('editdescription_role'));
-        $this->_can_edit = ('1' === $this->get_processor()->get_shortcode_option('edit')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('edit_role'));
-
-        $this->_can_deeplink = ('1' === $this->get_processor()->get_shortcode_option('deeplink')) && Helpers::check_user_role($this->get_processor()->get_shortcode_option('deeplink_role'));
+        return self::$_instance;
     }
 
-    public function can_view()
+    public static function can_view()
     {
-        return $this->_can_view;
+        self::instance();
+
+        return self::$_can_view;
     }
 
-    public function can_preview()
+    public static function can_preview()
     {
-        return $this->_can_preview;
+        self::instance();
+
+        return self::$_can_preview;
     }
 
-    public function can_download()
+    public static function can_download()
     {
-        return $this->_can_download;
+        self::instance();
+
+        return self::$_can_download;
     }
 
-    public function can_download_zip()
+    public static function can_download_zip()
     {
-        return $this->_can_download_zip;
+        self::instance();
+
+        return self::$_can_download_zip;
     }
 
-    public function can_delete_files()
+    public static function can_delete_files()
     {
-        return $this->_can_delete_files;
+        self::instance();
+
+        return self::$_can_delete_files;
     }
 
-    public function can_delete_folders()
+    public static function can_delete_folders()
     {
-        return $this->_can_delete_folders;
+        self::instance();
+
+        return self::$_can_delete_folders;
     }
 
-    public function can_rename_files()
+    public static function can_rename_files()
     {
-        return $this->_can_rename_files;
+        self::instance();
+
+        return self::$_can_rename_files;
     }
 
-    public function can_rename_folders()
+    public static function can_rename_folders()
     {
-        return $this->_can_rename_folders;
+        self::instance();
+
+        return self::$_can_rename_folders;
     }
 
-    public function can_add_folders()
+    public static function can_add_folders()
     {
-        return $this->_can_add_folders;
+        self::instance();
+
+        return self::$_can_add_folders;
     }
 
-    public function can_create_document()
+    public static function can_create_document()
     {
-        return $this->_can_create_document;
+        self::instance();
+
+        return self::$_can_create_document;
     }
 
-    public function can_upload()
+    public static function can_upload()
     {
-        return $this->_can_upload;
+        self::instance();
+
+        return self::$_can_upload;
     }
 
-    public function can_move_files()
+    public static function can_move_files()
     {
-        return $this->_can_move_files;
+        self::instance();
+
+        return self::$_can_move_files;
     }
 
-    public function can_move_folders()
+    public static function can_move_folders()
     {
-        return $this->_can_move_folders;
+        self::instance();
+
+        return self::$_can_move_folders;
     }
 
-    public function can_copy_files()
+    public static function can_copy_files()
     {
-        return $this->_can_copy_files;
+        self::instance();
+
+        return self::$_can_copy_files;
     }
 
-    public function can_copy_folders()
+    public static function can_copy_folders()
     {
-        return $this->_can_copy_folders;
+        self::instance();
+
+        return self::$_can_copy_folders;
     }
 
-    public function can_share()
+    public static function can_share()
     {
-        return $this->_can_share;
+        self::instance();
+
+        return self::$_can_share;
     }
 
-    public function can_edit_description()
+    public static function can_edit_description()
     {
-        return $this->_can_edit_description;
+        self::instance();
+
+        return self::$_can_edit_description;
     }
 
-    public function can_edit()
+    public static function can_edit()
     {
-        return $this->_can_edit;
+        self::instance();
+
+        return self::$_can_edit;
     }
 
-    public function can_deeplink()
+    public static function can_deeplink()
     {
-        return $this->_can_deeplink;
+        self::instance();
+
+        return self::$_can_deeplink;
     }
 
-    public function get_permissions_hash()
+    public static function can_search()
     {
-        $data = get_object_vars($this);
-        unset($data['_processor']);
+        self::instance();
 
+        return self::$_can_search;
+    }
+
+    public static function get_permissions_hash()
+    {
+        self::instance();
+
+        $data = get_object_vars(self::$_instance);
         $data = json_encode($data);
 
         return md5($data);
     }
 
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
-    }
+       private static function init()
+       {
+           self::$_can_view = Helpers::check_user_role(Processor::instance()->get_shortcode_option('view_role'));
+
+           if (false === self::$_can_view) {
+               return;
+           }
+
+           self::$_can_preview = Helpers::check_user_role(Processor::instance()->get_shortcode_option('preview_role'));
+           self::$_can_download = Helpers::check_user_role(Processor::instance()->get_shortcode_option('download_role'));
+           self::$_can_download_zip = ('1' === Processor::instance()->get_shortcode_option('can_download_zip')) && self::$_can_download;
+
+           if ('1' === Processor::instance()->get_shortcode_option('delete')) {
+               self::$_can_delete_files = Helpers::check_user_role(Processor::instance()->get_shortcode_option('delete_files_role'));
+               self::$_can_delete_folders = Helpers::check_user_role(Processor::instance()->get_shortcode_option('delete_folders_role'));
+           }
+
+           if ('1' === Processor::instance()->get_shortcode_option('rename')) {
+               self::$_can_rename_files = Helpers::check_user_role(Processor::instance()->get_shortcode_option('rename_files_role'));
+               self::$_can_rename_folders = Helpers::check_user_role(Processor::instance()->get_shortcode_option('rename_folders_role'));
+           }
+
+           self::$_can_add_folders = ('1' === Processor::instance()->get_shortcode_option('addfolder')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('addfolder_role'));
+           self::$_can_create_document = ('1' === Processor::instance()->get_shortcode_option('create_document')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('create_document_role'));
+           self::$_can_upload = ('1' === Processor::instance()->get_shortcode_option('upload')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('upload_role'));
+
+           if ('1' === Processor::instance()->get_shortcode_option('move')) {
+               self::$_can_move_files = Helpers::check_user_role(Processor::instance()->get_shortcode_option('move_files_role'));
+               self::$_can_move_folders = Helpers::check_user_role(Processor::instance()->get_shortcode_option('move_folders_role'));
+           }
+
+           if ('1' === Processor::instance()->get_shortcode_option('copy')) {
+               self::$_can_copy_files = Helpers::check_user_role(Processor::instance()->get_shortcode_option('copy_files_role'));
+               self::$_can_copy_folders = Helpers::check_user_role(Processor::instance()->get_shortcode_option('copy_folders_role'));
+           }
+
+           self::$_can_share = ('1' === Processor::instance()->get_shortcode_option('show_sharelink')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('share_role'));
+           self::$_can_edit_description = ('1' === Processor::instance()->get_shortcode_option('editdescription')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('editdescription_role'));
+           self::$_can_edit = ('1' === Processor::instance()->get_shortcode_option('edit')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('edit_role'));
+
+           self::$_can_deeplink = ('1' === Processor::instance()->get_shortcode_option('deeplink')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('deeplink_role'));
+
+           self::$_can_search = ('1' === Processor::instance()->get_shortcode_option('search')) && Helpers::check_user_role(Processor::instance()->get_shortcode_option('search_role'));
+       }
 }

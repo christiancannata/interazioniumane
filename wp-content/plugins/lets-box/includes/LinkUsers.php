@@ -1,35 +1,26 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class LinkUsers
 {
-    /**
-     * @var \TheLion\LetsBox\Main
-     */
-    private $_main;
-
-    /**
-     * Construct the plugin object.
-     */
-    public function __construct(Main $main)
+    public static function render()
     {
-        $this->_main = $main;
-    }
+        Core::instance()->load_scripts();
+        wp_enqueue_script('LetsBox.PrivateFolders');
 
-    public function render()
-    {
-        wp_enqueue_script('LetsBox.PrivateFolders', LETSBOX_ROOTPATH.'/includes/js/LinkUsers.min.js', ['LetsBox'], LETSBOX_VERSION, true);
+        Core::instance()->load_styles();
+        wp_enqueue_style('WPCloudPlugins.AdminUI');
 
         include sprintf('%s/templates/admin/private_folders.php', LETSBOX_ROOTDIR);
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Main
-     */
-    public function get_main()
-    {
-        return $this->_main;
     }
 }
 
@@ -55,7 +46,7 @@ class User_List_Table extends \WP_List_Table
         $sortable = $this->get_sortable_columns();
 
         $usersearch = isset($_REQUEST['s']) ? wp_unslash(trim($_REQUEST['s'])) : '';
-        $role = isset($_REQUEST['role']) ? $_REQUEST['role'] : '';
+        $role = $_REQUEST['role'] ?? '';
         $per_page = ($this->is_site_users) ? 'site_users_network_per_page' : 'users_per_page';
         $users_per_page = $this->get_items_per_page($per_page);
         $paged = $this->get_pagenum();
@@ -115,9 +106,9 @@ class User_List_Table extends \WP_List_Table
             'avatar' => '',
             'username' => esc_html__('Username'),
             'name' => esc_html__('Name'),
-            'email' => esc_html__('Email'),
+
             'role' => esc_html__('Role'),
-            'private_folder' => esc_html__('Private Folder', 'wpcloudplugins'),
+            'private_folder' => esc_html__('Linked Folder', 'wpcloudplugins'),
             'buttons' => '',
         ];
     }
@@ -163,8 +154,10 @@ class User_List_Table extends \WP_List_Table
             case 'avatar':
             case 'email':
             case 'role':
-            case 'name':
                 return $item[$column_name];
+
+            case 'name':
+                return $item[$column_name].'<br/><em>'.$item['email'].'</em>';
 
             case 'username':
                 if ('GUEST' === $item['id']) {
@@ -174,20 +167,38 @@ class User_List_Table extends \WP_List_Table
                 return '<strong><a href="'.get_edit_user_link($item['id']).'" title="'.$item[$column_name].'">'.$item[$column_name].'</a></strong>';
 
             case 'private_folder':
-                if (isset($item[$column_name]['foldertext'])) {
-                    return $item[$column_name]['foldertext'];
+                $linked_data = $item[$column_name];
+
+                if (isset($linked_data['foldertext'])) {
+                    $accounts = $linked_account = Accounts::instance();
+                    $account_text = '';
+
+                    if (!isset($linked_data['accountid'])) {
+                        $linked_account = $accounts->get_primary_account();
+                    } else {
+                        $linked_account = $accounts->get_account_by_id($linked_data['accountid']);
+                    }
+
+                    if (count($accounts->list_accounts()) > 1) {
+                        $account_text = "<code>{$linked_account->get_email()}</code><br/>";
+                    }
+
+                    if (!empty($linked_account)) {
+                        return "{$account_text}<strong>{$linked_data['foldertext']}</strong>";
+                    }
+
+                    return '<code>'.sprintf(esc_html__('Account with ID: %s not found.', 'wpcloudplugins'), $linked_data['accountid']).'</code><br/>'.$linked_data['foldertext'];
                 }
 
-                return '';
+                return '-';
 
             case 'buttons':
                 $private_folder = $item['private_folder'];
 
                 $has_link = (!(empty($private_folder) || !is_array($private_folder) || !isset($private_folder['foldertext'])));
 
-                $buttons_html = '<a href="#" title="'.esc_html__('Create link with Private Folder', 'wpcloudplugins').'" class="linkbutton '.(($has_link) ? 'hidden' : '').'" data-user-id="'.$item['id'].'"><i class="eva eva-folder eva-lg" aria-hidden="true"></i> <span class="linkedto">'.esc_html__('Select folder', 'wpcloudplugins').'</span></a>';
-                $buttons_html .= '<a href="#" title="'.esc_html__('Break link with Private Folder', 'wpcloudplugins').'" class="unlinkbutton '.(($has_link) ? '' : 'hidden').'" data-user-id="'.$item['id'].'"><i class="eva eva-close-circle eva-lg" aria-hidden="true"></i> <span class="linkedto">'.esc_html__('Unlink', 'wpcloudplugins').'</span></a>';
-                $buttons_html .= '<div class="wpcp-spinner"></div>';
+                $buttons_html = '<button type="button" title="'.esc_html__('Create link with Private Folder', 'wpcloudplugins').'" class="wpcp-button-icon-only select_folder '.(($has_link) ? 'hidden' : '').'" data-user-id="'.$item['id'].'"><i class="eva eva-folder eva-lg" aria-hidden="true"></i></button>';
+                $buttons_html .= '<button type="button" title="'.esc_html__('Break link with Private Folder', 'wpcloudplugins').'" class="wpcp-button-icon-only deselect_folder '.(($has_link) ? '' : 'hidden').'" data-user-id="'.$item['id'].'"><i class="eva eva-slash-outline eva-lg" aria-hidden="true"></i></button>';
 
                 return $buttons_html;
 
@@ -281,7 +292,7 @@ class User_List_Table extends \WP_List_Table
             'id' => 'GUEST',
             'avatar' => '<img src="'.LETSBOX_ROOTPATH.'/css/images/usericon.png" style="height:32px"/>',
             'username' => esc_html__('Anonymous user', 'wpcloudplugins'),
-            'name' => '...'.esc_html__('Default folder for Guests and non-linked Users', 'wpcloudplugins'),
+            'name' => esc_html__('Default folder for Guests and non-linked Users', 'wpcloudplugins'),
             'email' => '',
             'role' => '',
             'private_folder' => $guestfolder,
@@ -289,15 +300,10 @@ class User_List_Table extends \WP_List_Table
         ];
 
         foreach ($users as $user) {
-            // Gravatar
-            if (function_exists('get_wp_user_avatar_url')) {
-                $display_gravatar = get_wp_user_avatar($user->user_email, 32);
-            } else {
-                $display_gravatar = get_avatar($user->user_email, 32);
-                if (false === $display_gravatar) {
-                    // Gravatar is disabled, show default image.
-                    $display_gravatar = '<img src="'.LETSBOX_ROOTPATH.'/css/images/usericon.png" style="height:32px"/>';
-                }
+            $display_gravatar = get_avatar($user->user_email, 32);
+            if (false === $display_gravatar) {
+                // Gravatar is disabled, show default image.
+                $display_gravatar = '<img src="'.LETSBOX_ROOTPATH.'/css/images/usericon.png" style="height:32px"/>';
             }
 
             $curfolder = get_user_option('lets_box_linkedto', $user->ID);

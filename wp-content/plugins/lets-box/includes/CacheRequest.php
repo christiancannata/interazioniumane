@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -45,34 +53,20 @@ class CacheRequest
      */
     private $_user_identifier;
 
-    /**
-     * @var \TheLion\LetsBox\Processor
-     */
-    private $_processor;
-
-    public function __construct(Processor $_processor, $request = null)
+    public function __construct($request = null)
     {
         if (empty($request)) {
             $request = $_REQUEST;
         }
 
-        $this->_processor = $_processor;
         $this->_user_identifier = $this->_set_user_identifier();
         $encoded = json_encode($request);
-        $request_hash = md5($encoded.$this->get_processor()->get_requested_entry());
-        $this->_cache_name = 'request_'.$_processor->get_listtoken().'_'.$request_hash.'_'.$this->get_user_identifier();
+        $request_hash = md5($encoded.Processor::instance()->get_requested_entry());
+        $this->_cache_name = 'request_'.Helpers::filter_filename(App::get_current_account()->get_id().'_'.Processor::instance()->get_listtoken(), false).'_'.$request_hash.'_'.$this->get_user_identifier();
         $this->_cache_location = LETSBOX_CACHEDIR.$this->get_cache_name().'.cache';
 
         // Load Cache
         $this->load_cache();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
     }
 
     public function get_user_identifier()
@@ -112,7 +106,7 @@ class CacheRequest
             return false;
         }
 
-        $sorting = $this->get_processor()->get_shortcode_option('sort_field');
+        $sorting = Processor::instance()->get_shortcode_option('sort_field');
 
         if (!empty($sorting) && 'shuffle' === $sorting) {
             return false;
@@ -133,9 +127,10 @@ class CacheRequest
         $this->_save_local_cache();
     }
 
-    public static function clear_local_cache_for_shortcode($listtoken)
+    public static function clear_local_cache_for_shortcode($account_id, $listtoken)
     {
-        $file_name = 'request_'.$listtoken;
+        $file_name = Helpers::filter_filename($account_id.'_'.$listtoken, false);
+
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(LETSBOX_CACHEDIR, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $path) {
             if (false === strpos($path->getFilename(), $file_name)) {
                 continue;
@@ -255,7 +250,7 @@ class CacheRequest
         }
 
         // Check if the file is more than 1 minute old.
-        $requires_unlock = ((filemtime($file) + 60) < (time()));
+        $requires_unlock = ((filemtime($file) + 60) < time());
 
         // Temporarily workaround when flock is disabled. Can cause problems when plugin is used in multiple processes
         if (false !== strpos(ini_get('disable_functions'), 'flock')) {
@@ -336,12 +331,12 @@ class CacheRequest
      */
     private function _set_user_identifier()
     {
-        $shortcode = $this->get_processor()->get_shortcode();
+        $shortcode = Processor::instance()->get_shortcode();
 
         if (empty($shortcode)) {
             return false;
         }
 
-        return $this->get_processor()->get_user()->get_permissions_hash();
+        return User::get_permissions_hash();
     }
 }

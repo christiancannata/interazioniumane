@@ -266,18 +266,18 @@ if ( post_password_required() ) {
 											echo '<span class="course--prices">';
 											echo '<span class="course--price sale"><span class="course--price--symbol">€</span><span class="course--price--value">'. number_format($sale_price, 0, ',', '.'). '</span></span>';
 											echo '<span class="course--price old"><span class="course--price--symbol">€</span><span class="course--price--value">'. number_format($course_price, 0, ',', '.'). '</span></span>';
-											if( get_field('course_vat') ){
+											/*if( get_field('course_vat') ){
 												echo '<span class="course--price__vat">+ IVA</span>';
-											}
+											}*/
 											echo '</span>';
 											echo '<span class="course--early"><strong>Early Booking</strong> fino al ' . $end_early_booking_day . ' ' . $early_month . ' ' . $end_early_booking_year .'</span>';
 										}
 									} else {
 
 										echo '<span class="course--price"><span class="course--price--symbol">€</span><span class="course--price--value">'. number_format($course_price, 0, ',', '.'). '</span>';
-										if( get_field('course_vat') ){
+										/*if( get_field('course_vat') ){
 											echo '<span class="course--price__vat">+ IVA</span>';
-										}
+										}*/
 										echo'</span>';
 
 									if($current_date > $end_booking) {
@@ -296,9 +296,9 @@ if ( post_password_required() ) {
 									}
 							} else {
 									echo '<span class="course--price"><span class="course--price--symbol">€</span><span class="course--price--value">'. number_format($course_price, 0, ',', '.'). '</span>';
-									if( get_field('course_vat') ){
+									/*if( get_field('course_vat') ){
 										echo '<span class="course--price__vat">+ IVA</span>';
-									}
+									}*/
 									echo'</span>';
 									if($current_date < $end_booking) {
 										$date1 = new DateTime($current_date);

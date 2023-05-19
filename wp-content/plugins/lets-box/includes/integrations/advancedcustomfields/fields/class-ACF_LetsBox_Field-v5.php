@@ -2,6 +2,15 @@
 
 namespace TheLion\LetsBox\Integrations;
 
+use TheLion\LetsBox\Accounts;
+use TheLion\LetsBox\API;
+use TheLion\LetsBox\App;
+use TheLion\LetsBox\Client;
+use TheLion\LetsBox\Core;
+use TheLion\LetsBox\Helpers;
+use TheLion\LetsBox\Processor;
+use TheLion\LetsBox\Zip;
+
 // exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -88,13 +97,13 @@ class ACF_LetsBox_Field extends \acf_field
                 'label' => 'Returned data',
                 'instructions' => 'What information should be available for the files objects besides the default <code>name</code>, <code>size</code>, <code>icon_url</code>, <code>direct_url</code> and <code>download_url</code>',
                 'type' => 'checkbox',
-                'layout' => 'horizontal',
+                'layout' => 'vertical',
                 'name' => 'return_data',
                 'choices' => [
-                    'shortlived_download_url' => 'Temporarily download URL (<code>shortlived_download_url</code>) | A direct, short-lived, download URL to the file in the cloud.',
-                    'shared_url' => 'Public URL (<code>shared_url</code>) | A shared URL to the file is created, accessible by anyone with the link.',
-                    'embed_url' => 'Embed URL (<code>embed_url</code>) | A shared URL for embedding the file in an iFrame. Only available for supported formats.',
-                    'thumbnail_url' => 'Thumbnail URL (<code>thumbnail_url</code>) | An URL to a thumbnail of the file. If no thumbnail is available an icon will be shown.',
+                    'shortlived_download_url' => 'Temporarily download URL (shortlived_download_url) | A direct, short-lived, download URL to the file in the cloud.',
+                    'shared_url' => 'Public URL (shared_url) | A shared URL to the file is created, accessible by anyone with the link.',
+                    'embed_url' => 'Embed URL (embed_url) | A shared URL for embedding the file in an iFrame. Only available for supported formats.',
+                    'thumbnail_url' => 'Thumbnail URL (thumbnail_url) | An URL to a thumbnail of the file. If no thumbnail is available an icon will be shown.',
                 ],
             ]
         );
@@ -124,67 +133,21 @@ class ACF_LetsBox_Field extends \acf_field
                 'data-name' => 'id',
             ]
         ); ?>
-        <table class="wpcp-acf-items-table wp-list-table widefat striped">
-            <thead>
-                <th style="width: 18px;"></th>
-                <th><?php esc_html_e('Name', 'wpcloudplugins'); ?></th>
-                <th><?php esc_html_e('Entry ID', 'wpcloudplugins'); ?></th>
-                <th style="width: 175px;"></th>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-        <br/>
-        <a href="#" class="button button-primary button-large wpcp-acf-add-item"><?php printf(esc_html__('Choose from %s', 'wpcloudplugins'), 'Box'); ?></a>
+<table class="wpcp-acf-items-table wp-list-table widefat striped">
+    <thead>
+        <th style="width: 18px;"></th>
+        <th><?php esc_html_e('Name', 'wpcloudplugins'); ?></th>
+        <th><?php esc_html_e('File ID', 'wpcloudplugins'); ?></th>
+        <th style="width: 175px;"></th>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<br />
+<a href="#" class="button button-primary button-large wpcp-acf-add-item"><?php printf(esc_html__('Choose from %s', 'wpcloudplugins'), 'Box'); ?></a>
 
-	<?php
-            $this->render_file_selector();
-    }
-
-    /**
-     * Render the File Browser to allow the user to add files to the Product.
-     *
-     * @param \WP_Post $post
-     *
-     * @return string
-     */
-    public function render_file_selector()
-    {
-        ?>
-        <div id='lb-embedded' style='clear:both;display:none'>
-          <?php
-
-          $atts = ['mode' => 'files',
-              'filelayout' => 'list',
-              'filesize' => '0',
-              'filedate' => '0',
-              'addfolder' => '0',
-              'showbreadcrumb' => '0',
-              'downloadrole' => 'none',
-              'candownloadzip' => '0',
-              'showsharelink' => '0',
-              'search' => '1',
-              'mcepopup' => 'woocommerce', ];
-
-        $user_folder_backend = apply_filters('letsbox_use_user_folder_backend', $this->get_processor()->get_setting('userfolder_backend'));
-
-        if ('No' !== $user_folder_backend) {
-            $atts['userfolders'] = $user_folder_backend;
-
-            $private_root_folder = $this->get_processor()->get_setting('userfolder_backend_auto_root');
-            if ('auto' === $user_folder_backend && !empty($private_root_folder) && isset($private_root_folder['id'])) {
-                $atts['dir'] = $private_root_folder['id'];
-
-                if (!isset($private_root_folder['view_roles'])) {
-                    $private_root_folder['view_roles'] = ['none'];
-                }
-                $atts['viewuserfoldersrole'] = implode('|', $private_root_folder['view_roles']);
-            }
-        }
-
-        echo $this->get_processor()->create_from_shortcode($atts); ?>
-        </div>
-        <?php
+<?php
+            include sprintf('template_file_selector.php');
     }
 
     /*
@@ -208,12 +171,11 @@ class ACF_LetsBox_Field extends \acf_field
         $version = $this->settings['version'];
 
         // register & include JS
-        add_thickbox();
+        Core::instance()->load_scripts();
+        Core::instance()->load_styles();
 
-        $this->get_main()->load_scripts();
-        $this->get_main()->load_styles();
-
-        wp_enqueue_style('LetsBox.ShortcodeBuilder');
+        wp_enqueue_script('LetsBox.AdminUI');
+        wp_enqueue_style('WPCloudPlugins.AdminUI');
 
         wp_register_script('WPCP_ACF_'.$this->name, "{$url}assets/js/input.js", ['acf-input'], $version);
         wp_enqueue_script('WPCP_ACF_'.$this->name);
@@ -275,20 +237,21 @@ class ACF_LetsBox_Field extends \acf_field
                 continue; // Don't get all data again if it is already present
             }
 
-            $cached_entry = $this->get_processor()->get_client()->get_entry($entry_id, false);
+            API::set_account_by_id($entry['account_id']);
+            $cached_entry = Client::instance()->get_entry($entry_id, false);
 
             // Name
             $entries[$entry_id]['name'] = $cached_entry->get_name();
 
             // Size
             $size = $cached_entry->get_entry()->get_size();
-            $entries[$entry_id]['size'] = ($size > 0) ? \TheLion\LetsBox\Helpers::bytes_to_size_1024($size) : '';
+            $entries[$entry_id]['size'] = ($size > 0) ? Helpers::bytes_to_size_1024($size) : '';
 
             // Direct URL
             $entries[$entry_id]['direct_url'] = 'https://app.box.com/'.($cached_entry->get_entry()->is_dir() ? 'folder' : 'file').'/'.$entry_id;
 
             // Download link
-            $entries[$entry_id]['download_url'] = LETSBOX_ADMIN_URL."?action=letsbox-acf-download&pid={$post_id}&fid={$field['key']}&id={$entry_id}";
+            $entries[$entry_id]['download_url'] = LETSBOX_ADMIN_URL."?action=letsbox-acf-download&pid={$post_id}&fid={$field['key']}&aid={$entry['account_id']}&id={$entry_id}";
 
             // Icon URL
             $entries[$entry_id]['icon_url'] = $cached_entry->get_entry()->get_icon();
@@ -321,7 +284,8 @@ class ACF_LetsBox_Field extends \acf_field
         }
 
         foreach ($entries as $entry_id => $entry) {
-            $cached_entry = $this->get_processor()->get_client()->get_entry($entry_id, false);
+            API::set_account_by_id($entry['account_id']);
+            $cached_entry = Client::instance()->get_entry($entry_id, false);
 
             // Thumbnail
             if (in_array('thumbnail_url', $field['return_data'], true)) {
@@ -335,7 +299,7 @@ class ACF_LetsBox_Field extends \acf_field
             // Embed URL
             if (in_array('embed_url', $field['return_data'], true)) {
                 if (empty($entries[$entry_id]['embed_url'])) {
-                    $entries[$entry_id]['embed_url'] = $this->get_processor()->get_client()->get_embedded_link($cached_entry);
+                    $entries[$entry_id]['embed_url'] = Client::instance()->get_embedded_link($cached_entry, ['access' => 'open']);
 
                     // Update this information
                     update_field($field['key'], $entries, $post_id);
@@ -347,7 +311,7 @@ class ACF_LetsBox_Field extends \acf_field
             // Shared (public) URL
             if (in_array('shared_url', $field['return_data'], true)) {
                 if (empty($entries[$entry_id]['shared_url'])) {
-                    $entries[$entry_id]['shared_url'] = $this->get_processor()->get_client()->get_shared_link($cached_entry);
+                    $entries[$entry_id]['shared_url'] = Client::instance()->get_shared_link($cached_entry);
 
                     // Update this information
                     update_field($field['key'], $entries, $post_id);
@@ -359,7 +323,7 @@ class ACF_LetsBox_Field extends \acf_field
             // Short-lived direct download URL
             if (in_array('shortlived_download_url', $field['return_data'], true)) {
                 if (empty($entries[$entry_id]['shortlived_download_url'])) {
-                    $entries[$entry_id]['shortlived_download_url'] = $this->get_processor()->get_client()->get_temporarily_link($cached_entry);
+                    $entries[$entry_id]['shortlived_download_url'] = Client::instance()->get_temporarily_link($cached_entry);
                 }
             } else {
                 $entries[$entry_id]['shortlived_download_url'] = null;
@@ -379,10 +343,10 @@ class ACF_LetsBox_Field extends \acf_field
      */
     public function start_download()
     {
-        if (!isset($_REQUEST['pid']) || !isset($_REQUEST['fid']) || !isset($_REQUEST['id'])) {
+        if (!isset($_REQUEST['pid']) || !isset($_REQUEST['fid']) || !isset($_REQUEST['aid']) || !isset($_REQUEST['id'])) {
             http_response_code(400);
 
-            exit();
+            exit;
         }
 
         $entries = get_field(sanitize_key($_REQUEST['fid']), sanitize_key($_REQUEST['pid']), false);
@@ -390,24 +354,26 @@ class ACF_LetsBox_Field extends \acf_field
         if (empty($entries) || !isset($entries[$_REQUEST['id']])) {
             http_response_code(401);
 
-            exit();
+            exit;
         }
 
-        $cached_entry = $this->get_processor()->get_client()->get_entry($_REQUEST['id'], false);
+        API::set_account_by_id($_REQUEST['aid']);
+
+        $cached_entry = Client::instance()->get_entry($_REQUEST['id'], false);
 
         if (empty($cached_entry)) {
             http_response_code(404);
         }
 
         if ($cached_entry->get_entry()->is_dir()) {
-            $this->get_processor()->set_requested_entry($_REQUEST['id']);
-            $zip = new \TheLion\LetsBox\Zip($this->get_processor(), sanitize_key($_REQUEST['fid']));
+            Processor::instance()->set_requested_entry($_REQUEST['id']);
+            $zip = new Zip(Processor::instance(), sanitize_key($_REQUEST['fid']));
             $zip->do_zip();
 
-            exit();
+            exit;
         }
 
-        $temporarily_link = $this->get_processor()->get_client()->get_temporarily_link($cached_entry);
+        $temporarily_link = Client::instance()->get_temporarily_link($cached_entry);
 
         // Download Hook
         do_action('letsbox_download', $cached_entry, $temporarily_link);
@@ -415,25 +381,7 @@ class ACF_LetsBox_Field extends \acf_field
 
         header('Location: '.$temporarily_link);
 
-        exit();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->get_main()->get_processor();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Main
-     */
-    public function get_main()
-    {
-        global $LetsBox;
-
-        return $LetsBox;
+        exit;
     }
 
     private function _load_hooks()
@@ -444,6 +392,6 @@ class ACF_LetsBox_Field extends \acf_field
 }
 
 // initialize
-new \TheLion\LetsBox\Integrations\ACF_LetsBox_Field($this->settings);
+new ACF_LetsBox_Field($this->settings);
 
 ?>

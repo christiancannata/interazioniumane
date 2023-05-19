@@ -3,13 +3,13 @@
  * Plugin Name: Kadence WooCommerce Email Designer
  * Plugin URI: http://kadencewp.com/products/woocommerce-email-designer/
  * Description: Customize the default woocommerce email templates design and text through the native WordPress customizer. Preview emails and send test emails.
- * Version: 1.5.1
+ * Version: 1.5.10
  * Author: Kadence WP
  * Author URI: http://kadencewp.com/
  * License: GPLv2 or later
  * Text Domain: kadence-woocommerce-email-designer
  * WC requires at least: 5.6.0
- * WC tested up to: 6.4.0
+ * WC tested up to: 7.5
  *
  * @package Kadence Woocommerce Email Designer
  */
@@ -59,7 +59,7 @@ class Kadence_Woomail_Designer {
 
 		define( 'KT_WOOMAIL_PATH', realpath( plugin_dir_path( __FILE__ ) ) . DIRECTORY_SEPARATOR );
 		define( 'KT_WOOMAIL_URL', plugin_dir_url( __FILE__ ) );
-		define( 'KT_WOOMAIL_VERSION', '1.5.0' );
+		define( 'KT_WOOMAIL_VERSION', '1.5.10' );
 
 		if ( ! kadence_woomail_is_woo_active() ) {
 			add_action( 'admin_notices', array( $this, 'admin_notice_need_woocommerce' ) );
@@ -315,17 +315,21 @@ class Kadence_Woomail_Designer {
 
 		// Get Email ID.
 		$key = $email->id;
+		$setting_key = $key . '_body';
 		if ( 'customer_refunded_order' == $key ) {
 			if ( $email->partial_refund ) {
+				$setting_key = $key . '_body_partial';
 				$body_text = Kadence_Woomail_Customizer::opt( $key . '_body_partial' );
 			} else {
+				$setting_key = $key . '_body_full';
 				$body_text = Kadence_Woomail_Customizer::opt( $key . '_body_full' );
 			}
 		} elseif ( 'customer_partially_refunded_order' == $key ) {
-			$body_text = Kadence_Woomail_Customizer::opt( 'customer_refunded_order_body_partial' );
+			$setting_key = 'customer_refunded_order_body_partial';
+			$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 		} elseif ( 'customer_invoice' == $key ) {
 			if ( $order->has_status( 'pending' ) ) {
-				$body_text = Kadence_Woomail_Customizer::opt( $key . '_body' );
+				$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 				$btn_switch = Kadence_Woomail_Customizer::opt( $key . '_btn_switch' );
 				if ( true == $btn_switch ) {
 					$pay_link = '<p class="btn-container"><a class="btn" href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'kadence-woocommerce-email-designer' ) . '</a></p>';
@@ -334,11 +338,12 @@ class Kadence_Woomail_Designer {
 				}
 				$body_text = str_replace( '{invoice_pay_link}', $pay_link, $body_text );
 			} else {
-				$body_text = Kadence_Woomail_Customizer::opt( $key . '_body_paid' );
+				$setting_key = $key . '_body_paid';
+				$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 			}
 		} elseif ( 'customer_renewal_invoice' == $key ) {
 			if ( $order->has_status( 'pending' ) ) {
-				$body_text = Kadence_Woomail_Customizer::opt( $key . '_body' );
+				$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 				$btn_switch = Kadence_Woomail_Customizer::opt( $key . '_btn_switch' );
 				if ( true == $btn_switch ) {
 					$pay_link = '<p class="btn-container"><a class="btn" href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay Now &raquo;', 'kadence-woocommerce-email-designer' ) . '</a></p>';
@@ -347,7 +352,8 @@ class Kadence_Woomail_Designer {
 				}
 				$body_text = str_replace( '{invoice_pay_link}', $pay_link, $body_text );
 			} else {
-				$body_text = Kadence_Woomail_Customizer::opt( $key . '_body_failed' );
+				$setting_key = $key . '_body_failed';
+				$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 				$btn_switch = Kadence_Woomail_Customizer::opt( $key . '_btn_switch' );
 				if ( true == $btn_switch ) {
 					$pay_link = '<p class="btn-container"><a class="btn" href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay Now &raquo;', 'kadence-woocommerce-email-designer' ) . '</a></p>';
@@ -357,7 +363,7 @@ class Kadence_Woomail_Designer {
 				$body_text = str_replace( '{invoice_pay_link}', $pay_link, $body_text );
 			}
 		} elseif ( 'customer_payment_retry' == $key ) {
-			$body_text = Kadence_Woomail_Customizer::opt( $key . '_body' );
+			$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 			$btn_switch = Kadence_Woomail_Customizer::opt( $key . '_btn_switch' );
 			if ( true == $btn_switch ) {
 				$pay_link = '<p class="btn-container"><a class="btn" href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay Now &raquo;', 'kadence-woocommerce-email-designer' ) . '</a></p>';
@@ -366,15 +372,23 @@ class Kadence_Woomail_Designer {
 			}
 			$body_text = str_replace( '{invoice_pay_link}', $pay_link, $body_text );
 		} else {
-			$body_text = Kadence_Woomail_Customizer::opt( $key . '_body' );
+			$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 		}
 		$body_text = str_replace( '{site_title}', get_bloginfo( 'name', 'display' ), $body_text );
 		$body_text = str_replace( '{site_address}', wp_parse_url( home_url(), PHP_URL_HOST ), $body_text );
 		$body_text = str_replace( '{site_url}', wp_parse_url( home_url(), PHP_URL_HOST ), $body_text );
 
 		if ( $order ) {
-			if ( 0 === ( $user_id = (int) get_post_meta( $order->get_id(), '_customer_user', true ) ) ) {
+			if ( 0 === ( $user_id = (int) $order->get_customer_id() ) ) {
 				$user_id = 'guest';
+			}
+			if ( class_exists( 'WCML_Orders' ) ) {
+				$order_language = WCML_Orders::getLanguage( $order->get_id() );
+				if ( $order_language ) {
+					$language_code = $order_language;
+					$name   = '[kt_woomail]' . $setting_key;
+					$body_text = apply_filters( 'wpml_translate_single_string', $body_text, 'admin_texts_kt_woomail', $name, $order_language );
+				}
 			}
 			// Check for placeholders.
 			$body_text = str_replace( '{order_date}', wc_format_datetime( $order->get_date_created() ), $body_text );
@@ -388,7 +402,6 @@ class Kadence_Woomail_Designer {
 		}
 
 		$body_text = apply_filters( 'kadence_woomail_order_body_text', $body_text, $order, $sent_to_admin, $plain_text, $email );
-
 		// auto wrap text.
 		$body_text = wpautop( $body_text );
 
@@ -427,6 +440,7 @@ class Kadence_Woomail_Designer {
 		$subtitle = str_replace( '{site_title}', get_bloginfo( 'name', 'display' ), $subtitle );
 		$subtitle = str_replace( '{site_address}', wp_parse_url( home_url(), PHP_URL_HOST ), $subtitle );
 		$subtitle = str_replace( '{site_url}', wp_parse_url( home_url(), PHP_URL_HOST ), $subtitle );
+		$order_language = '';
 		if ( is_a( $email->object, 'WP_User' ) ) {
 			$first_name = get_user_meta( $email->object->ID, 'billing_first_name', true );
 			if ( empty( $first_name ) ) {
@@ -452,8 +466,19 @@ class Kadence_Woomail_Designer {
 			$subtitle = str_replace( '{customer_email}', $email->object->user_email, $subtitle );
 
 		} elseif ( is_a( $email->object, 'WC_Order' ) ) {
-			if ( 0 === ( $user_id = (int) get_post_meta( $email->object->get_id(), '_customer_user', true ) ) ) {
+			if ( 0 === ( $user_id = (int) $email->object->get_customer_id() ) ) {
 				$user_id = 'guest';
+			}
+			if ( class_exists( 'WCML_Orders' ) ) {
+				$order_id = ( method_exists( $email->object, 'get_id' ) ? $email->object->get_id() : '' );
+				$order_language = WCML_Orders::getLanguage( $order_id );
+				if ( $order_language ) {
+					if ( isset( $email ) && is_object( $email ) && isset( $email->id ) ) {
+						$setting_key = $email->id;
+						$name   = '[kt_woomail]' . $setting_key;
+						$subtitle = apply_filters( 'wpml_translate_single_string', $subtitle, 'admin_texts_kt_woomail', $name, $order_language );
+					}
+				}
 			}
 			$subtitle = str_replace( '{order_date}', wc_format_datetime( $email->object->get_date_created() ), $subtitle );
 			$subtitle = str_replace( '{order_number}', $email->object->get_order_number(), $subtitle );
@@ -466,9 +491,25 @@ class Kadence_Woomail_Designer {
 		} elseif ( is_a( $email->object, 'WC_Product' ) ) {
 			$subtitle = str_replace( '{product_title}', $email->object->get_title(), $subtitle );
 		}
-
 		return $subtitle;
 
+	}
+	/**
+	 * @param WC_Email $object
+	 *
+	 * @return bool|string|int
+	 */
+	private function get_order_id_from_email_object( $object ) {
+
+		if ( method_exists( $object->object, 'get_id' ) ) {
+			return $object->object->get_id();
+		}
+
+		if ( is_array( $object->object ) && isset( $object->object['ID'] ) ) {
+			return $object->object['ID'];
+		}
+
+		return false;
 	}
 
 	/**
@@ -482,8 +523,8 @@ class Kadence_Woomail_Designer {
 
 		// Get Email ID.
 		$key = $email->id;
-
-		$body_text = Kadence_Woomail_Customizer::opt( $key . '_body' );
+		$setting_key = $key . '_body';
+		$body_text = Kadence_Woomail_Customizer::opt( $setting_key );
 		// Check for placeholders.
 		$body_text = str_replace( '{site_title}', get_bloginfo( 'name', 'display' ), $body_text );
 		$body_text = str_replace( '{site_address}', wp_parse_url( home_url(), PHP_URL_HOST ), $body_text );
@@ -573,7 +614,7 @@ class Kadence_Woomail_Designer {
 			$string = str_replace( '{customer_email}', $email->object->user_email, $string );
 
 		} else if ( is_a( $email->object, 'WC_Order' ) ) {
-			if ( 0 === ( $user_id = (int) get_post_meta( $email->object->get_id(), '_customer_user', true ) ) ) {
+			if ( 0 === ( $user_id = (int) $email->object->get_customer_id() ) ) {
 				$user_id = 'guest';
 			}
 			$string = str_replace( '{customer_first_name}', $email->object->get_billing_first_name(), $string );
@@ -805,3 +846,9 @@ class Kadence_Woomail_Plugin_Check {
 function kadence_woomail_is_woo_active() {
 	return Kadence_Woomail_Plugin_Check::active_check_woo();
 }
+
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+	}
+} );

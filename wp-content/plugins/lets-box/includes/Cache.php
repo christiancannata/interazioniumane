@@ -1,9 +1,24 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class Cache
 {
+    /**
+     * The single instance of the class.
+     *
+     * @var Cache
+     */
+    protected static $_instance;
+
     /**
      * Set after how much time the cached noded should be refreshed.
      * This value can be overwritten by Cloud Service Cache classes
@@ -14,10 +29,12 @@ class Cache
     protected $_max_entry_age = 99999999999;
 
     /**
-     *  @var \TheLion\LetsBox\Processor
+     * The file name of the requested cache. This will be set in construct.
+     *
+     * @var string
      */
-    private $_processor;
-
+    private $_cache_name;
+    
     /**
      * Contains the location to the cache file.
      *
@@ -34,7 +51,7 @@ class Cache
     private $_cache_file_handle;
 
     /**
-     * $_nodes contains all the cached entries that are present
+     * $_nodes contains all the cached files that are present
      * in the Cache File.
      *
      * @var \TheLion\LetsBox\CacheNode[]
@@ -74,21 +91,15 @@ class Cache
      */
     private $_max_change_age = 900;
 
-    public function __construct(Processor $processor)
+    public function __construct()
     {
-        $this->_processor = $processor;
-
-        $this->_cache_name = get_current_blog_id();
-        if ($this->_processor->is_network_authorized()) {
-            $this->_cache_name = 'network';
+        $cache_id = get_current_blog_id();
+        if (null !== App::get_current_account()) {
+            $cache_id = App::get_current_account()->get_id();
         }
 
-        // OLD: Set cache per shortcode
-        // $this->_cache_name .= ('' === $processor->get_listtoken() ? '' : '_'.$processor->get_listtoken()).'.index';
-
-        // New: Set cache per site (Can cause memory issues with large Box accounts and low memory limits)
-        $this->_cache_name .= '.index';
-        $this->_cache_location = LETSBOX_CACHEDIR.$this->_cache_name;
+        $this->_cache_name = Helpers::filter_filename($cache_id, false).'.index';
+        $this->_cache_location = LETSBOX_CACHEDIR.'/'.$this->_cache_name;
 
         // Load Cache
         $this->load_cache();
@@ -97,6 +108,34 @@ class Cache
     public function __destruct()
     {
         $this->update_cache();
+    }
+
+    /**
+     * Cache Instance.
+     *
+     * Ensures only one instance is loaded or can be loaded.
+     *
+     * @return Cache - Cache instance
+     *
+     * @static
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+
+        return self::$_instance;
+    }
+
+    public static function instance_unload()
+    {
+        if (is_null(self::$_instance)) {
+            return;
+        }
+
+        self::instance()->update_cache();
+        self::$_instance = null;
     }
 
     public function load_cache()
@@ -117,7 +156,7 @@ class Cache
             foreach ($this->_nodes as $node) {
                 if ($node->has_parents()) {
                     foreach ($node->get_parents() as $key => $parent_id) {
-                        if (!($parent_id instanceof CacheNode)) {
+                        if (!$parent_id instanceof CacheNode) {
                             $node->remove_parent_by_id($key);
                         }
                         $parent_in_tree = $this->get_node_by_id($parent_id);
@@ -129,7 +168,7 @@ class Cache
 
                 if ($node->has_children()) {
                     foreach ($node->get_children() as $key => $child_id) {
-                        if (!($child_id instanceof CacheNode)) {
+                        if (!$child_id instanceof CacheNode) {
                             $node->remove_child_by_id($key);
                         }
                     }
@@ -164,7 +203,7 @@ class Cache
         if ($this->is_updated()) {
             // Clear Cached Requests, not needed if we only pulled for updates without receiving any changes
             if ($clear_request_cache) {
-                CacheRequest::clear_local_cache_for_shortcode($this->get_processor()->get_listtoken());
+                CacheRequest::clear_local_cache_for_shortcode(App::get_current_account()->get_id(), Processor::instance()->get_listtoken());
             }
 
             $saved = $this->_save_local_cache();
@@ -201,10 +240,10 @@ class Cache
          *  */
         if (!$as_parent && $node->is_expired()) {
             if ($node->get_entry()->is_dir()) {
-                return $this->get_processor()->get_client()->update_expired_folder($node);
+                return Client::instance()->update_expired_folder($node);
             }
 
-            return $this->get_processor()->get_client()->update_expired_entry($node);
+            return Client::instance()->update_expired_entry($node);
         }
 
         // Check if the children of the node are loaded.
@@ -217,7 +256,7 @@ class Cache
 
     public function build_folder_structure($entries)
     {
-        // Add all entries in folder to cache
+        // Add all files in folder to cache
         // @var $entry Entry
         foreach ($entries as $entry) {
             $cached_node = $this->add_node($entry);
@@ -229,7 +268,7 @@ class Cache
             }
         }
 
-        // Walk through the cache to linked all entries to the parent
+        // Walk through the cache to linked all files to the parent
         foreach ($this->get_nodes() as $cached_node) {
             if (!$cached_node->get_entry()->has_parents()) {
                 continue;
@@ -261,7 +300,7 @@ class Cache
         /* If entry is not yet present in the cache,
          * create a new Node
          */
-        if ((false === $cached_node)) {
+        if (false === $cached_node) {
             $cached_node = $this->add_node($entry);
         } else {
             $cached_node->set_name($entry->get_name());
@@ -298,7 +337,7 @@ class Cache
             $parent_in_tree = $this->is_cached($parent_id, 'id', 'as_parent');
 
             if (empty($parent_in_tree)) {
-                $newparent = $this->get_processor()->get_client()->get_folder($parent_id, false);
+                $newparent = Client::instance()->get_folder($parent_id, false);
 
                 if (empty($newparent)) {
                     // If the parent still can't be found?, set it to root node
@@ -328,41 +367,12 @@ class Cache
         }
 
         if ('update' === $reason) {
-            // Just remove the parents
             $node->remove_parents();
-        /* $node->set_entry(null);
-          $node->set_expired(null);
-          $node->set_loaded(false);
-          $node->set_loaded_children(false);
-          $node->set_parents_found(false); */
-
-            // First remove all children starting from this entry
-            /* if ($node->has_children()) {
-              foreach ($node->get_children() as $child) {
-              $this->remove_from_cache($child->get_id(), 'update', $node->get_id());
-              }
-              } */
         } elseif ('moved' === $reason) {
             $node->remove_parents();
         } elseif ('deleted' === $reason) {
-            // First remove all children starting from this entry
-            /* if ($node->has_children()) {
-              foreach ($node->get_children() as $child) {
-              $this->remove_from_cache($child->get_id(), 'deleted', $node->get_id());
-              }
-              } */
-
-            // Remove the entry from the parent
-            //if ($parent_id !== false) {
-            //  $node->remove_parent_by_id($parent_id);
-            //} else {
             $node->remove_parents();
-            //}
-
-            // After that, remove the current entry if no parents are left
-            //if (!$node->has_children()) {
             unset($this->_nodes[$entry_id]);
-            //}
         }
 
         $this->set_updated();
@@ -442,7 +452,7 @@ class Cache
         $cached_node = new CacheNode(
             [
                 '_id' => $entry->get_id(),
-                '_account_id' => null,
+                '_account_id' => App::get_current_account()->get_id(),
                 '_name' => $entry->get_name(),
             ]
         );
@@ -464,27 +474,35 @@ class Cache
 
         // Check if we need to check for updates
         $current_time = time();
-        $update_needed = ($this->get_last_check_for_update() + $this->get_max_change_age());
+        $last_check_time = $this->get_last_check_for_update();
+        $update_needed = ($last_check_time + $this->get_max_change_age());
         if (($current_time < $update_needed) && !$force) {
             return false;
         }
-        if (true === $force && ($this->get_last_check_for_update() > $current_time - $buffer)) {
+        if (true === $force && ($last_check_time > $current_time - $buffer)) {
             // Don't pull again if the request was within $buffer seconds
             return false;
         }
 
-        $result = $this->get_processor()->get_client()->get_changes($this->get_last_check_token());
+        // Reset Cache if the last time we used this cache is more than a day ago
+        if (!empty($last_check_time) && $last_check_time < ($current_time - 60 * 60 * 24)) {
+            Processor::reset_complete_cache(false);
+            $this->set_last_check_for_update();
+
+            return $this->update_cache();
+        }
+
+        $result = Client::instance()->get_changes($this->get_last_check_token());
 
         if (empty($result)) {
             return false;
         }
 
-        list($new_change_token, $changes) = $result;
-        $this->set_last_check_token($new_change_token);
+        $this->set_last_check_token($result['new_change_token']);
         $this->set_last_check_for_update();
 
-        if (is_array($changes) && count($changes) > 0) {
-            $result = $this->_process_changes($changes);
+        if (is_array($result['changes']) && count($result['changes']) > 0) {
+            $result = $this->_process_changes($result['changes']);
             if (!defined('HAS_CHANGES')) {
                 define('HAS_CHANGES', true);
             }
@@ -565,14 +583,6 @@ class Cache
         return $this->_max_change_age = $value;
     }
 
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
-    }
-
     protected function _read_local_cache($close = false)
     {
         $handle = $this->_get_cache_file_handle();
@@ -611,7 +621,7 @@ class Cache
         }
 
         // Check if the file is more than 1 minute old.
-        $requires_unlock = ((filemtime($file) + 60) < (time()));
+        $requires_unlock = ((filemtime($file) + 60) < time());
 
         // Temporarily workaround when flock is disabled. Can cause problems when plugin is used in multiple processes
         if (false !== strpos(ini_get('disable_functions'), 'flock')) {
@@ -703,7 +713,7 @@ class Cache
                 // Update cache with new entry
                 if ($change instanceof Entry) {
                     // Keep thumbnails as that isn't yet provided by API
-                    //$old_cached_entry = $this->get_node_by_id($entry_id);
+                    // $old_cached_entry = $this->get_node_by_id($entry_id);
                     $cached_entry = $this->add_to_cache($change);
                     if ($change->is_file()) {
                         $cached_entry->set_expired(time() - 1);

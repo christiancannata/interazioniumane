@@ -169,12 +169,17 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 		 * @param YITH_WCAN_Preset $item Current item.
 		 */
 		public function action_change_status( $item ) {
-			?>
-			<div class="yith-plugin-fw-onoff-container ">
-				<input type="checkbox" class="preset-status" data-preset="<?php echo esc_attr( $item->get_id() ); ?>" value="<?php echo $item->is_enabled() ? esc_attr( 'yes' ) : esc_attr( 'no' ); ?>" <?php checked( $item->is_enabled() ); ?> class="on_off">
-				<span class="yith-plugin-fw-onoff" data-text-on="<?php echo esc_attr_x( 'YES', '[Admin] on-off yes', 'yith-woocommerce-ajax-navigation' ); ?>" data-text-off="<?php echo esc_attr_x( 'NO', '[Admin] on-off no', 'yith-woocommerce-ajax-navigation' ); ?>"></span>
-			</div>
-			<?php
+
+			yith_plugin_fw_get_field(
+				array(
+					'id'    => 'preset-status',
+					'value' => $item->is_enabled() ? 'yes' : 'no',
+					'type'  => 'onoff',
+					'custom_attributes' => 'data-preset="' . esc_attr( $item->get_id() ) . '"',
+
+				),
+				true
+			);
 		}
 
 		/* === OUTPUT METHODS === */

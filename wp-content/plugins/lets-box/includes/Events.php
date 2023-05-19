@@ -1,19 +1,19 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class Events
 {
-    /**
-     * @var \TheLion\LetsBox\Main
-     */
-    private $_main;
-
-    public function __construct(Main $_main)
+    public function __construct()
     {
-        $this->_main = $_main;
-
-        if ('Yes' === $this->_main->settings['log_events']) {
+        if ('Yes' === Core::get_setting('log_events')) {
             $this->_load_hooks();
             $this->_install_cron_job();
         }
@@ -35,8 +35,8 @@ class Events
     public function _install_cron_job()
     {
         $summary_cron = wp_next_scheduled('letsbox_send_event_summary');
-        if (false === $summary_cron && 'Yes' === $this->_main->settings['event_summary']) {
-            wp_schedule_event(time(), $this->_main->settings['event_summary_period'], 'letsbox_send_event_summary');
+        if (false === $summary_cron && 'Yes' === Core::get_setting('event_summary')) {
+            wp_schedule_event(time(), Core::get_setting('event_summary_period'), 'letsbox_send_event_summary');
         }
     }
 
@@ -44,9 +44,9 @@ class Events
      * Log new events
      * Hook into this function with something like: do_action('letsbox_log_event', 'letsbox_event_type', TheLion\LetsBox\CacheNode $cached_entry, array('extra_data' => $value));.
      *
-     * @param string                     $event
-     * @param \TheLion\LetsBox\CacheNode $cached_entry
-     * @param array                      $extra_data
+     * @param string                            $event
+     * @param string|\TheLion\LetsBox\CacheNode $cached_entry
+     * @param array                             $extra_data
      */
     public function log_event($event, $cached_entry = null, $extra_data = [])
     {
@@ -56,9 +56,14 @@ class Events
             'user_id' => get_current_user_id(),
         ];
 
+        if (!($cached_entry instanceof CacheNode) && !empty($cached_entry)) {
+            $cached_entry = Client::instance()->get_entry($cached_entry);
+        }
+
         // @var $cached_entry CacheNode
         if (!empty($cached_entry)) {
             $new_event['entry_id'] = $cached_entry->get_id();
+            $new_event['account_id'] = App::get_current_account()->get_id();
             $new_event['entry_mimetype'] = $cached_entry->get_entry()->get_mimetype();
             $new_event['entry_is_dir'] = $cached_entry->get_entry()->is_dir();
             $new_event['entry_name'] = $cached_entry->get_name();
@@ -67,8 +72,11 @@ class Events
                 $parents = $cached_entry->get_parents();
                 $first_parent = reset($parents);
                 $new_event['parent_id'] = $first_parent->get_id();
-                $root_id = $this->get_processor()->get_client()->get_root_folder()->get_id();
+                $root_id = API::get_root_folder()->get_id();
                 $new_event['parent_path'] = $first_parent->get_path($root_id);
+            } else {
+                $new_event['parent_id'] = '';
+                $new_event['parent_path'] = '';
             }
         }
 
@@ -76,22 +84,51 @@ class Events
             $new_event['entry_mimetype'] = ($cached_entry->get_entry()->is_dir()) ? 'folder' : 'application/octet-stream';
         }
 
-        if (!empty($extra_data)) {
-            $new_event['extra'] = json_encode($extra_data);
-        }
+        $new_event['extra'] = json_encode($extra_data);
+        $new_event['location'] = Helpers::get_page_url();
 
-        $location = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        if (!empty($location)) {
-            $new_event['location'] = urlencode($location);
-        }
-
-        $new_event = apply_filters('letsbox_new_event', $new_event, $event, $cached_entry, $extra_data, $this->get_processor());
+        $new_event = apply_filters('letsbox_new_event', $new_event, $event, $cached_entry, $extra_data, Processor::instance());
 
         try {
             Event_DB_Model::insert($new_event);
         } catch (\Exception $ex) {
             error_log('[WP Cloud Plugin message]: '.sprintf('Cannot log Event on line %s: %s', __LINE__, $ex->getMessage()));
         }
+
+        $new_event['text'] = $this->get_event_type($event)['text'];
+        $new_event['description'] = strip_tags($this->get_event_description($new_event));
+
+        do_action('letsbox_event_added', $event, $new_event, $cached_entry, Processor::instance());
+
+        // Trigger webhook
+        $webhook_data = [
+            'entry' => null,
+            'account' => [
+                'id' => App::get_current_account()->get_id(),
+                'name' => App::get_current_account()->get_name(),
+                'email' => App::get_current_account()->get_email(),
+                'image' => App::get_current_account()->get_image(),
+            ],
+        ];
+
+        if (!empty($cached_entry)) {
+            $webhook_data['entry'] = [
+                'id' => $new_event['entry_id'],
+                'name' => $new_event['entry_name'],
+                'mimetype' => $new_event['entry_mimetype'],
+                'size' => Helpers::bytes_to_size_1024($cached_entry->get_entry()->get_size()),
+                'icon' => $cached_entry->get_entry()->get_icon(),
+                'description' => $cached_entry->get_entry()->get_description(),
+                'thumbnail' => Client::instance()->get_thumbnail($cached_entry->get_entry(), true, 500, 500, false, false),
+                'preview_url' => 'https://app.box.com/'.($cached_entry->get_entry()->is_dir() ? 'folder' : 'file').'/'.$cached_entry->get_id(),
+                'download_url' => null,
+                'is_dir' => $new_event['entry_is_dir'],
+                'parent_id' => $new_event['parent_id'],
+                'parent_path' => $new_event['parent_path'],
+            ];
+        }
+
+        WebHook::instance()->add($event, $new_event['description'], $webhook_data, get_current_user_id());
     }
 
     /**
@@ -100,28 +137,28 @@ class Events
     public function log_ajax_event()
     {
         if (!isset($_REQUEST['type'])) {
-            exit();
+            exit;
         }
 
-        $this->get_processor()->start_process();
+        Processor::instance()->start_process();
 
         if ('log_preview_event' === $_REQUEST['type'] && isset($_REQUEST['id'])) {
             // JS Preview Log Event
-            $cached_entry = $this->get_processor()->get_client()->get_entry($_REQUEST['id'], false);
+            $cached_entry = Client::instance()->get_entry($_REQUEST['id'], false);
             $this->log_event('letsbox_previewed_entry', $cached_entry);
 
-            exit();
+            exit;
         }
 
         if ('log_failed_upload_event' === $_REQUEST['type']) {
             // JS Failed Upload Event
 
             $id = (empty($_REQUEST['id']) ? false : $_REQUEST['id']);
-            $cached_entry = $this->get_processor()->get_client()->get_entry($id, false);
+            $cached_entry = Client::instance()->get_entry($id, false);
 
             $this->log_event('letsbox_uploaded_failed', $cached_entry, $_REQUEST['data']);
 
-            exit();
+            exit;
         }
     }
 
@@ -130,22 +167,22 @@ class Events
      */
     public function get_stats()
     {
-        if (!Helpers::check_user_role($this->get_main()->settings['permissions_see_dashboard'])) {
-            exit();
+        if (!Helpers::check_user_role(Core::get_setting('permissions_see_dashboard'))) {
+            exit;
         }
 
         if (!isset($_REQUEST['type'])) {
-            exit();
+            exit;
         }
 
-        $nonce_verification = ('Yes' === $this->get_processor()->get_setting('nonce_validation'));
+        $nonce_verification = ('Yes' === Processor::instance()->get_setting('nonce_validation'));
         $allow_nonce_verification = apply_filters('lets_box_allow_nonce_verification', $nonce_verification);
 
         if ($allow_nonce_verification && is_user_logged_in()) {
             if (false === check_ajax_referer('letsbox-admin-action', false, false)) {
                 error_log('[WP Cloud Plugin message]: '." Function get_stats() didn't receive a valid nonce");
 
-                exit();
+                exit;
             }
         }
 
@@ -159,11 +196,11 @@ class Events
 
         $data = [];
 
-        $this->get_processor()->_set_gzip_compression();
+        Processor::instance()->_set_gzip_compression();
 
         switch ($_REQUEST['type']) {
             case 'totals':
-                $data = $this->get_totals();
+                $data = $this->get_totals($period);
 
                 break;
 
@@ -199,7 +236,7 @@ class Events
 
             case 'get-detail':
                 if (!isset($_REQUEST['detail']) || !isset($_REQUEST['id'])) {
-                    exit();
+                    exit;
                 }
 
                 switch ($_REQUEST['detail']) {
@@ -209,7 +246,7 @@ class Events
                         break;
 
                     case 'entry':
-                        $this->render_entry_detail($_REQUEST['id']);
+                        $this->render_entry_detail($_REQUEST['id'], $_REQUEST['account_id']);
 
                         break;
                 }
@@ -218,7 +255,7 @@ class Events
 
             case 'get-download':
                 if (isset($_REQUEST['id'])) {
-                    $this->start_download_by_id($_REQUEST['id']);
+                    $this->start_download_by_id($_REQUEST['id'], $_REQUEST['account_id']);
                 }
 
                 break;
@@ -230,23 +267,23 @@ class Events
             echo json_encode($data);
         }
 
-        exit();
+        exit;
     }
 
     public function export_to_csv($dataset, $type)
     {
         $delimiter = ',';
 
-        //create a file pointer
+        // create a file pointer
         $handle = fopen('php://output', 'w');
 
         // set UTF-8 headers
         fputs($handle, $bom = chr(0xEF).chr(0xBB).chr(0xBF));
 
-        //set column headers
+        // set column headers
         fputcsv($handle, array_keys(reset($dataset)), $delimiter);
 
-        //output each row of the data, format line as csv and write to file pointer
+        // output each row of the data, format line as csv and write to file pointer
         foreach ($dataset as $raw_row) {
             $row = array_map(function ($key, $value) {
                 if ('entry_name' === $key || 'parent_path' === $key) {
@@ -267,16 +304,18 @@ class Events
      *
      * @param string $id
      * @param mixed  $entry_id
+     * @param string $account_id
      */
-    public function start_download_by_id($entry_id)
+    public function start_download_by_id($entry_id, $account_id)
     {
-        $cached_entry = $this->get_processor()->get_client()->get_entry($entry_id, false);
+        App::set_current_account_by_id($account_id);
+        $cached_entry = Client::instance()->get_entry($entry_id, false);
 
         if (false === $cached_entry) {
-            exit();
+            exit;
         }
 
-        $this->get_processor()->get_client()->download_content($cached_entry);
+        Client::instance()->download_content($cached_entry);
     }
 
     /**
@@ -285,11 +324,13 @@ class Events
      * @global $wpdb
      *
      * @param string $where
+     * @param mixed  $period
      *
      * @return array
      */
-    public function get_totals($where = 1)
+    public function get_totals($period)
     {
+        $where = 1;
         // Get Totals for user
         if (isset($_REQUEST['detail'], $_REQUEST['id'])) {
             global $wpdb;
@@ -304,6 +345,17 @@ class Events
                     $where = $wpdb->prepare('`entry_id` = %s', [$_REQUEST['id']]);
 
                     break;
+            }
+        }
+
+        if (!empty($period)) {
+            if (is_int($period) || 1 === count($period)) {
+                // If $period is an interval (e.g. when sending summary email
+                $sql = ' AND (`datetime` BETWEEN DATE_SUB(NOW(), INTERVAL %d second) AND NOW())';
+                $where .= $wpdb->prepare($sql, [$period]);
+            } else {
+                $sql = ' AND (`datetime` BETWEEN %s AND %s )';
+                $where .= $wpdb->prepare($sql, [$period['start'], $period['end']]);
             }
         }
 
@@ -370,7 +422,7 @@ class Events
                 $raw_chart_data['datasets'][$day['type']] = [
                     'label' => $event['text'],
                     'data' => [],
-                    //'fill' => false,
+                    // 'fill' => false,
                     'spanGaps' => true,
                     'backgroundColor' => $event['colors']['light'],
                     'borderColor' => $event['colors']['normal'],
@@ -418,6 +470,9 @@ class Events
         $columns = [
             [
                 'db' => 'MAX(`entry_id`)', 'dt' => 'entry_id', 'field' => 'entry_id', 'as' => 'entry_id',
+            ],
+            [
+                'db' => 'MAX(`account_id`)', 'dt' => 'account_id', 'field' => 'account_id', 'as' => 'account_id',
             ],
             [
                 'db' => 'MAX(`entry_mimetype`)', 'dt' => 'icon', 'field' => 'entry_mimetype', 'as' => 'entry_mimetype', 'formatter' => function ($value, $row) {
@@ -483,14 +538,10 @@ class Events
                         return LETSBOX_ROOTPATH.'/css/images/usericon.png';
                     }
 
-                    if (function_exists('get_wp_user_avatar_url')) {
-                        $display_gravatar = get_wp_user_avatar_url($user->user_email, 32);
-                    } else {
-                        $display_gravatar = get_avatar_url($user->user_email, 32);
-                        if (false === $display_gravatar) {
-                            //Gravatar is disabled, show default image.
-                            $display_gravatar = LETSBOX_ROOTPATH.'/css/images/usericon.png';
-                        }
+                    $display_gravatar = get_avatar_url($user->user_email, 32);
+                    if (false === $display_gravatar) {
+                        // Gravatar is disabled, show default image.
+                        $display_gravatar = LETSBOX_ROOTPATH.'/css/images/usericon.png';
                     }
 
                     return $display_gravatar;
@@ -568,6 +619,9 @@ class Events
                 'db' => 'MAX(`entry_id`)', 'dt' => 'entry_id', 'field' => 'entry_id', 'as' => 'entry_id',
             ],
             [
+                'db' => 'MAX(`account_id`)', 'dt' => 'account_id', 'field' => 'account_id', 'as' => 'account_id',
+            ],
+            [
                 'db' => 'MAX(`entry_mimetype`)', 'dt' => 'icon', 'field' => 'entry_mimetype', 'as' => 'entry_mimetype', 'formatter' => function ($value, $row) {
                     return Helpers::get_default_icon($value, $row['entry_is_dir']);
                 },
@@ -633,14 +687,10 @@ class Events
                         return LETSBOX_ROOTPATH.'/css/images/usericon.png';
                     }
 
-                    if (function_exists('get_wp_user_avatar_url')) {
-                        $display_gravatar = get_wp_user_avatar_url($user->user_email, 32);
-                    } else {
-                        $display_gravatar = get_avatar_url($user->user_email, 32);
-                        if (false === $display_gravatar) {
-                            //Gravatar is disabled, show default image.
-                            $display_gravatar = LETSBOX_ROOTPATH.'/css/images/usericon.png';
-                        }
+                    $display_gravatar = get_avatar_url($user->user_email, 32);
+                    if (false === $display_gravatar) {
+                        // Gravatar is disabled, show default image.
+                        $display_gravatar = LETSBOX_ROOTPATH.'/css/images/usericon.png';
                     }
 
                     return $display_gravatar;
@@ -778,7 +828,7 @@ class Events
 
                     $display_gravatar = get_avatar_url($user->user_email, 32);
                     if (false === $display_gravatar) {
-                        //Gravatar is disabled, show default image.
+                        // Gravatar is disabled, show default image.
                         $display_gravatar = LETSBOX_ROOTPATH.'/css/images/usericon.png';
                     }
 
@@ -787,6 +837,9 @@ class Events
             ],
             [
                 'db' => 'entry_id', 'dt' => 'entry_id', 'field' => 'entry_id',
+            ],
+            [
+                'db' => 'account_id', 'dt' => 'account_id', 'field' => 'account_id', 'as' => 'account_id',
             ],
             [
                 'db' => 'entry_mimetype', 'dt' => 'entry_mimetype', 'field' => 'entry_mimetype',
@@ -892,8 +945,8 @@ class Events
                 $text = esc_html__('Previewed', 'wpcloudplugins');
                 $icon = 'eva-eye-outline';
                 $colors = [
-                    'light' => '#9c27b050',
-                    'normal' => '#9c27b0',
+                    'light' => '#590E5450',
+                    'normal' => '#590E54',
                     'dark' => '#7b1fa2',
                 ];
 
@@ -965,8 +1018,19 @@ class Events
 
                 break;
 
+            case 'letsbox_updated_description':
+                $text = esc_html__('Description updated', 'wpcloudplugins');
+                $icon = 'eva-message-square-outline';
+                $colors = [
+                    'light' => '#00968850',
+                    'normal' => '#009688',
+                    'dark' => '#00796b',
+                ];
+
+                break;
+
             case 'letsbox_updated_metadata':
-                $text = esc_html__('Updated metadata', 'wpcloudplugins');
+                $text = esc_html__('Metadata updated', 'wpcloudplugins');
                 $icon = 'eva-hash';
                 $colors = [
                     'light' => '#ff572250',
@@ -1041,7 +1105,7 @@ class Events
                 ];
 
                 break;
-                
+
             default:
                 $text = $type;
                 $icon = 'eva-star-outline';
@@ -1054,7 +1118,7 @@ class Events
                 break;
         }
 
-        return ['text' => $text, 'icon' => $icon, 'colors' => $colors];
+        return apply_filters('letsbox_events_set_properties', ['text' => $text, 'icon' => $icon, 'colors' => $colors], $type);
     }
 
     /**
@@ -1079,11 +1143,13 @@ class Events
         // Is entry  a file or a folder
         $file_or_folder = ('1' === $event_row['entry_is_dir']) ? esc_html__('folder', 'wpcloudplugins') : esc_html__('file', 'wpcloudplugins');
 
+        $account_id = empty($event_row['account_id']) ? Accounts::instance()->get_primary_account()->get_id() : $event_row['account_id'];
+
         // Generate File link
-        $entry_link = "<a href='#{$event_row['entry_id']}' title='{$event_row['parent_path']}/{$event_row['entry_name']}' class='open-entry-details' data-entry-id='{$event_row['entry_id']}'>{$event_row['entry_name']}</a>";
+        $entry_link = "<a href='#{$event_row['entry_id']}' title='{$event_row['parent_path']}/{$event_row['entry_name']}' class='open-entry-details' data-entry-id='{$event_row['entry_id']}' data-account-id='{$account_id}'>{$event_row['entry_name']}</a>";
 
         // Generate link to parent folder
-        $parent_folder_link = "<a href='#{$event_row['parent_id']}' title='{$event_row['parent_path']}' class='open-entry-details' data-entry-id='{$event_row['parent_id']}'>{$event_row['parent_path']}</a>";
+        $parent_folder_link = "<a href='#{$event_row['parent_id']}' title='{$event_row['parent_path']}' class='open-entry-details' data-entry-id='{$event_row['parent_id']}' data-account-id='{$account_id}'>{$event_row['parent_path']}</a>";
 
         // Decode the Extra data field
         $data = json_decode($event_row['extra'], true);
@@ -1134,6 +1200,11 @@ class Events
 
                 break;
 
+            case 'letsbox_updated_description':
+                $description = sprintf(esc_html__('%s updated the description of the %s %s', 'wpcloudplugins'), $user, $file_or_folder, $entry_link);
+
+                break;
+
             case 'letsbox_updated_metadata':
                 $metadata_field = ($data && isset($data['metadata_field'])) ? $data['metadata_field'] : '';
                 $description = sprintf(esc_html__('%s updated the %s of the %s %s', 'wpcloudplugins'), $user, $metadata_field, $file_or_folder, $entry_link);
@@ -1179,12 +1250,12 @@ class Events
                 break;
 
             default:
-                $description = sprintf(esc_html__('%s performed an action: %s', 'wpcloudplugins'), $user, $event_row['type']);
+                $description = sprintf(esc_html__('%s performed an action: %s for %s', 'wpcloudplugins'), $user, $event_row['type'], $entry_link);
 
                 break;
         }
 
-        return $description;
+        return apply_filters('letsbox_events_set_description', $description, $event_row['type'], $event_row, $user, $file_or_folder, $entry_link, $parent_folder_link);
     }
 
     /**
@@ -1196,11 +1267,7 @@ class Events
     {
         $wp_user = get_userdata($user_id);
 
-        if (function_exists('get_wp_user_avatar_url')) {
-            $display_gravatar = get_wp_user_avatar_url($wp_user->user_email, ['size' => 512]);
-        } else {
-            $display_gravatar = get_avatar_url($wp_user->user_email, ['size' => 512]);
-        }
+        $display_gravatar = get_avatar_url($wp_user->user_email, ['size' => 512]);
 
         $user_name = $wp_user->display_name;
 
@@ -1224,17 +1291,25 @@ class Events
 
         echo json_encode($return);
 
-        exit();
+        exit;
     }
 
     /**
-     * Get the details for a specific entry.
+     * Get the details for a specific file.
      *
      * @param int|string $entry_id
+     * @param string     $account_id
      */
-    public function render_entry_detail($entry_id)
+    public function render_entry_detail($entry_id, $account_id)
     {
-        $cached_entry = $this->get_processor()->get_client()->get_entry($entry_id, false);
+        $cloud_account = Accounts::instance()->get_account_by_id($account_id);
+
+        if (empty($cloud_account)) {
+            $cached_entry = false;
+        } else {
+            App::set_current_account($cloud_account);
+            $cached_entry = Client::instance()->get_entry($entry_id, false);
+        }
 
         if (false === $cached_entry) {
             $sql = 'SELECT * FROM `'.Event_DB_Model::table().'` WHERE `entry_id` = %s';
@@ -1245,7 +1320,7 @@ class Events
                 'entry' => [
                     'entry_id' => $entry_id,
                     'entry_name' => $data[0]['entry_name'],
-                    'entry_description' => esc_html__('The file you are looking for cannot be found', 'wpcloudplugins').'.'.esc_html__('The file is probably deleted from the cloud', 'wpcloudplugins').'.',
+                    'entry_description' => esc_html__('The file you are looking for cannot be found.', 'wpcloudplugins').' '.esc_html__('The file is probably deleted from the cloud.', 'wpcloudplugins'),
                     'entry_link' => false,
                     'entry_thumbnails' => str_replace('32x32', '256x256', Helpers::get_default_icon($data[0]['entry_mimetype'], $data[0]['entry_is_dir'])),
                 ],
@@ -1253,17 +1328,17 @@ class Events
 
             echo json_encode($return);
 
-            exit();
+            exit;
         }
 
         $entry = $cached_entry->get_entry();
 
-        $download_link = ($entry->is_file()) ? LETSBOX_ADMIN_URL.'?action=letsbox-event-stats&type=get-download&id='.$entry->get_id() : false;
+        $download_link = ($entry->is_file()) ? LETSBOX_ADMIN_URL."?action=letsbox-event-stats&type=get-download&account_id={$account_id}&id=".$entry->get_id() : false;
 
         if ($entry->get_size() < 5242880) {
-            $thumbnail_medium = $this->get_processor()->get_client()->get_thumbnail($entry, true, 350, 350, false, true);
+            $thumbnail_medium = Client::instance()->get_thumbnail($entry, true, 350, 350, false, true);
         } else {
-            $thumbnail_medium = $this->get_processor()->get_client()->get_thumbnail($entry, true, 350, 350, false, false);
+            $thumbnail_medium = Client::instance()->get_thumbnail($entry, true, 350, 350, false, false);
         }
 
         $return = [
@@ -1278,7 +1353,7 @@ class Events
 
         echo json_encode($return);
 
-        exit();
+        exit;
     }
 
     public function send_event_summary()
@@ -1302,7 +1377,7 @@ class Events
         // Set period selection
         $interval = 86400; // Day in seconds
         $wp_cron_schedules = wp_get_schedules();
-        $summary_schedule = $this->get_processor()->get_setting('event_summary_period');
+        $summary_schedule = Processor::instance()->get_setting('event_summary_period');
         if (isset($wp_cron_schedules[$summary_schedule])) {
             $interval = $wp_cron_schedules[$summary_schedule]['interval'];
         }
@@ -1328,22 +1403,24 @@ class Events
             return;
         }
 
-        // Generate Email content from template
-        $subject = get_bloginfo().' | '.sprintf(esc_html__('%s activity for %s', 'wpcloudplugins'), 'Lets-Box', date_i18n('l j F '));
-        $colors = $this->get_processor()->get_setting('colors');
-        $template = apply_filters('letsbox_events_set_summary_template', LETSBOX_ROOTDIR.'/templates/notifications/event_summary.php', $this);
-
-        ob_start();
-
-        include_once $template;
-        $htmlmessage = Helpers::compress_html(ob_get_clean());
+        // Template colors
+        $colors = Processor::instance()->get_setting('colors');
 
         // Send mail
         try {
             $headers = ['Content-Type: text/html; charset=UTF-8'];
-            $recipients = array_unique(array_map('trim', explode(',', $this->get_processor()->get_setting('event_summary_recipients'))));
+            $recipients = array_unique(array_map('trim', explode(',', Processor::instance()->get_setting('event_summary_recipients'))));
 
             foreach ($recipients as $recipient) {
+                // Generate Email content from template
+                $subject = get_bloginfo().' | '.sprintf(esc_html__('%s activity for %s', 'wpcloudplugins'), 'Lets-Box', date_i18n('l j F '));
+                $template = apply_filters('letsbox_events_set_summary_template', LETSBOX_ROOTDIR.'/templates/notifications/event_summary.php', $this, $recipient);
+
+                ob_start();
+
+                include_once $template;
+                $htmlmessage = Helpers::compress_html(ob_get_clean());
+
                 $result = wp_mail($recipient, $subject, $htmlmessage, $headers);
             }
         } catch (\Exception $ex) {
@@ -1369,7 +1446,6 @@ class Events
 
         require_once LETSBOX_ROOTDIR.'/vendors/datatables/ssp.class.php';
 
-
         return SSP::simple($_GET, $table, $primaryKey, $columns, $join, $where, $groupBy, $having, $limit);
     }
 
@@ -1394,6 +1470,7 @@ class Events
                     `entry_mimetype` varchar(255) NOT NULL,
                     `entry_is_dir` BOOLEAN NOT NULL, 
                     `entry_name` TEXT NOT NULL,
+                    `account_id` varchar(255) ,                    
                     `parent_id` varchar(255) NOT NULL,
                     `parent_path` TEXT NOT NULL,
                     `location` TEXT,
@@ -1403,6 +1480,14 @@ class Events
 
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+    }
+
+    public static function update_2_1_1()
+    {
+        $table_name = Event_DB_Model::table();
+
+        require_once ABSPATH.'wp-admin/includes/upgrade.php';
+        maybe_add_column($table_name, 'account_id', "ALTER TABLE {$table_name} ADD COLUMN account_id varchar(255)");
     }
 
     public static function drop_database()
@@ -1425,6 +1510,20 @@ class Events
         return $result;
     }
 
+    public static function export()
+    {
+        $table_name = Event_DB_Model::table();
+
+        global $wpdb;
+        $results = $wpdb->get_results("SELECT * FROM {$table_name}", ARRAY_A);
+
+        if (empty($results)) {
+            return;
+        }
+
+        return $results;
+    }
+
     public static function uninstall()
     {
         self::drop_database();
@@ -1433,22 +1532,6 @@ class Events
         if (false !== $summary_cron_job) {
             wp_unschedule_event($summary_cron_job, 'letsbox_send_event_summary');
         }
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->get_main()->get_processor();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Main
-     */
-    public function get_main()
-    {
-        return $this->_main;
     }
 }
 

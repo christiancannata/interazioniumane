@@ -1,83 +1,124 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
-define('LETSBOX_CURRENT_BLOG_ID', get_current_blog_id());
-
 class CSS
 {
-    public $custom_css;
-    public $colors;
-    public $loaders;
-    public $css_template_path;
-    public static $css_url = LETSBOX_CACHEURL.LETSBOX_CURRENT_BLOG_ID.'_style.min.css';
-    public static $css_path = LETSBOX_CACHEDIR.LETSBOX_CURRENT_BLOG_ID.'_style.min.css';
-
-    public function __construct($settings)
-    {
-        $this->custom_css = $settings['custom_css'];
-        $this->colors = $settings['colors'];
-        $this->loaders = $settings['loaders'];
-
-        $this->css_template_path = LETSBOX_ROOTDIR.'/css/skin.'.$this->colors['style'].'.min.css';
-    }
-
-    public function register_style()
-    {
-        if (!file_exists(self::$css_path)) {
-            $this->generate_custom_css();
-        }
-
-        wp_register_style('LetsBox.CustomStyle', self::$css_url, ['LetsBox'], filemtime(self::$css_path));
-    }
-
-    public function generate_custom_css()
+    public static function generate_inline_css()
     {
         $css = '';
 
-        if (!empty($this->custom_css)) {
-            $css .= $this->custom_css."\n";
+        $custom_css = Core::get_setting('custom_css');
+        if (!empty($custom_css)) {
+            $css .= $custom_css."\n";
         }
 
-        if ('custom' === $this->loaders['style']) {
-            $css .= '#LetsBox .loading{  background-image: url('.$this->loaders['loading'].');}'."\n";
+        $loaders = Core::get_setting('loaders');
+        if ('custom' === $loaders['style']) {
+            $css .= '#LetsBox .loading{  background-image: url('.$loaders['loading'].');}'."\n";
         }
 
-        $css .= '#LetsBox .wpcp-no-results .ajax-filelist { background-image: url('.$this->loaders['no_results'].');}'."\n";
+        $css .= '#LetsBox .wpcp-no-results .ajax-filelist { background-image: url('.$loaders['no_results'].');}'."\n";
 
         $css .= "
     iframe[src*='letsbox'] {
-        background-image: url({$this->loaders['iframe']});
+        background-image: url({$loaders['iframe']});
         background-repeat: no-repeat;
         background-position: center center;
         background-size: auto 128px;
     }\n";
 
-        $css .= $this->get_basic_style_css();
+        $css .= self::get_basic_style_css();
 
-        $css_minified = \TheLion\LetsBox\Helpers::compress_css($css);
-
-        \file_put_contents(self::$css_path, $css_minified);
+        return \TheLion\LetsBox\Helpers::compress_css($css);
     }
 
-    public function get_basic_style_css()
+    public static function get_basic_style_css()
     {
-        $css = file_get_contents($this->css_template_path);
+        $css = '
+        :root {
+            --wpcp--present--color--always--white:%white%;
+            --wpcp--present--color--always--black:%black%;            
+            --wpcp--present--border--radius:'.Core::get_setting('layout_border_radius').'px;
+            --wpcp--present--gap: '.Core::get_setting('layout_gap').'px;
+        }
 
-        return preg_replace_callback('/%(.*)%/iU', [$this, 'fill_placeholder_styles'], $css);
+        @media only screen and (max-width: 480px) {
+            :root {
+                --wpcp--present--gap: calc('.Core::get_setting('layout_gap').'px * .4);
+            }
+        }
+
+        @media only screen and (min-width: 480px) and (max-width : 768px) {
+            :root {
+                --wpcp--present--gap: calc('.Core::get_setting('layout_gap').'px * .6);
+            }
+        }
+                
+        :root .wpcp-theme-light {
+        --wpcp--present--color--color-scheme:light;
+        --wpcp--present--color--accent:%accent%;
+        --wpcp--present--color--background:%background%;
+        --wpcp--present--color--background--50:%background_opacity_50%;
+        --wpcp--present--color--background--90:%background_opacity_90%;
+        --wpcp--present--color--black:%black%;
+        --wpcp--present--color--dark1:%dark1%;
+        --wpcp--present--color--dark2:%dark2%;
+        --wpcp--present--color--white:%white%;
+        --wpcp--present--color--light1:%light1%;
+        --wpcp--present--color--light2:%light2%;
+        }
+
+        :root .wpcp-theme-dark {
+        --wpcp--present--color--color-scheme:dark;
+        --wpcp--present--color--accent:%accent%;
+        --wpcp--present--color--background:%background-dark%;
+        --wpcp--present--color--background--50:%background-dark_opacity_50%;
+        --wpcp--present--color--background--90:%background-dark_opacity_90%;
+        --wpcp--present--color--black:%white%;
+        --wpcp--present--color--dark1:%light1%;
+        --wpcp--present--color--dark2:%light2%;
+        --wpcp--present--color--white:%black%;
+        --wpcp--present--color--light1:%dark1%;
+        --wpcp--present--color--light2:%dark2%;
+    
+        }
+        ';
+
+        return preg_replace_callback('/%(.*)%/iU', [__CLASS__, 'fill_placeholder_styles'], $css);
     }
 
-    public function fill_placeholder_styles($matches)
+    public static function fill_placeholder_styles($matches)
     {
-        if (isset($this->colors[$matches[1]])) {
-            return $this->colors[$matches[1]];
+        $colors = Core::get_setting('colors');
+
+        if (isset($colors[$matches[1]])) {
+            return $colors[$matches[1]];
+        }
+
+        if (false !== strpos($matches[1], 'opacity_')) {
+            $original_color_key = str_replace(['_opacity_50', '_opacity_90'], '', $matches[1]);
+            if (false !== strpos($colors[$original_color_key], '#')) {
+                list($r, $g, $b) = sscanf($colors[$original_color_key], '#%02x%02x%02x');
+                $colors[$original_color_key] = "rgb({$r}, {$g}, {$b})";
+            }
+            $css = str_replace('rgn', 'rgb', $colors[$original_color_key]);
+
+            if (false !== strpos($matches[1], 'opacity_50')) {
+                return str_replace(')', ', 0.5)', $css);
+            }
+            if (false !== strpos($matches[1], 'opacity_90')) {
+                return str_replace(')', ', 0.9)', $css);
+            }
         }
 
         return 'initial';
-    }
-
-    public static function reset_custom_css()
-    {
-        @unlink(self::$css_path);
     }
 }

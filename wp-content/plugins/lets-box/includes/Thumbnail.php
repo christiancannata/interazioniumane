@@ -1,24 +1,17 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class Thumbnail
 {
-    /**
-     * @var App
-     */
-    private $_app;
-
-    /**
-     * @var \Box\Model\Client\Client
-     */
-    private $_client;
-
-    /**
-     * @var Processor
-     */
-    private $_processor;
-
     /**
      * @var Entry
      */
@@ -81,11 +74,8 @@ class Thumbnail
      */
     private $_loading_thumb = false;
 
-    public function __construct(Processor $_processor, Entry $entry, $width, $height, $crop = true, $raw = true, $quality = 75, $format = 'jpeg', $imagedata = null, $loading_thumb = false)
+    public function __construct(Entry $entry, $width, $height, $crop = true, $raw = true, $quality = 75, $format = 'jpeg', $imagedata = null, $loading_thumb = false)
     {
-        $this->_app = $_processor->get_app();
-        $this->_client = $this->_app->get_client();
-        $this->_processor = $_processor;
         $this->_entry = $entry;
         $this->_width = round($width);
         $this->_height = round($height);
@@ -146,7 +136,7 @@ class Thumbnail
 
     public function build_thumbnail()
     {
-        @set_time_limit(60); //Creating thumbnail can take a while
+        @set_time_limit(60); // Creating thumbnail can take a while
 
         $representations = $this->_get_entry()->get_representations();
         $first_thumbnail = reset($representations['entries']);
@@ -159,12 +149,12 @@ class Thumbnail
 
                 while (is_int($data)) {
                     if (false === $this->get_raw()) {
-                        $data = $this->_get_client()->downloadRepresentation($first_thumbnail_location);
+                        $data = App::instance()->get_sdk_client()->downloadRepresentation($first_thumbnail_location);
                     }
 
                     // Try to load the image file itself
-                    if (empty($data) && in_array($this->_get_entry()->get_extension(), ['jpg', 'jpeg', 'png'])) {
-                        $data = $this->_get_client()->downloadFile($this->_get_entry()->get_id(), true);
+                    if (empty($data) && in_array($this->_get_entry()->get_extension(), ['jpg', 'jpeg', 'png', 'webp'])) {
+                        $data = App::instance()->get_sdk_client()->downloadFile($this->_get_entry()->get_id(), true);
                     }
 
                     // When the API still isn't able to provide us with a thumbnail, please fallback to icons
@@ -179,7 +169,7 @@ class Thumbnail
                 }
 
                 if (isset($data['headers']['location'])) {
-                    $connection = $this->_get_client()->getConnection();
+                    $connection = App::instance()->get_sdk_client()->getConnection();
                     $data = $connection->query($data['headers']['location']);
                 }
 
@@ -270,7 +260,7 @@ class Thumbnail
 
     private function _build_thumbnail_url()
     {
-        return LETSBOX_ADMIN_URL."?action=letsbox-thumbnail&src={$this->_thumbnail_name}&listtoken={$this->_processor->get_listtoken()}";
+        return LETSBOX_ADMIN_URL."?action=letsbox-thumbnail&src={$this->_thumbnail_name}&listtoken=".Processor::instance()->get_listtoken().'&account_id='.App::get_current_account()->get_id();
     }
 
     private function _create_thumbnail()
@@ -288,9 +278,9 @@ class Thumbnail
                     'height' => $php_thumb->source_height,
                 ];
 
-                $cached_entry = $this->_processor->get_cache()->get_node_by_id($this->_get_entry()->get_id());
+                $cached_entry = Cache::instance()->get_node_by_id($this->_get_entry()->get_id());
                 $cached_entry->get_entry()->set_media($media);
-                $this->_processor->get_cache()->set_updated();
+                Cache::instance()->set_updated();
             }
 
             $php_thumb->SetCacheFilename();
@@ -323,9 +313,9 @@ class Thumbnail
                 'height' => $size[1],
             ];
 
-            $cached_entry = $this->_processor->get_cache()->get_node_by_id($this->_get_entry()->get_id());
+            $cached_entry = Cache::instance()->get_node_by_id($this->_get_entry()->get_id());
             $cached_entry->get_entry()->set_media($media);
-            $this->_processor->get_cache()->set_updated();
+            Cache::instance()->set_updated();
 
             $got_dimension = true;
         }
@@ -371,12 +361,12 @@ class Thumbnail
         }
 
         $php_thumb->setParameter('f', $this->get_format());
-        $php_thumb->setParameter('bg', 'FFFFFF|0');
+        $php_thumb->setParameter('bg', 'FFFFFF');
         $php_thumb->setParameter('ar', 'x');
         $php_thumb->setParameter('aoe', false);
 
         $max_file_size = ($this->get_width() * $this->get_height()) / 5;
-        //$php_thumb->setParameter('maxb', $max_file_size);
+        // $php_thumb->setParameter('maxb', $max_file_size);
 
         $php_thumb->setSourceData($this->_get_image_data());
 
@@ -398,14 +388,6 @@ class Thumbnail
         }
 
         return is_writable($this->_get_location_thumbnails());
-    }
-
-    /**
-     * @return \Box\Model\Client\Client
-     */
-    private function _get_client()
-    {
-        return $this->_client;
     }
 
     /**

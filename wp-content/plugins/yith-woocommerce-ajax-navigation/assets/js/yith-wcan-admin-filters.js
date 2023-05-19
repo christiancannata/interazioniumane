@@ -23,13 +23,6 @@ function YITH_WCAN_Filters( $ ) {
 		filter_design: {
 			type: [ 'tax', 'review', 'price_range' ],
 		},
-		label_position: {
-			filter_design: [ 'label', 'color' ],
-		},
-		column_number: {
-			filter_design: [ 'label', 'color' ],
-			label_position: [ 'below', 'hide' ],
-		},
 		customize_terms: {
 			type: 'tax',
 			use_all_terms: '!:checked',
@@ -37,6 +30,40 @@ function YITH_WCAN_Filters( $ ) {
 		terms_options: {
 			term_ids: ( v ) => !! v,
 			customize_terms: ':checked',
+			__show: ( $filter ) => self.updateTerms( $filter, true ),
+		},
+		label_position: {
+			filter_design: ( v, $fd, $fl ) => {
+				if ( 'color' === v ) {
+					return true;
+				}
+
+				if ( 'label' === v ) {
+					const $terms_options = self._findFilterField(
+						$fl,
+						'terms_options'
+					);
+
+					if (
+						$terms_options.length &&
+						self._checkFilterFieldConditions(
+							$fl,
+							self.dependencies.terms_options
+						) &&
+						$terms_options
+							.find( 'input[name*=image]' )
+							.filter( ( i, e ) => !! $( e ).val() ).length
+					) {
+						return true;
+					}
+				}
+
+				return false;
+			},
+		},
+		column_number: {
+			filter_design: [ 'label', 'color' ],
+			label_position: [ 'below', 'hide' ],
 		},
 		show_search: {
 			type: 'tax',
@@ -226,8 +253,7 @@ function YITH_WCAN_Filters( $ ) {
 
 	self.initFilterFieldsDependencies = function ( $filter ) {
 		$filter
-			.find( ':input' )
-			.on( 'change', () => {
+			.on( 'change', ':input', () => {
 				self._applyFilterDependencies( $filter );
 			} )
 			.first()
@@ -417,10 +443,9 @@ function YITH_WCAN_Filters( $ ) {
 							$filterDesign.append(
 								$( '<option/>', {
 									value: design,
-									text:
-										yith_wcan_admin.supported_designs[
-											design
-										],
+									text: yith_wcan_admin.supported_designs[
+										design
+									],
 								} )
 							);
 						}
@@ -614,9 +639,8 @@ function YITH_WCAN_Filters( $ ) {
 			$customizeTermsRow = $customizeTermsWrapper.closest(
 				'.yith-toggle-content-row'
 			),
-			$customizeTermsDescription = $customizeTermsWrapper.next(
-				'.description'
-			),
+			$customizeTermsDescription =
+				$customizeTermsWrapper.next( '.description' ),
 			$customizeTerms = $customizeTermsWrapper.find( 'input' ),
 			$wcclNotice = $customizeTermsDescription.find( '.wccl-notice' ),
 			$imagesNotice = $customizeTermsDescription.find( '.images-notice' ),
@@ -710,8 +734,16 @@ function YITH_WCAN_Filters( $ ) {
 
 			if ( show ) {
 				container?.css( { display: 'table' } );
+
+				if ( 'function' === typeof conditions?.__show ) {
+					conditions?.__show( $filter );
+				}
 			} else {
 				container?.hide();
+
+				if ( 'function' === typeof conditions?.__hide ) {
+					conditions?.__hide( $filter );
+				}
 			}
 		} );
 	};
@@ -722,7 +754,7 @@ function YITH_WCAN_Filters( $ ) {
 		$.each( conditions, function ( field, condition ) {
 			let $field, fieldValue;
 
-			if ( ! result ) {
+			if ( ! result || [ '__show', '__hide' ].includes( field ) ) {
 				return;
 			}
 
@@ -741,7 +773,7 @@ function YITH_WCAN_Filters( $ ) {
 			if ( Array.isArray( condition ) ) {
 				result = condition.includes( fieldValue );
 			} else if ( typeof condition === 'function' ) {
-				result = condition( fieldValue );
+				result = condition( fieldValue, $field, $filter );
 			} else if ( 0 === condition.indexOf( ':' ) ) {
 				result = $field.is( condition );
 			} else if ( 0 === condition.indexOf( '!:' ) ) {
@@ -883,7 +915,10 @@ function YITH_WCAN_Filters( $ ) {
 					);
 				}
 			} else if ( $input.is( ':checkbox' ) ) {
-				$input.prop( 'checked', value === 'yes' ).change();
+				$input
+					.prop( 'checked', value === 'yes' )
+					.val( value )
+					.change();
 			} else if ( $input.is( '[data-type="radio"]' ) ) {
 				$input
 					.find( ':input' )
@@ -1001,7 +1036,8 @@ function YITH_WCAN_Filters( $ ) {
 		$filter
 			.find( '.yith-toggle-title' )
 			.find( '.title-arrow' )
-			.text( 'keyboard_arrow_down' );
+			.removeClass( 'yith-icon-arrow-right-alt' )
+			.addClass( 'yith-icon-arrow-down-alt' );
 
 		// animate content and return promise
 		return $filter
@@ -1020,7 +1056,8 @@ function YITH_WCAN_Filters( $ ) {
 		$filter
 			.find( '.yith-toggle-title' )
 			.find( '.title-arrow' )
-			.text( 'keyboard_arrow_right' );
+			.addClass( 'yith-icon-arrow-right-alt' )
+			.removeClass( 'yith-icon-arrow-down-alt' );
 
 		// animate content and return promise
 		return $filter
@@ -1056,9 +1093,8 @@ function YITH_WCAN_Filters( $ ) {
 				if ( data.filters ) {
 					for ( const i in data.filters ) {
 						const filterData = data.filters[ i ],
-							newFilterTemplate = wp.template(
-								'yith-wcan-filter'
-							),
+							newFilterTemplate =
+								wp.template( 'yith-wcan-filter' ),
 							newFilter = newFilterTemplate( {
 								id: i,
 							} ),
@@ -1323,7 +1359,7 @@ function YITH_WCAN_Filters( $ ) {
 
 				$selected.prepend( $selectedImg );
 
-				$input.val( attachment.id );
+				$input.val( attachment.id ).change();
 
 				self.unblock( $placeholder );
 
@@ -1342,7 +1378,7 @@ function YITH_WCAN_Filters( $ ) {
 		$clear.off( 'click' ).on( 'click', function ( ev ) {
 			ev.preventDefault();
 
-			$input.val( '' );
+			$input.val( '' ).change();
 
 			$selected.hide();
 			$placeholder.show();
@@ -1427,8 +1463,9 @@ function YITH_WCAN_Filters( $ ) {
 		}
 
 		const selectedTerms = self._getSelectedTerms( $filter ),
-			$existingTerms = $termsContainer.find( '.term-box' ),
-			newTerms = [];
+			newTerms = [],
+			newTermTemplate = wp.template( 'yith-wcan-filter-term' ),
+			$existingTerms = $termsContainer.find( '.term-box' );
 
 		if ( selectedTerms ) {
 			$.each( selectedTerms, function ( i, v ) {
@@ -1438,10 +1475,7 @@ function YITH_WCAN_Filters( $ ) {
 				if ( $term.length ) {
 					newTerms.push( $term );
 				} else {
-					const newTermTemplate = wp.template(
-							'yith-wcan-filter-term'
-						),
-						newTerm = newTermTemplate( {
+					const newTerm = newTermTemplate( {
 							id: self.getRowIndex( $filter ),
 							term_id: v.id,
 							name: v.name,

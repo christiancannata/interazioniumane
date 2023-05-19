@@ -2,6 +2,8 @@
 
 namespace TheLion\LetsBox\Integrations;
 
+use TheLion\LetsBox\Processor;
+
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
@@ -46,17 +48,13 @@ class GF_WPCP_AddOn extends \GFAddOn
 
         // Deprecated hooks, but still in use by e.g. GravityView + GravityFlow?
         add_filter('gform_entry_field_value', [$this, 'filter_entry_field_value'], 10, 4);
-
-        \GF_Fields::register(new GF_WPCP_Field());
     }
 
     public function scripts()
     {
         if (\GFForms::is_gravity_page()) {
-            global $LetsBox;
-
-            $LetsBox->load_scripts();
-            $LetsBox->load_styles();
+            \TheLion\LetsBox\Core::instance()->load_scripts();
+            \TheLion\LetsBox\Core::instance()->load_styles();
 
             add_thickbox();
         }
@@ -81,7 +79,7 @@ class GF_WPCP_AddOn extends \GFAddOn
 
     public function styles()
     {
-        wp_enqueue_style('LetsBox.CustomStyle');
+        wp_enqueue_style('LetsBox');
 
         $styles = [
             [
@@ -104,13 +102,13 @@ class GF_WPCP_AddOn extends \GFAddOn
     {
         if (1430 == $position) {
             ?>
-            <li class="letsbox_setting field_setting">
-              <label for="field_wpcp_letsbox">Shortcode <?php echo gform_tooltip('form_field_'.$this->_slug); ?></label>
-              <textarea id="field_wpcp_letsbox" class="large fieldwidth-3 fieldheight-2" onchange="SetFieldProperty('LetsBoxShortcode', this.value)"></textarea>
-              </br>
-              <button class='button gform-button primary wpcp-shortcodegenerator letsbox'><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></button>
-            </li>
-            <?php
+<li class="letsbox_setting field_setting">
+    <label for="field_wpcp_letsbox">Shortcode <?php echo gform_tooltip('form_field_'.$this->_slug); ?></label>
+    <textarea id="field_wpcp_letsbox" class="large fieldwidth-3 fieldheight-2" onchange="SetFieldProperty('LetsBoxShortcode', this.value)"></textarea>
+    </br>
+    <button class='button gform-button primary wpcp-shortcodegenerator letsbox'><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></button>
+</li>
+<?php
         }
     }
 
@@ -124,17 +122,17 @@ class GF_WPCP_AddOn extends \GFAddOn
     public function field_defaults()
     {
         ?>
-    case 'letsbox':
-        field.label = <?php echo json_encode(esc_html__('Attach your documents', 'wpcloudplugins')); ?>;
-        break;
-    <?php
+case 'letsbox':
+field.label = <?php echo json_encode(esc_html__('Attach your documents', 'wpcloudplugins')); ?>;
+break;
+<?php
     }
 
     public function create_private_folder($user_id, $feed, $entry, $password)
     {
-        global $LetsBox;
-
-        $LetsBox->user_folder_create($user_id);
+        if ('Yes' === \TheLion\LetsBox\Core::instance()->get_setting('userfolder_oncreation')) {
+            \TheLion\LetsBox\Core::instance()->user_folder_create($user_id);
+        }
     }
 
     /**
@@ -151,7 +149,7 @@ class GF_WPCP_AddOn extends \GFAddOn
             return $private_folder_name;
         }
 
-        if ('gf_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('gf_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name;
         }
 
@@ -172,11 +170,13 @@ class GF_WPCP_AddOn extends \GFAddOn
      */
     public function rename_private_folder_names_for_guests($private_folder_name_guest, $processor)
     {
-        if ('gf_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('gf_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name_guest;
         }
 
-        return str_replace(esc_html__('Guests', 'wpcloudplugins').' - ', '', $private_folder_name_guest);
+        $prefix = Processor::instance()->get_setting('userfolder_name_guest_prefix');
+
+        return str_replace($prefix, '', $private_folder_name_guest);
     }
 
     public function render_wpdatatables_field($tableId)
@@ -202,7 +202,7 @@ class GF_WPCP_AddOn extends \GFAddOn
 class GF_WPCP_Field extends \GF_Field
 {
     public $type = 'letsbox';
-    public $defaultValue = '[letsbox class="gf_upload_box" mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
+    public $defaultValue = '[letsbox mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
 
     public function get_form_editor_field_title()
     {
@@ -315,29 +315,29 @@ class GF_WPCP_Field extends \GF_Field
         }
 
         ob_start(); ?>
-            <div id="LetsBox" class="light upload">
-                <div class="LetsBox upload"style="width: 100%;">
-                    <div class="fileupload-box -is-formfield -is-required -has-files -placeholder" style="width:100%;max-width:100%;"">
+<div id="LetsBox" class="light upload">
+    <div class="LetsBox upload" style="width: 100%;">
+        <div class="fileupload-box -is-formfield -is-required -has-files -placeholder" style="width:100%;max-width:100%;"">
                     <!-- FORM ELEMENTS -->
-                    <div class="fileupload-form" >
-                    <!-- END FORM ELEMENTS -->
+                    <div class=" fileupload-form">
+            <!-- END FORM ELEMENTS -->
 
-                    <!-- UPLOAD BOX HEADER -->
-                    <div class="fileupload-header">
-                        <div class="fileupload-header-title">
-                            <div class="fileupload-empty">
-                                <div class="fileupload-header-text-title upload-add-file"><?php esc_html_e('Add your file', 'wpcloudplugins'); ?></div>
-                                    <div class="fileupload-header-text-subtitle upload-add-folder"><a><?php esc_html_e('Or select a folder', 'wpcloudplugins'); ?></a>
-                                </div>
-                            </div>
+            <!-- UPLOAD BOX HEADER -->
+            <div class="fileupload-header">
+                <div class="fileupload-header-title">
+                    <div class="fileupload-empty">
+                        <div class="fileupload-header-text-title upload-add-file"><?php esc_html_e('Add your file', 'wpcloudplugins'); ?></div>
+                        <div class="fileupload-header-text-subtitle upload-add-folder"><a><?php esc_html_e('Or select a folder', 'wpcloudplugins'); ?></a>
                         </div>
-                    </div>
-                    <!-- END UPLOAD BOX HEADER -->
-
                     </div>
                 </div>
             </div>
-            <?php
+            <!-- END UPLOAD BOX HEADER -->
+
+        </div>
+    </div>
+</div>
+<?php
         return ob_get_clean();
     }
 
@@ -363,12 +363,12 @@ class GF_WPCP_Field extends \GF_Field
 
     public function get_value_merge_tag($value, $input_id, $entry, $form, $modifier, $raw_value, $url_encode, $esc_html, $format, $nl2br)
     {
-        return $this->renderUploadedFiles(html_entity_decode($value), ('html' === $format));
+        return $this->renderUploadedFiles(html_entity_decode($value), 'html' === $format);
     }
 
     public function get_value_entry_detail($value, $currency = '', $use_text = false, $format = 'html', $media = 'screen')
     {
-        return $this->renderUploadedFiles(html_entity_decode($value), ('html' === $format));
+        return $this->renderUploadedFiles(html_entity_decode($value), 'html' === $format);
     }
 
     public function get_value_entry_list($value, $entry, $field_id, $columns, $form)
@@ -402,3 +402,5 @@ class GF_WPCP_Field extends \GF_Field
 
 \GFForms::include_addon_framework();
 $GF_WPCP_AddOn = new GF_WPCP_AddOn();
+
+\GF_Fields::register(new GF_WPCP_Field());

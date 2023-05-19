@@ -12,17 +12,17 @@ if (!defined('ABSPATH')) {
  */
 class Elementor
 {
-    const VERSION = \LETSBOX_VERSION;
-    const MINIMUM_ELEMENTOR_VERSION = '2.9.0';
-    const MINIMUM_PHP_VERSION = '7.4';
+    public const VERSION = \LETSBOX_VERSION;
+    public const MINIMUM_ELEMENTOR_VERSION = '3.5.0';
+    public const MINIMUM_PHP_VERSION = '7.4';
 
-    private static $_instance = null;
+    private static $_instance;
 
     public function __construct()
     {
         // Add Plugin actions
         \add_action('elementor/elements/categories_registered', [$this, 'add_elementor_category']);
-        \add_action('elementor/widgets/widgets_registered', [$this, 'init_widgets']);
+        \add_action('elementor/widgets/register', [$this, 'init_widgets']);
     }
 
     public static function instance()
@@ -57,7 +57,7 @@ class Elementor
         require_once __DIR__.'/widget.php';
 
         // Register widget
-        \Elementor\Plugin::instance()->widgets_manager->register_widget_type(new \TheLion\LetsBox\Integrations\Elementor\Widget());
+        \Elementor\Plugin::instance()->widgets_manager->register(new \TheLion\LetsBox\Integrations\Elementor\Widget());
     }
 }
 

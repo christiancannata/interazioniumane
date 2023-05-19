@@ -8,16 +8,16 @@ use AC\Asset\Script;
 use AC\Asset\Style;
 use AC\ColumnRepository;
 use ACP;
+use ACP\Sorting;
 use ACP\Sorting\ApplyFilter;
 use ACP\Sorting\Controller;
 use ACP\Sorting\ModelFactory;
 use ACP\Sorting\NativeSortable\NativeSortableRepository;
 use ACP\Sorting\Request;
-use ACP\Sorting\Settings;
 use ACP\Sorting\Type\SortType;
 use ACP\Sorting\UserPreference;
 
-class Screen implements AC\Registrable {
+class Screen implements AC\Registerable {
 
 	/**
 	 * @var AC\ListScreen
@@ -45,16 +45,24 @@ class Screen implements AC\Registrable {
 	private $column_respository;
 
 	/**
-	 * @var Settings\ListScreen\PreferredSort
+	 * @var Sorting\Settings\ListScreen\PreferredSort
 	 */
 	private $preferred_sort;
 
 	/**
-	 * @var Settings\ListScreen\PreferredSegmentSort
+	 * @var Sorting\Settings\ListScreen\PreferredSegmentSort
 	 */
 	private $preferred_segment_sort;
 
-	public function __construct( AC\ListScreen $list_screen, Location\Absolute $location, NativeSortableRepository $native_sortable_repository, ModelFactory $model_factory, ColumnRepository $column_respository, Settings\ListScreen\PreferredSort $preferred_sort, Settings\ListScreen\PreferredSegmentSort $preferred_segment_sort ) {
+	public function __construct(
+		AC\ListScreen $list_screen,
+		Location\Absolute $location,
+		NativeSortableRepository $native_sortable_repository,
+		ModelFactory $model_factory,
+		ColumnRepository $column_respository,
+		Sorting\Settings\ListScreen\PreferredSort $preferred_sort,
+		Sorting\Settings\ListScreen\PreferredSegmentSort $preferred_segment_sort
+	) {
 		$this->list_screen = $list_screen;
 		$this->location = $location;
 		$this->native_sortable_repository = $native_sortable_repository;
@@ -122,8 +130,9 @@ class Screen implements AC\Registrable {
 	 */
 	public function save_user_preference() {
 		$request = Request\Sort::create_from_globals();
+		$persist = (bool) apply_filters( 'acp/sorting/remember_last_sorting_preference', true, $this->list_screen );
 
-		if ( $request->get_order_by() ) {
+		if ( $persist && $request->get_order_by() ) {
 			$this->user_preference()->save( SortType::create_by_request( $request ) );
 		}
 	}
@@ -144,7 +153,7 @@ class Screen implements AC\Registrable {
 		}
 
 		$columns = $this->column_respository->find_all( [
-			ColumnRepository::ARG_FILTER => new Filter\SortableColumns( $this->model_factory ),
+			ColumnRepository::ARG_FILTER => [ new Filter\SortableColumns( $this->model_factory ) ],
 		] );
 
 		foreach ( $columns as $column ) {
@@ -163,7 +172,7 @@ class Screen implements AC\Registrable {
 	 */
 	public function unset_original_sortable_headings( $sortable_columns ) {
 		$columns = $this->column_respository->find_all( [
-			ColumnRepository::ARG_FILTER => new Filter\DisabledOriginalColumns(),
+			ColumnRepository::ARG_FILTER => [ new Filter\DisabledOriginalColumns() ],
 		] );
 
 		foreach ( $columns as $column ) {

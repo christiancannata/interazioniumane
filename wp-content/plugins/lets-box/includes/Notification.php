@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -47,7 +54,14 @@ class Notification
     public $from_email;
 
     /**
-     * HTML list of entries for in message.
+     * Replyto email for the email notification.
+     *
+     * @var string
+     */
+    public $replyto_email;
+
+    /**
+     * HTML list of files for in message.
      *
      * @var string
      */
@@ -81,21 +95,20 @@ class Notification
      */
     public $skip_notification_for_current_user = false;
 
-    public function __construct(Processor $_processor, $notification_type, $entries)
+    public function __construct($notification_type, $entries)
     {
-        $this->_processor = $_processor;
         $this->type = $notification_type;
         $this->entries = $entries;
 
         // Load current folder
-        $this->folder = $this->get_client()->get_folder(false, false);
+        $this->folder = Client::instance()->get_folder(false, false);
         if (count($entries) > 0) {
             $first_entry = reset($entries);
             $parents = $first_entry->get_parents();
             $this->folder = reset($parents);
         }
 
-        if ('1' === $this->get_processor()->get_shortcode_option('notification_skip_email_currentuser') && is_user_logged_in()) {
+        if ('1' === Processor::instance()->get_shortcode_option('notification_skip_email_currentuser') && is_user_logged_in()) {
             $this->skip_notification_for_current_user = true;
         }
 
@@ -123,7 +136,7 @@ class Notification
 
         do_action('letsbox_notification_before_send', $this);
 
-        $colors = $this->get_processor()->get_setting('colors');
+        $colors = Processor::instance()->get_setting('colors');
         $template = apply_filters('letsbox_notification_set_template', LETSBOX_ROOTDIR.'/templates/notifications/default_notification.php', $this);
 
         $subject = $this->get_subject();
@@ -141,8 +154,15 @@ class Notification
             ];
 
             // Set From if needed
-            if (!empty($this->from_name) && !empty($this->from_email)) {
-                $headers[] = 'From: '.$this->from_name.' <'.$this->from_email.'>';
+            $from_email = sanitize_email($this->from_email);
+            if (!empty($this->from_name) && !empty($from_email)) {
+                $headers[] = 'From: '.$this->from_name.' <'.$from_email.'>';
+            }
+
+            // Set Reply if needed
+            $replyto_email = sanitize_email($this->replyto_email);
+            if (!empty($this->replyto_email) && !empty($replyto_email)) {
+                $headers[] = 'Reply-To: '.$this->replyto_email.' <'.$replyto_email.'>';
             }
 
             $recipients = array_unique($this->get_recipients());
@@ -235,6 +255,16 @@ class Notification
         return $this->from_email;
     }
 
+    public function set_replyto_email($replyto_email)
+    {
+        $this->replyto_email = $replyto_email;
+    }
+
+    public function get_replyto_email()
+    {
+        return $this->replyto_email;
+    }
+
     public function set_entries($entries)
     {
         $this->entries = $entries;
@@ -281,30 +311,6 @@ class Notification
     }
 
     /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\App
-     */
-    public function get_app()
-    {
-        return $this->get_processor()->get_app();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Client
-     */
-    public function get_client()
-    {
-        return $this->get_processor()->get_client();
-    }
-
-    /**
      * Set subject of notification using the Global Template setting.
      */
     private function _process_subject()
@@ -334,7 +340,7 @@ class Notification
                 $template_key = '';
         }
 
-        $subject_template = $this->get_processor()->get_setting($template_key);
+        $subject_template = Processor::instance()->get_setting($template_key);
         $subject = apply_filters('letsbox_notification_set_subject', $subject_template, $this);
 
         $this->set_subject(trim($subject));
@@ -366,7 +372,7 @@ class Notification
                 $message_key = '';
         }
 
-        $message_template = $this->get_processor()->get_setting($message_key);
+        $message_template = Processor::instance()->get_setting($message_key);
         $message = apply_filters('letsbox_notification_set_message', $message_template, $this);
 
         $this->set_message(trim($message));
@@ -378,7 +384,7 @@ class Notification
      */
     private function _process_entry_list()
     {
-        $entry_list_template = $this->get_processor()->get_setting('filelist_template');
+        $entry_list_template = Processor::instance()->get_setting('filelist_template');
         $entry_list = apply_filters('letsbox_notification_set_entry_list', $entry_list_template, $this);
 
         $this->set_entry_list(trim($entry_list));
@@ -389,13 +395,13 @@ class Notification
      */
     private function _process_recipients()
     {
-        $recipients_template_str = $this->get_processor()->get_shortcode_option('notificationemail');
+        $recipients_template_str = Processor::instance()->get_shortcode_option('notificationemail');
         $recipients_template_arr = array_map('trim', explode(',', $recipients_template_str));
 
         /* Add addresses of linked users if needed
          * Can't send notifications to linked users when folder is deleted */
         $linked_users_key = array_search('%linked_user_email%', $recipients_template_arr);
-        if (false !== $linked_users_key && !in_array($this->type, ['deletion', 'deletion_multiple'])) {
+        if (false !== $linked_users_key) {
             unset($recipients_template_arr[$linked_users_key]);
 
             $linked_users = $this->folder->get_linked_users();
@@ -431,17 +437,23 @@ class Notification
 
     private function _process_from()
     {
-        $from_name = $this->get_processor()->get_shortcode_option('notification_from_name');
+        $from_name = Processor::instance()->get_shortcode_option('notification_from_name');
         if (empty($from_name)) {
-            $from_name = $this->get_processor()->get_setting('notification_from_name');
+            $from_name = Processor::instance()->get_setting('notification_from_name');
         }
         $this->set_from_name(sanitize_text_field($from_name));
 
-        $from_email = $this->get_processor()->get_shortcode_option('notification_from_email');
+        $from_email = Processor::instance()->get_shortcode_option('notification_from_email');
         if (empty($from_email)) {
-            $from_email = $this->get_processor()->get_setting('notification_from_name');
+            $from_email = Processor::instance()->get_setting('notification_from_name');
         }
-        $this->set_from_email(sanitize_email($from_email));
+        $this->set_from_email($from_email);
+
+        $replyto_email = Processor::instance()->get_shortcode_option('notification_replyto_email');
+        if (empty($replyto_email)) {
+            $replyto_email = Processor::instance()->get_setting('notification_replyto_email');
+        }
+        $this->set_replyto_email($replyto_email);
     }
 
     /**
@@ -449,7 +461,7 @@ class Notification
      */
     private function _create_placeholders()
     {
-        $cloud_root_id = $this->get_processor()->get_client()->get_root_folder()->get_id();
+        $cloud_root_id = API::get_root_folder()->get_id();
 
         $this->placeholders = [
             '%admin_email%' => get_option('admin_email'),
@@ -457,7 +469,7 @@ class Notification
             '%number_of_files%' => count($this->entries),
             '%ip%' => Helpers::get_user_ip(),
             '%folder_name%' => $this->get_folder()->get_name(),
-            '%folder_relative_path%' => $this->get_folder()->get_path($this->get_processor()->get_root_folder()),
+            '%folder_relative_path%' => $this->get_folder()->get_path(Processor::instance()->get_root_folder()),
             '%folder_absolute_path%' => $this->get_folder()->get_path($cloud_root_id),
             '%folder_url%' => 'https://letsbox.app.box.com/folder/'.$this->get_folder()->get_id(),
         ];
@@ -469,7 +481,7 @@ class Notification
         $this->placeholders['%user_last_name%'] = (is_user_logged_in()) ? wp_get_current_user()->last_name : '';
 
         // Account data
-        $this->placeholders['%account_email%'] = '';
+        $this->placeholders['%account_email%'] = App::get_current_account()->get_email();
 
         // Location data
         $location_data_required = $this->_is_placeholder_needed('%location%');
@@ -485,26 +497,38 @@ class Notification
             $file_cloud_shared_url = '';
             $shared_link_required = $this->_is_placeholder_needed('%file_cloud_shared_url%');
             if ($shared_link_required) {
-                $file_cloud_shared_url = $this->get_client()->get_shared_link($cached_node);
+                $file_cloud_shared_url = Client::instance()->get_shared_link($cached_node, []);
             }
 
             $file_cloud_shortlived_download_url = '';
             $shortlived_download_link_required = $this->_is_placeholder_needed('%file_cloud_shortlived_download_url%');
             if ($shortlived_download_link_required) {
-                $file_cloud_shortlived_download_url = $this->get_client()->get_temporarily_link($cached_node);
+                $file_cloud_shortlived_download_url = Client::instance()->get_temporarily_link($cached_node);
             }
+
+            // deeplink
+            $deeplink = json_encode([
+                'source' => md5(Processor::instance()->options['account'].Processor::instance()->options['root'].Processor::instance()->options['mode']),
+                'account_id' => App::get_current_account()->get_id(),
+                'lastFolder' => Processor::instance()->get_last_folder(),
+                'folderPath' => Processor::instance()->get_folder_path(),
+                'focus_id' => $entry->get_id(),
+            ]);
+
+            $deeplink_url = Helpers::get_page_url().'?wpcp_link='.base64_encode($deeplink);
 
             $fileline = strtr($this->_update_depricated_placeholders($this->entry_list), [
                 '%file_name%' => $entry->get_name(),
-                '%file_lastedited%' => $entry->get_last_edited_str(),
+                '%file_lastedited%' => $entry->get_last_edited_str(false),
                 '%file_size%' => Helpers::bytes_to_size_1024($entry->get_size()),
                 '%file_cloud_shortlived_download_url%' => $file_cloud_shortlived_download_url,
                 '%file_cloud_preview_url%' => 'https://app.box.com/'.($cached_node->get_entry()->is_dir() ? 'folder' : 'file').'/'.$cached_node->get_id(),
                 '%file_cloud_shared_url%' => $file_cloud_shared_url,
-                '%file_download_url%' => LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.($cached_node->get_id()).'&listtoken='.$this->get_processor()->get_listtoken(),
-                '%file_relative_path%' => $cached_node->get_path($this->get_processor()->get_root_folder()),
+                '%file_download_url%' => LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$cached_node->get_id().'&account_id='.App::get_current_account()->get_id().'&listtoken='.Processor::instance()->get_listtoken(),
+                '%file_deeplink_url%' => $deeplink_url,
+                '%file_relative_path%' => $cached_node->get_path(Processor::instance()->get_root_folder()),
                 '%file_absolute_path%' => $cached_node->get_path($cloud_root_id),
-                '%folder_relative_path%' => $this->get_folder()->get_path($this->get_processor()->get_root_folder()),
+                '%folder_relative_path%' => $this->get_folder()->get_path(Processor::instance()->get_root_folder()),
                 '%folder_absolute_path%' => $this->get_folder()->get_path($cloud_root_id),
                 '%folder_url%' => 'https://app.box.com/folder/'.$this->get_folder()->get_id(),
                 '%file_icon%' => $entry->get_default_icon(),
@@ -517,20 +541,19 @@ class Notification
         $cached_entry = reset($this->entries);
         $this->placeholders['%file_name%'] = $cached_entry->get_name();
         $this->placeholders['%file_size%'] = Helpers::bytes_to_size_1024($cached_entry->get_entry()->get_size());
-        $this->placeholders['%file_relative_path%'] = $cached_entry->get_path($this->get_processor()->get_root_folder());
+        $this->placeholders['%file_relative_path%'] = $cached_entry->get_path(Processor::instance()->get_root_folder());
         $this->placeholders['%file_absolute_path%'] = $cached_entry->get_path($cloud_root_id);
         $this->placeholders['%file_icon%'] = $cached_entry->get_entry()->get_default_thumbnail_icon();
         $this->placeholders['%file_cloud_shortlived_download_url%'] = $file_cloud_shortlived_download_url;
         $this->placeholders['%file_cloud_shared_url%'] = $file_cloud_shared_url;
         $this->placeholders['%file_cloud_preview_url%'] = $entry->get_preview_link();
-        $this->placeholders['%file_download_url%'] = LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.($cached_entry->get_id()).'&listtoken='.$this->get_processor()->get_listtoken();
+        $this->placeholders['%file_download_url%'] = LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.$cached_entry->get_id().'&account_id='.App::get_current_account()->get_id().'&listtoken='.Processor::instance()->get_listtoken();
 
         // Set page url
-        $current_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        $this->placeholders['%current_url%'] = $current_url;
+        $this->placeholders['%current_url%'] = Helpers::get_page_url();
         $this->placeholders['%page_name%'] = get_bloginfo();
 
-        $post_id = url_to_postid($current_url);
+        $post_id = url_to_postid(Helpers::get_page_url());
 
         if ($post_id > 0) {
             $this->placeholders['%page_name%'] = get_the_title($post_id);
@@ -612,6 +635,7 @@ class Notification
 
         $this->from_name = strtr($this->_update_depricated_placeholders($this->from_name), $this->placeholders);
         $this->from_email = strtr($this->_update_depricated_placeholders($this->from_email), $this->placeholders);
+        $this->replyto_email = strtr($this->_update_depricated_placeholders($this->replyto_email), $this->placeholders);
     }
 
     /**
@@ -622,7 +646,9 @@ class Notification
      */
     private function _fill_recipient_placeholders($html_message, $recipient_email)
     {
-        if (get_option('admin_email') === $recipient_email) {
+        $user_data = get_user_by('email', $recipient_email);
+
+        if (empty($user_data) && get_option('admin_email') === $recipient_email) {
             $user_data = new \stdClass();
             $user_data->user_login = esc_html__('Administrator', 'wpcloudplugins');
             $user_data->user_email = $recipient_email;
@@ -630,8 +656,6 @@ class Notification
             $user_data->user_lastname = '';
             $user_data->display_name = esc_html__('Administrator', 'wpcloudplugins');
             $user_data->ID = '';
-        } else {
-            $user_data = get_user_by('email', $recipient_email);
         }
 
         return strtr($html_message, [

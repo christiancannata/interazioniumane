@@ -176,7 +176,7 @@ class phpthumb_functions {
 
 
 	public static function ImageTypeToMIMEtype($imagetype) {
-		if (function_exists('image_type_to_mime_type') && ($imagetype >= 1) && ($imagetype <= 18)) {
+		if (function_exists('image_type_to_mime_type') && ($imagetype >= 1) && ($imagetype <= 19)) {
 			// PHP v4.3.0+
 			return image_type_to_mime_type($imagetype);
 		}
@@ -199,6 +199,7 @@ class phpthumb_functions {
 			16 => 'image/xbm',                     // IMAGETYPE_XBM
 			17 => 'image/x-icon',                  // IMAGETYPE_ICO
 			18 => 'image/webp',                    // IMAGETYPE_WEBP
+			19 => 'image/avif',                    // IMAGETYPE_AVIF
 
 			'gif'  => 'image/gif',                 // IMAGETYPE_GIF
 			'jpg'  => 'image/jpeg',                // IMAGETYPE_JPEG
@@ -207,6 +208,7 @@ class phpthumb_functions {
 			'bmp'  => 'image/bmp',                 // IMAGETYPE_BMP
 			'ico'  => 'image/x-icon',              // IMAGETYPE_ICO
 			'webp' => 'image/webp',                // IMAGETYPE_WEBP
+			'avif' => 'image/avif',                // IMAGETYPE_AVIF
 		);
 
 		return (isset($image_type_to_mime_type[$imagetype]) ? $image_type_to_mime_type[$imagetype] : false);
@@ -746,7 +748,7 @@ class phpthumb_functions {
 			'http'  => 80,
 			'https' => 443,
 		);
-		return (isset($schemePort[strtolower($scheme)]) ? $schemePort[strtolower($scheme)] : null);
+		return ((!empty($scheme) && isset($schemePort[strtolower($scheme)])) ? $schemePort[strtolower($scheme)] : null);
 	}
 
 	public static function ParseURLbetter($url) {
@@ -1050,8 +1052,8 @@ if (!function_exists('preg_quote')) {
 if (!function_exists('file_get_contents')) {
 	// included in PHP v4.3.0+
 	function file_get_contents($filename) {
-		if (preg_match('#^(f|ht)tp\://#i', $filename)) {
-			return SafeURLread($filename, $error);
+		if (preg_match('#^(ftp|https?)\://#i', $filename)) {
+			return phpthumb_functions::SafeURLread($filename, $error);
 		}
 		if ($fp = @fopen($filename, 'rb')) {
 			$rawData = '';

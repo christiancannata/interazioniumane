@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -67,8 +74,8 @@ class Helpers
         }
         // maximise filename length to 255 bytes http://serverfault.com/a/9548/44086
         $pathinfo = self::get_pathinfo($filename);
-        $ext = isset($pathinfo['extension']) ? ($pathinfo['extension']) : false;
-        $fn = isset($pathinfo['filename']) ? ($pathinfo['filename']) : false;
+        $ext = $pathinfo['extension'] ?? false;
+        $fn = $pathinfo['filename'] ?? false;
 
         if (!extension_loaded('mbstring')) {
             return $fn.($ext ? '.'.$ext : '');
@@ -151,8 +158,12 @@ class Helpers
             $user = wp_get_current_user();
         }
 
-        if (empty($user) || (!($user instanceof \WP_User))) {
+        if (empty($user) || (!$user instanceof \WP_User)) {
             return false;
+        }
+
+        if (in_array('users', $roles_to_check)) {
+            return true; // 'users' = all logged in users
         }
 
         foreach ($user->roles as $role) {
@@ -196,10 +207,10 @@ class Helpers
     {
         // User IP
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            //check ip from share internet
+            // check ip from share internet
             $ip = $_SERVER['HTTP_CLIENT_IP'];
         } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            //to check ip is pass from proxy
+            // to check ip is pass from proxy
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
@@ -215,7 +226,7 @@ class Helpers
         $userip = empty($ip) ? self::get_user_ip() : $ip;
 
         try {
-            $geolocation = (unserialize(file_get_contents('http://www.geoplugin.net/php.gp?ip='.$userip)));
+            $geolocation = unserialize(file_get_contents('http://www.geoplugin.net/php.gp?ip='.$userip));
 
             if (false !== $geolocation && 200 === $geolocation['geoplugin_status']) {
                 return $geolocation['geoplugin_city'].', '.$geolocation['geoplugin_region'].', '.$geolocation['geoplugin_countryName'];
@@ -225,6 +236,19 @@ class Helpers
         } catch (\Exception $ex) {
             return '-location unknown-';
         }
+    }
+
+    public static function get_page_url()
+    {
+        if (isset($_REQUEST['page_url'])) {
+            return esc_url($_REQUEST['page_url'], null, 'db');
+        }
+
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            return $_SERVER['HTTP_REFERER'];
+        }
+
+        return '';
     }
 
     public static function get_all_users_and_roles()
@@ -242,6 +266,7 @@ class Helpers
 
         // Add custom roles
         $wp_roles_names['guest'] = esc_html__('Anonymous user', 'wpcloudplugins');
+        $wp_roles_names['users'] = esc_html__('Logged in user', 'wpcloudplugins');        
         $wp_roles_names['all'] = esc_html__('Everyone', 'wpcloudplugins');
         $wp_roles_names['none'] = esc_html__('None', 'wpcloudplugins');
 
@@ -249,9 +274,9 @@ class Helpers
             $list[] = [
                 'value' => (string) $wp_role_id,
                 'id' => (string) $wp_role_id,
-                'text' => $wp_role_name,
+                'text' => esc_html($wp_role_name),
                 'type' => 'role',
-                'searchBy' => $wp_role_name,
+                'searchBy' => esc_html($wp_role_name),
                 'img' => get_avatar_url('role', ['size' => '32']),
             ];
         }
@@ -269,9 +294,9 @@ class Helpers
             $list[] = [
                 'value' => (string) $wp_user->id,
                 'id' => (string) $wp_user->id,
-                'text' => (empty($wp_user->display_name) ? $wp_user->user_login : $wp_user->display_name),
+                'text' => esc_html(str_replace('"', "", empty($wp_user->display_name) ? $wp_user->user_login : $wp_user->display_name)),
                 'type' => 'user',
-                'searchBy' => $wp_user->user_login,
+                'searchBy' => esc_html($wp_user->user_login),
                 'img' => ($user_count < 1000) ? get_avatar_url($wp_user->id, ['size' => '32']) : LETSBOX_ROOTPATH.'/css/images/usericon.png',
             ];
             ++$i;
@@ -320,7 +345,7 @@ class Helpers
         // human readable format -- powers of 1024
         $unit = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
 
-        return @round($bytes / pow(1024, ($i = floor(log($bytes, 1024)))), $precision).' '.$unit[$i];
+        return @round($bytes / pow(1024, $i = floor(log($bytes, 1024))), $precision).' '.$unit[$i];
     }
 
     public static function find_item_in_array_with_value($array, $key, $search)
@@ -436,7 +461,6 @@ class Helpers
 
         // Custom Post Meta Placeholders
         if ($context instanceof Processor && !is_null($context->get_shortcode_option('post_id'))) {
-
             $post_id = $context->get_shortcode_option('post_id');
             $post = get_post($post_id);
 
@@ -447,7 +471,6 @@ class Helpers
                 '%post_type%' => is_a($post, 'WP_Post') ? $post->post_type : '',
                 '%post_title%' => is_a($post, 'WP_Post') ? $post->post_title : '',
             ]);
-
 
             if (!empty($postmeta_placeholders)) {
                 foreach ($postmeta_placeholders as $placeholder_data) {
@@ -460,11 +483,23 @@ class Helpers
             }
         }
 
+        // Date Placeholders
+        preg_match_all('/%date_(?<format>.+)%/U', $value, $date_placeholders, PREG_SET_ORDER, 0);
+
+        if (!empty($date_placeholders)) {
+            foreach ($date_placeholders as $placeholder_data) {
+                $date_placeholder = $placeholder_data[0];
+                $value = strtr($value, [
+                    $date_placeholder => !empty($placeholder_data['format']) ? current_time($placeholder_data['format']) : '',
+                ]);
+            }
+        }
+
         // Extra Placeholders
         $value = strtr($value, [
-            '%yyyy-mm-dd%' => date('Y-m-d'),
-            '%jjjj-mm-dd%' => date('Y-m-d'), // Backward compatibility
-            '%hh:mm%' => date('Hi'),
+            '%yyyy-mm-dd%' => current_time('Y-m-d'),
+            '%jjjj-mm-dd%' => current_time('Y-m-d'), // Backward compatibility           
+            '%hh:mm%' => current_time('Hi'),
             '%ip%' => self::get_user_ip(),
             '%directory_separator%' => '/',
             '%uniqueID%' => get_option('lets_box_uniqueID', 0),
@@ -478,7 +513,23 @@ class Helpers
             ]);
         }
 
+        // Upload Placeholders
+        if (isset($extra['file_name'])) {
+            $value = strtr($value, [
+                '%file_name%' => $extra['file_name'],
+                '%file_extension%' => $extra['file_extension'],
+                '%queue_index%' => $extra['queue_index'],
+            ]);
+        }
+
         // WooCommerce Products Placeholders
+        if (empty($extra['wc_product']) && $context instanceof Processor && !is_null($context->get_shortcode_option('wc_product_id'))) {
+            $product = new \WC_Product($context->get_shortcode_option('wc_product_id'));
+            if (!empty($product) && $product instanceof \WC_Product) {
+                $extra['wc_product'] = $product;
+            }
+        }
+
         if (isset($extra['wc_product'])) {
             $value = strtr($value, [
                 '%wc_product_id%' => $extra['wc_product']->get_id(),
@@ -501,12 +552,45 @@ class Helpers
         }
 
         // WooCommerce Order Placeholders
+        if (empty($extra['wc_order']) && $context instanceof Processor && !is_null($context->get_shortcode_option('wc_order_id'))) {
+            $order = new \WC_Order($context->get_shortcode_option('wc_order_id'));
+            if (!empty($order) && $order instanceof \WC_Order) {
+                $extra['wc_order'] = $order;
+            }
+        }
+
         if (isset($extra['wc_order'])) {
             $value = strtr($value, [
                 '%wc_order_id%' => $extra['wc_order']->get_order_number(),
                 '%wc_order_quantity%' => $extra['wc_order']->get_item_count(),
                 '%wc_order_date_created%' => $extra['wc_order']->get_date_created()->format('Y-m-d'),
             ]);
+        }
+
+        // WooCommerce Item Placeholders
+        if (empty($extra['wc_item']) && $context instanceof Processor && !is_null($context->get_shortcode_option('wc_item_id'))) {
+            $item = new \WC_Order_Item_Product($context->get_shortcode_option('wc_item_id'));
+            if (!empty($item) && $item instanceof \WC_Order_Item_Product) {
+                $extra['wc_item'] = $item;
+            }
+        }
+
+        if (isset($extra['wc_item'])) {
+            $value = strtr($value, [
+                '%wc_item_id%' => $extra['wc_item']->get_id(),
+                '%wc_item_quantity%' => $extra['wc_item']->get_quantity(),
+            ]);
+        }
+
+        // Form Input Fields
+        if ($context instanceof Processor && isset($_COOKIE['WPCP-FORM-VALUES-'.$context->get_listtoken()])) {
+            $form_values = json_decode(stripslashes($_COOKIE['WPCP-FORM-VALUES-'.$context->get_listtoken()]), true);
+
+            foreach ($form_values as $placeholder_key => $form_value) {
+                $value = strtr($value, [
+                    '%'.$placeholder_key.'%' => !empty($form_value) ? self::filter_filename($form_value, false) : '',
+                ]);
+            }
         }
 
         return apply_filters('letsbox_apply_placeholders', $value, $context, $extra);
@@ -518,6 +602,8 @@ class Helpers
 
         if ($is_dir) {
             $icon = 'folder';
+        } elseif (empty($mimetype)) {
+            $icon = 'unknown';
         } elseif (false !== strpos($mimetype, 'word')) {
             $icon = 'application-msword';
         } elseif (false !== strpos($mimetype, 'excel') || false !== strpos($mimetype, 'spreadsheet')) {
@@ -530,13 +616,13 @@ class Helpers
             false !== strpos($mimetype, 'photoshop')
             || 'application/psd' === $mimetype
             || 'image/psd' === $mimetype
-            ) {
+        ) {
             $icon = 'application-x-photoshop';
         } elseif (
             false !== strpos($mimetype, 'illustrator')
             || false !== strpos($mimetype, 'postscript')
             || false !== strpos($mimetype, 'svg')
-            ) {
+        ) {
             $icon = 'vector';
         } elseif (false !== strpos($mimetype, 'image')) {
             $icon = 'image-x-generic';
@@ -555,7 +641,7 @@ class Helpers
         } elseif (false !== strpos($mimetype, 'html')
             || false !== strpos($mimetype, 'application/x-httpd-php')
             || false !== strpos($mimetype, 'application/javascript')
-            ) {
+        ) {
             $icon = 'text-xml';
         } elseif (false !== strpos($mimetype, 'application/exe')
                 || false !== strpos($mimetype, 'application/x-msdownload')
@@ -622,7 +708,7 @@ class Helpers
             return 0;
         }
 
-        $total_seconds = ($ms / 1000);
+        $total_seconds = (int) ($ms / 1000);
 
         if ($seconds) {
             return $total_seconds;
@@ -637,14 +723,14 @@ class Helpers
 
         if ($total_seconds >= 3600) {
             $value['hours'] = floor($total_seconds / 3600);
-            $total_seconds = $total_seconds % 3600;
+            $total_seconds = (int) $total_seconds % 3600;
 
             $time .= $value['hours'].':';
         }
 
         if ($total_seconds >= 60) {
             $value['minutes'] = floor($total_seconds / 60);
-            $total_seconds = $total_seconds % 60;
+            $total_seconds = (int) $total_seconds % 60;
 
             $time .= $value['minutes'].':';
         } else {
@@ -683,9 +769,9 @@ class Helpers
         return true;
     }
 
-    public static function is_deprecated($type, $name)
+    public static function is_deprecated($type, $name, $replaced_with = null)
     {
-        error_log("[WP Cloud Plugin message]: {$type} {$name} is deprecated.");
+        error_log("[WP Cloud Plugin message]: {$type} {$name} is deprecated.".($replaced_with) ? " Use {$replaced_with} instead." : '');
 
         ob_start();
         debug_print_backtrace();

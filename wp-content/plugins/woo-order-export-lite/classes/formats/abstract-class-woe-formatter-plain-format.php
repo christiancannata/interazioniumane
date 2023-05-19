@@ -904,6 +904,27 @@ abstract class WOE_Formatter_Plain_Format extends WOE_Formatter {
 			}	
 		}
 
+		if ( isset( $storageData['summary_report_total_sum_items_exported'] ) ) {
+			if( empty( WC_Order_Export_Engine::$extractor_options['include_products']) ) {
+				$export_only_products = false;
+			} else {
+				$export_only_products = WC_Order_Export_Engine::$extractor_options['include_products'];
+			}
+			$exported_items_total = 0;
+			foreach ( $order->get_items( 'line_item') as $item ) {
+				if ( $export_only_products AND
+					! in_array( $item['product_id'], $export_only_products ) AND // not  product
+					( ! $item['variation_id'] OR ! in_array( $item['variation_id'],
+							$export_only_products ) )  // not variation
+				) {
+					continue;
+				}				
+				//OK, item was exported 
+				$exported_items_total += wc_round_tax_total($item->get_total());
+			}
+			$storageData['summary_report_total_sum_items_exported'] += $exported_items_total; 	
+		}
+
 		if ( isset( $storageData['summary_report_total_amount'] ) ) {
 			$storageData['summary_report_total_amount'] += wc_round_tax_total( $order->get_total() );
 		}

@@ -490,7 +490,7 @@ if ( ! class_exists( 'YITH_WCAN_Query' ) ) {
 		 * @return void
 		 */
 		public function fill_query_vars( &$query ) {
-			$query_vars = $this->get_query_vars();
+			$query_vars = apply_filters( 'yith_wcan_query_vars_to_merge', $this->get_query_vars() );
 
 			if ( empty( $query_vars ) ) {
 				return;
@@ -786,7 +786,7 @@ if ( ! class_exists( 'YITH_WCAN_Query' ) ) {
 		public function suppress_default_query_vars() {
 			global $wp;
 
-			if ( empty( $wp->request ) && $this->should_filter() && apply_filters( 'yith_wcan_suppress_default_query_vars', true ) ) {
+			if ( empty( $wp->request ) && $this->should_filter() && get_option( 'permalink_structure' ) && apply_filters( 'yith_wcan_suppress_default_query_vars', true ) ) {
 				$wp->query_vars = array();
 			}
 		}
@@ -912,7 +912,7 @@ if ( ! class_exists( 'YITH_WCAN_Query' ) ) {
 		 * @return bool
 		 */
 		public function is_filtered() {
-			return $this->should_filter() && ! empty( $this->get_query_vars() );
+			return apply_filters( 'yith_wcan_is_filtered', $this->should_filter() && ! empty( $this->get_query_vars() ) );
 		}
 
 		/**
@@ -1222,7 +1222,9 @@ if ( ! class_exists( 'YITH_WCAN_Query' ) ) {
 			// perform basic sanitization.
 			$query = array_map(
 				function ( $string ) {
-					$string = str_replace( ' ', '+', $string );
+					if ( is_scalar( $string ) ) {
+						$string = str_replace( ' ', '+', $string );
+					}
 
 					return wc_clean( $string );
 				},
@@ -1294,11 +1296,11 @@ if ( ! class_exists( 'YITH_WCAN_Query' ) ) {
 		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function instance() {
-			if ( is_null( self::$instance ) ) {
-				self::$instance = new self();
+			if ( is_null( static::$instance ) ) {
+				static::$instance = new static();
 			}
 
-			return self::$instance;
+			return static::$instance;
 		}
 	}
 }
@@ -1312,6 +1314,8 @@ if ( ! function_exists( 'YITH_WCAN_Query' ) ) {
 	function YITH_WCAN_Query() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 		if ( defined( 'YITH_WCAN_PREMIUM' ) ) {
 			return YITH_WCAN_Query_Premium::instance();
+		} elseif ( defined( 'YITH_WCAN_EXTENDED' ) ) {
+			return YITH_WCAN_Query_Extended::instance();
 		}
 
 		return YITH_WCAN_Query::instance();

@@ -88,14 +88,14 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 			return self::$instance;
 		}
 		/**
-		* Class constructor
-		*
-		* @access public
-		* @return void
-		*/
+		 * Class constructor
+		 *
+		 * @access public
+		 * @return void
+		 */
 		public function __construct() {
 
-			// Only proceed if this is own request
+			// Only proceed if this is own request.
 			if ( ! Kadence_Woomail_Designer::is_own_customizer_request() && ! Kadence_Woomail_Designer::is_own_preview_request() ) {
 				return;
 			}
@@ -111,11 +111,10 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 		 * @return void
 		 */
 		static public function import_export_requests( $wp_customize ) {
-			// Check if user is allowed to change values
-			if ( ! Kadence_Woomail_Designer::is_admin()) {
+			// Check if user is allowed to change values.
+			if ( ! Kadence_Woomail_Designer::is_admin() ) {
 				exit;
 			}
-			
 			if ( isset( $_REQUEST['kt-woomail-export'] ) ) {
 				self::export_woomail( $wp_customize );
 			}
@@ -126,8 +125,6 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 			if ( isset( $_REQUEST['kt-woomail-import-template'] ) ) {
 				self::import_woomail_template( $wp_customize );
 			}
-
-
 		}
 
 		/**
@@ -141,13 +138,12 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 			if ( ! wp_verify_nonce( $_REQUEST['kt-woomail-export'], 'kt-woomail-exporting' ) ) {
 				return;
 			}
-			
 			$template	= 'kadence-woomail-designer';
 			$charset	= get_option( 'blog_charset' );
 			$data		= array(
-							  'template'  => $template,
-							  'options'	  => array()
-						  );
+				'template'  => $template,
+				'options'	  => array()
+			);
 
 			// Get options from the Customizer API.
 			$settings = $wp_customize->settings();
@@ -155,19 +151,19 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 			foreach ( $settings as $key => $setting ) {
 				if ( stristr( $key, 'kt_woomail' ) || in_array( $key, self::$woo_core_options ) ) {
 					// to prevent issues we don't want to export the order id.
-					if( $key != 'kt_woomail[preview_order_id]' ) {
+					if ( $key != 'kt_woomail[preview_order_id]' ) {
 						$data['options'][ $key ] = $setting->value();
 					}
 				}
 			}
 
-
 			// Set the download headers.
-			header( 'Content-disposition: attachment; filename=kadence-woomail-designer-export.dat' );
-			header( 'Content-Type: application/octet-stream; charset=' . $charset );
+			header( 'Content-disposition: attachment; filename=kadence-woomail-designer-export.json' );
+			header( 'Content-Type: application/json; charset=' . $charset );
 
 			// Serialize the export data.
-			echo base64_encode( serialize( $data ) );
+			echo wp_json_encode( $data );
+			// echo base64_encode( serialize( $data ) );
 
 			// Start the download.
 			die();
@@ -188,19 +184,17 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 			if ( ! function_exists( 'wp_handle_upload' ) ) {
 				require_once( ABSPATH . 'wp-admin/includes/file.php' );
 			}
-			
 			// Load the export/import option class.
 			require_once KT_WOOMAIL_PATH . 'includes/class-kadence-woomail-import-option.php';
-			
 			// Setup global vars.
 			global $wp_customize;
 			global $kt_woomail_import_error;
 
 			// Setup internal vars.
-			$kt_woomail_import_error	 = false;
-			$template	 = 'kadence-woomail-designer';
-			$overrides   = array( 'test_form' => false, 'test_type' => false, 'mimes' => array('dat' => 'text/plain') );
-			$file        = wp_handle_upload( $_FILES['kadence-woomail-import-file'], $overrides );
+			$kt_woomail_import_error = false;
+			$template                = 'kadence-woomail-designer';
+			$overrides               = array( 'test_form' => false, 'test_type' => false, 'mimes' => array( 'dat' => 'text/plain', 'json' => 'text/plain' ) );
+			$file                    = wp_handle_upload( $_FILES['kadence-woomail-import-file'], $overrides );
 
 			// Make sure we have an uploaded file.
 			if ( isset( $file['error'] ) ) {
@@ -211,25 +205,26 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 				$kt_woomail_import_error = __( 'Error importing settings! Please try again.', 'kadence-woocommerce-email-designer' );
 				return;
 			}
-
 			// Get the upload data.
 			$raw  = file_get_contents( $file['file'] );
-			//$data = @unserialize( $raw );
-			// $data = self::mb_unserialize( $raw );
-			$data = unserialize( base64_decode( $raw ) );
-			if ( 'array' != gettype( $data ) || ! isset( $data['template'] ) ) {
-				 $data = self::mb_unserialize( $raw );
+			$data = json_decode( $raw, true );
+			// Check for support of older export files. Will remove later.
+			if ( ( 'array' != gettype( $data ) || ! isset( $data['template'] ) ) && version_compare( phpversion(), '7.0.0' ) >= 0  ) {
+				$data = @unserialize( base64_decode( $raw ), array( 'allowed_classes' => false ) );
+				if ( 'array' != gettype( $data ) || ! isset( $data['template'] ) ) {
+					$data = self::mb_unserialize( $raw );
+				}
 			}
 			// Remove the uploaded file.
 			unlink( $file['file'] );
 
 			// Data checks.
 			if ( 'array' != gettype( $data ) ) {
-				$kt_woomail_import_error = __( 'Error importing settings! Please check that you uploaded an email customizer export file.', 'kadence-woocommerce-email-designer' );
+				$kt_woomail_import_error = __( 'Error importing settings! Please check that you uploaded the correct export file.', 'kadence-woocommerce-email-designer' );
 				return;
 			}
 			if ( ! isset( $data['template'] ) ) {
-				$kt_woomail_import_error = __( 'Error importing settings! Please check that you uploaded an email customizer export file.', 'kadence-woocommerce-email-designer' );
+				$kt_woomail_import_error = __( 'Error importing settings! Please check that you uploaded the correct export file.', 'kadence-woocommerce-email-designer' );
 				return;
 			}
 			if ( $data['template'] != $template ) {
@@ -239,20 +234,15 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 
 			// Import custom options.
 			if ( isset( $data['options'] ) ) {
-				
 				foreach ( $data['options'] as $option_key => $option_value ) {
-					
 					$option = new Kadence_Woomail_Import_Option( $wp_customize, $option_key, array(
 						'default'		=> '',
 						'type'			=> 'option',
 						'capability'	=> Kadence_Woomail_Designer::get_admin_capability(),
 					) );
-
 					$option->import( $option_value );
 				}
 			}
-
-
 			// Call the customize_save action.
 			do_action( 'customize_save', $wp_customize );
 
@@ -282,7 +272,7 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 
 				},
 			$string );
-			return @unserialize( $string2 );
+			return @unserialize( $string2, array( 'allowed_classes' => false ) );
 		}
 
 		/**
@@ -310,7 +300,7 @@ To reset your password, visit the following address:";s:31:"kt_woomail[email_loa
 			$prebuilt    = $_REQUEST['kt-woomail-prebuilt-template'];
 			$raw_data 	= self::prebuilt( $prebuilt );
 			
-			$data = @unserialize( $raw_data );
+			$data = @unserialize( $raw_data, array( 'allowed_classes' => false ));
 			
 			
 			// Data checks.

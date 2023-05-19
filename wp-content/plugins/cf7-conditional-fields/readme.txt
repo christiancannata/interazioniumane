@@ -5,8 +5,8 @@ Author: Jules Colle
 Website: http://bdwm.be
 Tags: wordpress, contact form 7, forms, conditional fields
 Requires at least: 5.0
-Tested up to: 6.0
-Stable tag: 2.1.5
+Tested up to: 6.2
+Stable tag: 2.3.8
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ Adds conditional logic to Contact Form 7.
 This plugin adds conditional logic to [Contact Form 7](https://wordpress.org/plugins/contact-form-7/).
 
 If you edit your CF7 form, you will see an additional tag called "Conditional fields Group". Everything you put between the start and end tag will be hidden by default.
-After you have added the field group(s), click Save and go to the "Conditional fields" tab to create one or more conditions that will make the group(s) appear.
+After you have added the field group(s), go to the "Conditional fields" tab to create one or more conditions that will make the group(s) appear.
 
 = How to use it =
 
@@ -121,7 +121,99 @@ The conditional fields javascript code is loaded during wp_footer, so a call to 
 
 Make sure to also update CF7 to the latest version! (Version 2.0 is only compatible with CF7 versions 5.4 and up. Version 1.9.16 is only compatible with CF7 version 5.3.*)
 
+= 2.2 =
+
+Make sure to also update CF7 to the latest version! (Version 2.2 is only compatible with CF7 versions 5.6 and up. Version 2.1.6 is only compatible with CF7 version 5.5.*)
+
+= 2.2.10 =
+
+Because the nature of the changes introduced in version 5.7 of Contact Form 7 you might need to make some manual changes to your forms and/or to your wp-config.php file. Please check the changelog. You could also wait for the release of version 5.7.1 of Contact Form 7. We hope the author will have address some of the issues by then.
+
+= 2.2.11 =
+
+Reverted autop-fix because it was causing addional errors. Bottom line: Make sure you are om Conditional Fields version 2.2.11 and CF7 version 5.6.4
+
 == Changelog ==
+
+= 2.3.8 (2023-04-23) =
+* Fully tested with Contact Form 7 version 5.7.6
+
+= 2.3.7 (2023-04-13) =
+* PRO: Fix obscure bug with disable_on_hide. Disabled fields didn't get recognized after calling reset() on the form element or after adding a repeater, causing conditions relying on disabled fields to malfunction.
+
+= 2.3.6 (2023-04-11) =
+* Fully tested with WP version 6.2
+
+= 2.3.5 (2023-03-24) =
+* Fully tested with Contact Form 7 version 5.7.5.1
+* Note: Previously it was possible to add a contact-form shortcode with only the title and not the ID. But since the last update of CF7 this seems to throw an error. Use the official shortcode provided by CF7 to prevent this.
+
+= 2.3.4 (2023-02-19) =
+* Fully tested with Contact Form 7 version 5.7.4
+
+= 2.3.3 (2023-01-26) =
+* PRO: Fix [summary]. CF7 5.7.3 introduced a tag-check function which [summary] did not pass.
+* Fully tested with Contact Form 7 version 5.7.3
+
+= 2.3.2 (2022-12-28) =
+* Fully tested with Contact Form 7 version 5.7.2
+
+= 2.3.1 (2022-12-17) =
+* PRO: fix problem with line breaks in multistep forms.
+
+= 2.3 (2022-12-16) =
+* Fully tested with Contact Form 7 version 5.7.1
+* PRO: Changed containing element for repeater and step controls from DIV to P. Otherwise CF7 would create additional P elements. 
+
+= 2.2.11 (2022-12-13) =
+* DO NOT UPDATE TO CONTACT FORM VERSION 5.7!! At least wait for version 5.7.1 before updating
+* Reverted autop-fix because it was causing addional errors.
+* Reverted compatibility declaration to CF7 version 5.6.4
+
+= 2.2.10 (2022-12-11) =
+* Fully tested with Contact Form 7 version 5.7 (when WP_DEBUG is false). Note: due to some errors in Contact Form 7 version 5.7 you will need to make sure WP_DEBUG is set to false in your wp-config.php file.
+* disable automatic insertion of paragraphs. Recent CF7 updates have changed the autop mechanism, causing too many problems with parsing the HTML code. If you still want to use autop (at your own risk) copy this code to your functions.php file: `add_filter( 'wpcf7_autop_or_not', '__return_true', 41, 0);`. Untill further notice Conditional Fields and Conditional Fields for Contact Form 7 will not use the automatic paragraph feature of CF7. Always try to write clean and valid HTML code. [GH issue 85](https://github.com/pwkip/contact-form-7-conditional-fields/issues/85)
+
+= 2.2.9 (2022-10-19) =
+* Fully tested with Contact Form 7 version 5.6.4
+* Add action hook: [wpcf7cf_step_completed](https://conditional-fields-cf7.bdwm.be/wpcf7cf_step_completed/)
+
+= 2.2.8 (2022-10-14) =
+* Fix acceptance field bug
+
+= 2.2.7 (2022-10-14) =
+* Remove unwanted whitespace between closing and opening group tags in mail messages.
+* Fix problems with acceptance fields [More info](https://conditional-fields-cf7.bdwm.be/acceptance/)
+* Redesign of [form tester](https://conditional-fields-cf7.bdwm.be/form-tester/)
+
+= 2.2.6 (2022-09-08) =
+* PRO: Fix issues with validation in nested repeaters [GH issue 92](https://github.com/pwkip/contact-form-7-conditional-fields/issues/92)
+* Fix error with optional file field in hidden group [GH issue 92](https://github.com/pwkip/contact-form-7-conditional-fields/issues/92)
+
+= 2.2.5 (2022-09-04) =
+* PRO: Fix bug with togglebutton
+
+= 2.2.4 (2022-09-01) =
+* Fully tested with Contact Form 7 version 5.6.3
+* JS code refactoring
+* Allow adding class names to group. For example: [group g class:my-class][/group]
+
+= 2.2.3 (2022-08-10) =
+* Fully tested with Contact Form 7 version 5.6.2
+* [Fix](https://wordpress.org/support/topic/only-textmode-with-smartgrid-plugin/#post-15895061) for smartgrid plugin
+* Some code refactoring
+
+= 2.2.2 (2022-08-07) =
+* Performance improvements
+
+= 2.2.1 (2022-07-21) =
+* Fully tested with Contact Form 7 version 5.6.1
+
+= 2.2 (2022-06-17) =
+* Make compatibile with Contact Form 7 version 5.6
+
+= 2.1.6 (2022-06-07) =
+* Fix bug: text view cleared after making a change to form code when there are more than 50 conditions.
 
 = 2.1.5 (2022-05-22) =
 * Fully tested with Contact Form 7 version 5.5.6.1

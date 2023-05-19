@@ -366,6 +366,28 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		}
 
 		/**
+		 * Checks if preset has any relevant filter for current product selection
+		 *
+		 * @return bool Whether preset has relevant filters.
+		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
+		 */
+		public function has_relevant_filters() {
+			$filters = $this->get_filters();
+
+			if ( ! $filters ) {
+				return false;
+			}
+
+			foreach ( $filters as $filter ) {
+				if ( $filter->is_relevant() ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/**
 		 * Returns true if preset needs pagination
 		 *
 		 * @return bool Whether preset needs pagination or not.
@@ -418,7 +440,7 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 				$results[] = yith_wcan_get_filter( $filter );
 			}
 
-			return $results;
+			return apply_filters( 'yith_wcan_get_filters', $results );
 		}
 
 		/**

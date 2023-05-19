@@ -1,12 +1,9 @@
 <?php
-
-namespace TheLion\LetsBox;
-
 /*
  * Plugin Name: WP Cloud Plugin Lets-Box (BOX)
  * Plugin URI: https://www.wpcloudplugins.com/plugins/lets-box-wordpress-plugin-for-box/
  * Description: Say hello to the most popular WordPress BOX plugin! Start using the Cloud even more efficiently by integrating it on your website.
- * Version: 1.14.6
+ * Version: 2.7.3
  * Author: WP Cloud Plugins
  * Author URI: https://www.wpcloudplugins.com
  * Text Domain: wpcloudplugins
@@ -15,8 +12,10 @@ namespace TheLion\LetsBox;
  * Requires PHP: 7.4
  */
 
+namespace TheLion\LetsBox;
+
 // SYSTEM SETTINGS
-define('LETSBOX_VERSION', '1.14.6');
+define('LETSBOX_VERSION', '2.7.3');
 define('LETSBOX_ROOTPATH', plugins_url('', __FILE__));
 define('LETSBOX_ROOTDIR', __DIR__);
 define('LETSBOX_SLUG', dirname(plugin_basename(__FILE__)).'/lets-box.php');
@@ -31,10 +30,16 @@ define('LETSBOX_CACHEURL', content_url().'/lets-box-cache/'.(LETSBOX_CACHE_SITE_
 
 require_once 'includes/Autoload.php';
 
-class Main
+class Core
 {
-    public $settings = false;
-    public $events;
+    public $settings;
+
+    /**
+     * The single instance of the class.
+     *
+     * @var Core
+     */
+    protected static $_instance;
 
     /**
      * Construct the plugin object.
@@ -42,14 +47,31 @@ class Main
     public function __construct()
     {
         $this->load_default_values();
+        $this->do_update();
 
         add_action('init', [$this, 'init']);
 
         if (is_admin() && (!defined('DOING_AJAX')
-                || (isset($_REQUEST['action']) && ('update-plugin' === $_REQUEST['action'])))
-                || wp_doing_cron()) {
-            $admin = new \TheLion\LetsBox\Admin($this);
+            || (isset($_REQUEST['action'])
+            && in_array(
+                $_REQUEST['action'],
+                [
+                    'letsbox-save-setting',
+                    'letsbox-check-account',
+                    'letsbox-reset-cache',
+                    'letsbox-backup',
+                    'letsbox-factory-reset',
+                    'letsbox-reset-statistics',
+                    'letsbox-revoke',
+                    'update-plugin',
+                ]
+            )))
+            || wp_doing_cron()) {
+            $admin = new \TheLion\LetsBox\Admin();
         }
+
+        // License
+        add_action('init', [__NAMESPACE__.'\\License', 'init']);
 
         // Shortcodes
         add_shortcode('letsbox', [$this, 'create_template']);
@@ -72,18 +94,7 @@ class Main
         add_action('plugins_loaded', [$this, 'load_integrations'], 9);
 
         // Hook to send notification emails when authorization is lost
-        add_action('letsbox_lost_authorisation_notification', [$this, 'send_lost_authorisation_notification']);
-
-        // Add user folder if needed
-        if (isset($this->settings['userfolder_oncreation']) && 'Yes' === $this->settings['userfolder_oncreation']) {
-            add_action('user_register', [$this, 'user_folder_create']);
-        }
-        if (isset($this->settings['userfolder_update']) && 'Yes' === $this->settings['userfolder_update']) {
-            add_action('profile_update', [$this, 'user_folder_update'], 100, 2);
-        }
-        if (isset($this->settings['userfolder_remove']) && 'Yes' === $this->settings['userfolder_remove']) {
-            add_action('delete_user', [$this, 'user_folder_delete']);
-        }
+        add_action('letsbox_lost_authorisation_notification', [$this, 'send_lost_authorisation_notification'], 10, 1);
 
         // Ajax calls
         add_action('wp_ajax_nopriv_letsbox-get-filelist', [$this, 'start_process']);
@@ -107,8 +118,8 @@ class Main
         add_action('wp_ajax_nopriv_letsbox-move-entries', [$this, 'start_process']);
         add_action('wp_ajax_letsbox-move-entries', [$this, 'start_process']);
 
-        add_action('wp_ajax_nopriv_letsbox-copy-entry', [$this, 'start_process']);
-        add_action('wp_ajax_letsbox-copy-entry', [$this, 'start_process']);
+        add_action('wp_ajax_nopriv_letsbox-copy-entries', [$this, 'start_process']);
+        add_action('wp_ajax_letsbox-copy-entries', [$this, 'start_process']);
 
         add_action('wp_ajax_nopriv_letsbox-edit-description-entry', [$this, 'start_process']);
         add_action('wp_ajax_letsbox-edit-description-entry', [$this, 'start_process']);
@@ -144,11 +155,6 @@ class Main
         add_action('wp_ajax_nopriv_letsbox-shorten-url', [$this, 'start_process']);
         add_action('wp_ajax_letsbox-shorten-url', [$this, 'start_process']);
 
-        add_action('wp_ajax_letsbox-reset-cache', [$this, 'start_process']);
-        add_action('wp_ajax_letsbox-factory-reset', [$this, 'start_process']);
-        add_action('wp_ajax_letsbox-reset-statistics', [$this, 'start_process']);
-        add_action('wp_ajax_letsbox-revoke', [$this, 'start_process']);
-
         add_action('wp_ajax_letsbox-getpopup', [$this, 'get_popup']);
         add_action('wp_ajax_letsbox-previewshortcode', [$this, 'preview_shortcode']);
 
@@ -168,11 +174,25 @@ class Main
         // add settings link on plugin page
         add_filter('plugin_row_meta', [$this, 'add_settings_link'], 10, 2);
 
-        if (isset($this->settings['log_events']) && 'Yes' === $this->settings['log_events']) {
-            $this->events = new \TheLion\LetsBox\Events($this);
+        define('LETSBOX_ICON_SET', $this->settings['icon_set']);
+    }
+
+    /**
+     * Core WP Cloud Plugin Instance.
+     *
+     * Ensures only one instance is loaded or can be loaded.
+     *
+     * @return Core - Core instance
+     *
+     * @static
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
         }
 
-        define('LETSBOX_ICON_SET', $this->settings['icon_set']);
+        return self::$_instance;
     }
 
     public function init()
@@ -180,11 +200,40 @@ class Main
         // Localize
         $i18n_dir = dirname(plugin_basename(__FILE__)).'/languages/';
         load_plugin_textdomain('wpcloudplugins', false, $i18n_dir);
+
+        // Add user folder if needed
+        if (isset($this->settings['userfolder_oncreation']) && 'Yes' === $this->settings['userfolder_oncreation']) {
+            add_action('user_register', [$this, 'user_folder_create']);
+        }
+        if (isset($this->settings['userfolder_update']) && 'Yes' === $this->settings['userfolder_update']) {
+            add_action('profile_update', [$this, 'user_folder_update'], 100, 2);
+        }
+        if (isset($this->settings['userfolder_remove']) && 'Yes' === $this->settings['userfolder_remove']) {
+            add_action('delete_user', [$this, 'user_folder_delete']);
+        }
+
+        // Load Event hooks
+        new Events();
     }
 
-    public function can_run_plugin()
+    public static function can_run_plugin()
     {
-        if ((version_compare(PHP_VERSION, '7.4') < 0) || (!function_exists('curl_init')) || (!defined('CURL_SSLVERSION_TLSv1_1') && !defined('CURL_SSLVERSION_TLSv1_2'))) {
+        // Check minimum PHP version
+        if (version_compare(PHP_VERSION, '7.4') < 0) {
+            return false;
+        }
+
+        // Check if cURL is present and its functions can be used
+        $disabled_php_functions = explode(',', ini_get('disable_functions'));
+        if (!function_exists('curl_init') || in_array('curl_init', $disabled_php_functions)) {
+            return false;
+        }
+
+        if (!function_exists('curl_exec') || in_array('curl_exec', $disabled_php_functions)) {
+            return false;
+        }
+
+        if (!defined('CURL_SSLVERSION_TLSv1_1') && !defined('CURL_SSLVERSION_TLSv1_2')) {
             return false;
         }
 
@@ -201,7 +250,7 @@ class Main
             }
         }
 
-        if (!file_exists(LETSBOX_CACHEDIR.'.htaccess')) {
+        if (!file_exists(LETSBOX_CACHEDIR.'.htaccess') && false === strpos(strtolower($_SERVER['SERVER_SOFTWARE']), 'microsoft-iis')) {
             return copy(LETSBOX_ROOTDIR.'/cache/.htaccess', LETSBOX_CACHEDIR.'.htaccess');
         }
 
@@ -211,9 +260,9 @@ class Main
     public function load_default_values()
     {
         $this->settings = get_option('lets_box_settings', [
+            'accounts' => [],
             'box_app_client_id' => '',
             'box_app_client_secret' => '',
-            'box_account_type' => '',
             'purchase_code' => '',
             'permissions_edit_settings' => ['administrator'],
             'permissions_link_users' => ['administrator', 'editor'],
@@ -225,12 +274,15 @@ class Main
             'custom_css' => '',
             'loaders' => [],
             'colors' => [],
+            'layout_border_radius' => '10',
+            'layout_gap' => '10',
             'google_analytics' => 'No',
             'loadimages' => 'boxthumbnail',
             'link_scope' => 'open',
             'lightbox_skin' => 'metro-black',
             'lightbox_path' => 'horizontal',
             'lightbox_rightclick' => 'No',
+            'lightbox_thumbnails' => 'Yes',
             'lightbox_showcaption' => 'always',
             'lightbox_showheader' => 'always',
             'mediaplayer_skin' => 'Default_Skin',
@@ -239,15 +291,17 @@ class Main
             'mediaplayer_ads_skipable' => 'Yes',
             'mediaplayer_ads_skipable_after' => '5',
             'userfolder_name' => '%user_login% (%user_email%)',
+            'userfolder_name_guest_prefix' => esc_html__('Guests', 'wpcloudplugins').' - ',
             'userfolder_oncreation' => 'Yes',
             'userfolder_onfirstvisit' => 'No',
             'userfolder_update' => 'Yes',
             'userfolder_remove' => 'Yes',
             'userfolder_backend' => 'No',
-            'userfolder_backend_auto_root' => '',
+            'userfolder_backend_auto_root' => [],
             'userfolder_noaccess' => '',
             'notification_from_name' => '',
             'notification_from_email' => '',
+            'notification_replyto_email' => '',
             'download_template_subject' => '',
             'download_template_subject_zip' => '',
             'download_template' => '',
@@ -258,6 +312,7 @@ class Main
             'filelist_template' => '',
             'manage_permissions' => 'Yes',
             'lostauthorization_notification' => get_site_option('admin_email'),
+            'remember_last_location' => 'Yes',
             'gzipcompression' => 'No',
             'always_load_scripts' => 'No',
             'nonce_validation' => 'Yes',
@@ -266,6 +321,8 @@ class Main
             'bitly_login' => '',
             'bitly_apikey' => '',
             'shortest_apikey' => '',
+            'tinyurl_apikey' => '',
+            'tinyurl_domain' => '',
             'rebrandly_apikey' => '',
             'rebrandly_domain' => '',
             'rebrandly_workspace' => '',
@@ -276,13 +333,16 @@ class Main
             'event_summary' => 'No',
             'event_summary_period' => 'daily',
             'event_summary_recipients' => get_site_option('admin_email'),
+            'webhook_endpoint_url' => '',
+            'webhook_endpoint_secret' => '',
             'uninstall_reset' => 'Yes',
         ]);
 
-        if (false === $this->settings) {
-            return;
-        }
+        return $this->settings;
+    }
 
+    public function do_update()
+    {
         $updated = false;
         // Set default values for new settings
         if (empty($this->settings['box_app_client_id']) && isset($this->settings['box_app_key'])) {
@@ -294,11 +354,6 @@ class Main
         if (empty($this->settings['box_app_client_secret']) && isset($this->settings['box_app_secret'])) {
             $this->settings['box_app_client_secret'] = $this->settings['box_app_secret'];
             unset($this->settings['box_app_secret']);
-            $updated = true;
-        }
-
-        if (empty($this->settings['box_account_type'])) {
-            $this->settings['box_account_type'] = null;
             $updated = true;
         }
 
@@ -381,6 +436,11 @@ class Main
             $updated = true;
         }
 
+        if (empty($this->settings['lostauthorization_notification'])) {
+            $this->settings['lostauthorization_notification'] = get_site_option('admin_email');
+            $updated = true;
+        }
+
         if (empty($this->settings['gzipcompression'])) {
             $this->settings['gzipcompression'] = 'No';
             $updated = true;
@@ -426,16 +486,17 @@ class Main
             $updated = true;
         }
 
-        if (!isset($this->settings['userfolder_backend_auto_root'])) {
-            $this->settings['userfolder_backend_auto_root'] = '';
+        if (!is_array($this->settings['userfolder_backend_auto_root'])) {
+            $this->settings['userfolder_backend_auto_root'] = [];
             $updated = true;
         }
 
         if (empty($this->settings['colors'])) {
             $this->settings['colors'] = [
                 'style' => 'light',
-                'background' => '#f2f2f2',
-                'accent' => '#522058',
+                'background' => '#f9f9f9',
+                'background-dark' => '#333333',
+                'accent' => '#590e54',
                 'black' => '#222',
                 'dark1' => '#666',
                 'dark2' => '#999',
@@ -443,6 +504,19 @@ class Main
                 'light1' => '#fcfcfc',
                 'light2' => '#e8e8e8',
             ];
+            $updated = true;
+        }
+        if (in_array($this->settings['colors']['background'], ['rgb(242,242,242)', '#f2f2f2'])) {
+            $this->settings['colors']['background'] = '#f9f9f9';
+            $updated = true;
+        }
+
+        if (!isset($this->settings['layout_border_radius']) || '' == $this->settings['layout_border_radius']) {
+            $this->settings['layout_border_radius'] = '10';
+            $updated = true;
+        }
+        if (!isset($this->settings['layout_gap']) || '' == $this->settings['layout_gap']) {
+            $this->settings['layout_gap'] = '10';
             $updated = true;
         }
 
@@ -476,8 +550,18 @@ class Main
             $updated = true;
         }
 
+        if (empty($this->settings['colors']['background-dark'])) {
+            $this->settings['colors']['background-dark'] = '#333333';
+            $updated = true;
+        }
+
         if (empty($this->settings['lightbox_rightclick'])) {
             $this->settings['lightbox_rightclick'] = 'No';
+            $updated = true;
+        }
+
+        if (empty($this->settings['lightbox_thumbnails'])) {
+            $this->settings['lightbox_thumbnails'] = 'Yes';
             $updated = true;
         }
 
@@ -562,6 +646,17 @@ class Main
             $updated = true;
         }
 
+        if (!isset($this->settings['webhook_endpoint_url'])) {
+            $this->settings['webhook_endpoint_url'] = '';
+            $updated = true;
+        }
+
+        if (!isset($this->settings['webhook_endpoint_secret'])) {
+            require_once ABSPATH.'wp-includes/pluggable.php';
+            $this->settings['webhook_endpoint_secret'] = wp_generate_password(16);
+            $updated = true;
+        }
+
         if (empty($this->settings['userfolder_noaccess'])) {
             $this->settings['userfolder_noaccess'] = "<h2>No Access</h2>
 
@@ -607,6 +702,16 @@ class Main
             $updated = true;
         }
 
+        if (!isset($this->settings['userfolder_name_guest_prefix'])) {
+            $this->settings['userfolder_name_guest_prefix'] = esc_html__('Guests', 'wpcloudplugins').' - ';
+            $updated = true;
+        }
+
+        if (!isset($this->settings['remember_last_location'])) {
+            $this->settings['remember_last_location'] = 'Yes';
+            $updated = true;
+        }
+
         $auth_key = get_site_option('wpcp-letsbox-auth_key');
         if (false === $auth_key) {
             require_once ABSPATH.'wp-includes/pluggable.php';
@@ -622,9 +727,13 @@ class Main
 
         $version = get_option('lets_box_version');
 
-        if (version_compare($version, '1.7') < 0) {
+        if (version_compare($version, '2.0') < 0) {
             // Install Event Database
-            $this->get_events()->install_database();
+            Events::install_database();
+        }
+
+        if (version_compare($version, '2.1.1') < 0) {
+            Events::update_2_1_1();
         }
 
         if (false !== $version) {
@@ -642,24 +751,53 @@ class Main
                 $this->settings['mediaplayer_skin'] = 'Default_Skin';
                 update_option('lets_box_settings', $this->settings);
             }
+
+            if (version_compare($version, '2.0') < 0) {
+                // Multi account support requires changes in account and access_token storage
+                if (!isset($this->settings['accounts'])) {
+                    $this->settings['accounts'] = [];
+                }
+                update_option('lets_box_settings', $this->settings);
+                add_action('plugins_loaded', [__NAMESPACE__.'\Accounts', 'upgrade_from_single'], 1);
+                $this->settings = get_option('lets_box_settings');
+            }
         }
 
         // Update Version number
         if (LETSBOX_VERSION !== $version) {
-            delete_transient('letsbox_activation_validated');
-            delete_site_transient('letsbox_activation_validated');
+            // Update License information
+            add_action('wp_loaded', [__NAMESPACE__.'\\License', 'reset']);
 
             // Clear Cache
-            $this->get_processor()->reset_complete_cache();
-
-            // Reset custom CSS
-            CSS::reset_custom_css();
+            Processor::reset_complete_cache();
 
             // Clear WordPress Cache
-            Helpers::purge_cache_others();
+            add_action('wp_loaded', [__NAMESPACE__.'\\Helpers', 'purge_cache_others']);
 
             update_option('lets_box_version', LETSBOX_VERSION);
         }
+    }
+
+    public static function get_setting($key)
+    {
+        if (1 == preg_match('/(.*?)\[(.*?)\]/', $key, $keys)) {
+            $setting = self::get_setting($keys[1]);
+
+            if (empty($setting) || empty($setting[$keys[2]])) {
+                return null;
+            }
+
+            return $setting[$keys[2]];
+        }
+
+        return array_key_exists($key, Core::instance()->settings) ? Core::instance()->settings[$key] : null;
+    }
+
+    public static function save_setting($key, $value)
+    {
+        Core::instance()->settings[$key] = $value;
+
+        return update_option('lets_box_settings', Core::instance()->settings);
     }
 
     public function add_settings_link($links, $file)
@@ -681,7 +819,13 @@ class Main
 
     public function load_scripts()
     {
-        if ('' !== $this->settings['recaptcha_sitekey']) {
+        if (defined('LETSBOX_SCRIPTS_LOADED')) {
+            return;
+        }
+
+        $version = LETSBOX_VERSION;
+
+        if (!is_admin() && '' !== $this->settings['recaptcha_sitekey']) {
             $url = add_query_arg(
                 [
                     'render' => $this->settings['recaptcha_sitekey'],
@@ -698,21 +842,34 @@ class Main
         wp_register_script('jQuery.iframe-transport', plugins_url('vendors/jquery-file-upload/js/jquery.iframe-transport.js', __FILE__), ['jquery', 'jquery-ui-widget'], false, true);
         wp_register_script('jQuery.fileupload-lb', plugins_url('vendors/jquery-file-upload/js/jquery.fileupload.js', __FILE__), ['jquery', 'jquery-ui-widget'], false, true);
         wp_register_script('jQuery.fileupload-process', plugins_url('vendors/jquery-file-upload/js/jquery.fileupload-process.js', __FILE__), ['jquery', 'jquery-ui-widget'], false, true);
-        wp_register_script('LetsBox.UploadBox', plugins_url('includes/js/UploadBox.min.js?v='.LETSBOX_VERSION, __FILE__), ['jQuery.iframe-transport', 'jQuery.fileupload-lb', 'jQuery.fileupload-process', 'jquery', 'jquery-ui-widget', 'WPCloudplugin.Libraries'], LETSBOX_VERSION, true);
+        wp_register_script('LetsBox.UploadBox', plugins_url('includes/js/UploadBox.min.js?v='.$version, __FILE__), ['jQuery.iframe-transport', 'jQuery.fileupload-lb', 'jQuery.fileupload-process', 'jquery', 'jquery-ui-widget', 'WPCloudplugin.Libraries'], $version, true);
 
-        wp_register_script('WPCloudplugin.Libraries', plugins_url('vendors/library.min.js?v='.LETSBOX_VERSION, __FILE__), ['WPCloudPlugins.Polyfill', 'jquery'], LETSBOX_VERSION, true);
-        wp_register_script('Tagify', plugins_url('vendors/tagify/tagify.min.js', __FILE__), ['WPCloudPlugins.Polyfill'], LETSBOX_VERSION, true);
-        wp_register_script('LetsBox', plugins_url('includes/js/Main.min.js?v='.LETSBOX_VERSION, __FILE__), ['jquery', 'jquery-ui-widget', 'WPCloudplugin.Libraries'], LETSBOX_VERSION, true);
+        wp_register_script('LetsBox.Carousel', plugins_url('includes/js/Carousel.min.js?v='.$version, __FILE__), ['jquery', 'jquery-ui-widget', 'LetsBox'], $version, true);
 
-        wp_register_script('LetsBox.DocumentEmbedder', plugins_url('includes/js/DocumentEmbedder.min.js', __FILE__), ['jquery'], LETSBOX_VERSION, true);
-        wp_register_script('LetsBox.DocumentLinker', plugins_url('includes/js/DocumentLinker.min.js', __FILE__), ['jquery'], LETSBOX_VERSION, true);
-        wp_register_script('LetsBox.ShortcodeBuilder', plugins_url('includes/js/ShortcodeBuilder.min.js', __FILE__), ['Tagify', 'jquery-ui-accordion', 'jquery'], LETSBOX_VERSION, true);
+        wp_register_script('WPCloudplugin.Libraries', plugins_url('vendors/library.min.js?v='.$version, __FILE__), ['WPCloudPlugins.Polyfill', 'jquery'], $version, true);
+        wp_register_script('Tagify', plugins_url('vendors/tagify/tagify.min.js', __FILE__), ['WPCloudPlugins.Polyfill'], $version, true);
+        wp_register_script('LetsBox', plugins_url('includes/js/Main.min.js?v='.$version, __FILE__), ['jquery', 'jquery-ui-widget', 'WPCloudplugin.Libraries'], $version, true);
 
         // Scripts for the Admin Dashboard
-        wp_register_script('LetsBox.Admin', plugins_url('includes/js/Admin.min.js', __FILE__), ['jquery'], LETSBOX_VERSION, true);
-        wp_register_script('LetsBox.Datatables', plugins_url('vendors/datatables/datatables.min.js', __FILE__), ['jquery'], LETSBOX_VERSION, true);
-        wp_register_script('LetsBox.ChartJs', plugins_url('vendors/chartjs/chartjs.min.js', __FILE__), ['jquery', 'jquery-ui-datepicker'], LETSBOX_VERSION, true);
-        wp_register_script('LetsBox.Dashboard', plugins_url('includes/js/Dashboard.min.js', __FILE__), ['LetsBox.Datatables', 'LetsBox.ChartJs', 'jquery-ui-widget', 'WPCloudplugin.Libraries'], LETSBOX_VERSION, true);
+        wp_register_script('LetsBox.AdminUI', plugins_url('includes/js/AdminUI.min.js', __FILE__), ['jquery', 'jquery-effects-fade', 'jquery-ui-widget', 'Tagify', 'WPCloudplugin.Libraries'], $version, true);
+
+        // -Settings
+        wp_register_script('wp-color-picker-alpha', LETSBOX_ROOTPATH.'/vendors/wp-color-picker-alpha/wp-color-picker-alpha.min.js', ['wp-color-picker'], '3.0.0', true);
+        wp_register_script('LetsBox.AdminSettings', plugins_url('includes/js/Admin.min.js', __FILE__), ['LetsBox', 'wp-color-picker-alpha', 'LetsBox.AdminUI'], $version, true);
+
+        // -Dashboard
+        wp_register_script('Flatpickr', plugins_url('vendors/flatpickr/flatpickr.min.js', __FILE__), [], $version, true);
+        wp_register_script('WPCloudplugin.Datatables', plugins_url('vendors/datatables/datatables.min.js', __FILE__), ['jquery'], $version, true);
+        wp_register_script('WPCloudplugin.ChartJs', plugins_url('vendors/chartjs/chartjs.min.js', __FILE__), ['jquery'], $version, true);
+        wp_register_script('LetsBox.Dashboard', plugins_url('includes/js/Dashboard.min.js', __FILE__), ['Flatpickr', 'WPCloudplugin.Datatables', 'WPCloudplugin.ChartJs', 'LetsBox.AdminUI'], $version, true);
+
+        // -Shortcode Builder
+        wp_register_script('LetsBox.DocumentEmbedder', plugins_url('includes/js/DocumentEmbedder.min.js', __FILE__), ['LetsBox.AdminUI'], $version, true);
+        wp_register_script('LetsBox.DocumentLinker', plugins_url('includes/js/DocumentLinker.min.js', __FILE__), ['LetsBox.AdminUI'], $version, true);
+        wp_register_script('LetsBox.ShortcodeBuilder', plugins_url('includes/js/ShortcodeBuilder.min.js', __FILE__), ['LetsBox.AdminUI'], $version, true);
+
+        // -Link Private Folders
+        wp_register_script('LetsBox.PrivateFolders', plugins_url('includes/js/LinkUsers.min.js', __FILE__), ['LetsBox.AdminUI', 'LetsBox'], $version, true);
 
         $post_max_size_bytes = min(Helpers::return_bytes(ini_get('post_max_size')), Helpers::return_bytes(ini_get('upload_max_filesize')));
 
@@ -723,13 +880,16 @@ class Main
             'cookie_path' => COOKIEPATH,
             'cookie_domain' => COOKIE_DOMAIN,
             'is_mobile' => wp_is_mobile(),
-            'recaptcha' => is_admin() ? '' : $this->settings['recaptcha_sitekey'],
+            'is_rtl' => is_rtl(),
+            'recaptcha' => is_admin() || (isset($_REQUEST['elementor-preview'])) ? '' : $this->settings['recaptcha_sitekey'],
             'shortlinks' => 'None' === $this->settings['shortlinks'] ? false : $this->settings['shortlinks'],
+            'remember_last_location' => 'Yes' === $this->settings['remember_last_location'],
             'content_skin' => $this->settings['colors']['style'],
             'icons_set' => $this->settings['icon_set'],
             'lightbox_skin' => $this->settings['lightbox_skin'],
             'lightbox_path' => $this->settings['lightbox_path'],
             'lightbox_rightclick' => $this->settings['lightbox_rightclick'],
+            'lightbox_thumbnails' => $this->settings['lightbox_thumbnails'],
             'lightbox_showheader' => $this->settings['lightbox_showheader'],
             'lightbox_showcaption' => $this->settings['lightbox_showcaption'],
             'post_max_size' => $post_max_size_bytes,
@@ -742,7 +902,7 @@ class Main
             'upload_nonce' => wp_create_nonce('letsbox-upload-file'),
             'delete_nonce' => wp_create_nonce('letsbox-delete-entries'),
             'rename_nonce' => wp_create_nonce('letsbox-rename-entry'),
-            'copy_nonce' => wp_create_nonce('letsbox-copy-entry'),
+            'copy_nonce' => wp_create_nonce('letsbox-copy-entries'),
             'move_nonce' => wp_create_nonce('letsbox-move-entries'),
             'log_nonce' => wp_create_nonce('letsbox-event-log'),
             'description_nonce' => wp_create_nonce('letsbox-edit-description-entry'),
@@ -774,7 +934,7 @@ class Main
             'str_delete_title' => esc_html__('Delete', 'wpcloudplugins'),
             'str_move_title' => esc_html__('Move', 'wpcloudplugins'),
             'str_copy_title' => esc_html__('Copy', 'wpcloudplugins'),
-            'str_copy' => esc_html__('Name of the copy:', 'wpcloudplugins'),
+            'str_copy' => esc_html__('New name:', 'wpcloudplugins'),
             'str_save_title' => esc_html__('Save', 'wpcloudplugins'),
             'str_zip_title' => esc_html__('Create zip file', 'wpcloudplugins'),
             'str_copy_to_clipboard_title' => esc_html__('Copy to clipboard', 'wpcloudplugins'),
@@ -786,13 +946,14 @@ class Main
             'str_add_description' => esc_html__('Add a description...', 'wpcloudplugins'),
             'str_module_error_title' => esc_html__('Configuration problem', 'wpcloudplugins'),
             'str_missing_location' => esc_html__('This module is currently linked to a cloud account and/or folder which is no longer accessible by the plugin. To resolve this, please relink the module again to the correct folder.', 'wpcloudplugins'),
-            'str_no_filelist' => esc_html__('Oops! The content cannot be loaded at this moment. Please try again...', 'wpcloudplugins'),
+            'str_no_filelist' => esc_html__('No content received. Try to reload this page.', 'wpcloudplugins'),
             'str_recaptcha_failed' => esc_html__("Oops! We couldn't verify that you're not a robot :(. Please try refreshing the page.", 'wpcloudplugins'),
             'str_addnew_title' => esc_html__('Create', 'wpcloudplugins'),
             'str_addnew_name' => esc_html__('Enter name', 'wpcloudplugins'),
             'str_addnew' => esc_html__('Add to folder', 'wpcloudplugins'),
             'str_zip_nofiles' => esc_html__('No files found or selected', 'wpcloudplugins'),
             'str_zip_createzip' => esc_html__('Creating zip file', 'wpcloudplugins'),
+            'str_zip_selected' => esc_html__('(x) selected', 'wpcloudplugins'),
             'str_share_link' => esc_html__('Share file', 'wpcloudplugins'),
             'str_shareon' => esc_html__('Share on', 'wpcloudplugins'),
             'str_create_shared_link' => esc_html__('Creating shared link...', 'wpcloudplugins'),
@@ -809,7 +970,7 @@ class Main
             'str_items' => esc_html__('Items', 'wpcloudplugins'),
             'str_max_file_size' => esc_html__('File is too large', 'wpcloudplugins'),
             'str_min_file_size' => esc_html__('File is too small', 'wpcloudplugins'),
-            'str_iframe_loggedin' => "<div class='empty_iframe'><h1>".esc_html__('Still Waiting?', 'wpcloudplugins').'</h1><span>'.esc_html__("If the document doesn't open, you are probably trying to access a protected file which requires a login.", 'wpcloudplugins')." <strong><a href='#' target='_blank' class='empty_iframe_link'>".esc_html__('Try to open the file in a new window.', 'wpcloudplugins').'</a></strong></span></div>',
+            'str_iframe_loggedin' => "<div class='empty_iframe'><div class='empty_iframe_container'><div class='empty_iframe_img'></div><h1>".esc_html__('Still Waiting?', 'wpcloudplugins').'</h1><span>'.esc_html__("If the document doesn't open, you are probably trying to access a protected file which requires a login.", 'wpcloudplugins')." <strong><a href='#' target='_blank' class='empty_iframe_link'>".esc_html__('Try to open the file in a new window.', 'wpcloudplugins').'</a></strong></span></div></div>',
         ];
 
         $localize_dashboard = [
@@ -825,18 +986,17 @@ class Main
 
         $localize_admin = [
             'ajax_url' => LETSBOX_ADMIN_URL,
-            'update_url' => admin_url('update-core.php'),
-            'documentation_url' => LETSBOX_ROOTPATH.'/_documentation/index.html',
             'activate_url' => 'https://www.wpcloudplugins.com/updates/activate.php?init=1&client_url='.strtr(base64_encode($location), ' + /=', '-_~').'&plugin_id=8204640',
             'admin_nonce' => wp_create_nonce('letsbox-admin-action'),
+            'is_network' => is_network_admin(),
         ];
 
         wp_localize_script('LetsBox', 'LetsBox_vars', $localize);
-        wp_localize_script('LetsBox.Dashboard', 'LetsBox_Dashboard_vars', $localize_dashboard);
-        wp_localize_script('LetsBox.Admin', 'LetsBox_Admin_vars', $localize_admin);
+        wp_localize_script('LetsBox.Dashboard', 'LetsBox_Report_Vars', $localize_dashboard);
+        wp_localize_script('LetsBox.AdminSettings', 'LetsBox_Admin_vars', $localize_admin);
 
         if ('Yes' === $this->settings['always_load_scripts']) {
-            $mediaplayer = $this->get_processor()->load_mediaplayer($this->settings['mediaplayer_skin']);
+            $mediaplayer = Processor::instance()->load_mediaplayer($this->settings['mediaplayer_skin']);
 
             if (!empty($mediaplayer)) {
                 $mediaplayer->load_scripts();
@@ -851,40 +1011,48 @@ class Main
 
             wp_enqueue_script('LetsBox');
         }
+
+        define('LETSBOX_SCRIPTS_LOADED', true);
     }
 
     public function load_styles()
     {
+        if (defined('LETSBOX_STYLES_LOADED')) {
+            return;
+        }
+
         $is_rtl_css = (is_rtl() ? '-rtl' : '');
+
+        $version = LETSBOX_VERSION;
 
         $skin = $this->settings['lightbox_skin'];
         wp_register_style('ilightbox', plugins_url('vendors/iLightBox/css/ilightbox.css', __FILE__));
         wp_register_style('ilightbox-skin-letsbox', plugins_url('vendors/iLightBox/'.$skin.'-skin/skin.css', __FILE__));
 
-        wp_register_style('Eva-Icons', plugins_url('vendors/eva-icons/eva-icons.min.css', __FILE__), false, LETSBOX_VERSION);
+        wp_register_style('Eva-Icons', plugins_url('vendors/eva-icons/eva-icons.min.css', __FILE__), false, $version);
 
-        $custom_css = new CSS($this->settings);
-        $custom_css->register_style();
+        wp_register_style('LetsBox', plugins_url("css/main.min{$is_rtl_css}.css", __FILE__), ['Eva-Icons'], $version);
+        wp_add_inline_style('LetsBox', CSS::generate_inline_css());
 
-        wp_register_style('LetsBox', plugins_url("css/main.min{$is_rtl_css}.css", __FILE__), ['Eva-Icons'], LETSBOX_VERSION);
-        wp_register_style('LetsBox.ShortcodeBuilder', plugins_url("css/tinymce.min{$is_rtl_css}.css", __FILE__), null, LETSBOX_VERSION);
-
-        // Scripts for the Admin Dashboard
-        wp_register_style('LetsBox.Datatables', plugins_url('vendors/datatables/datatables.min.css', __FILE__), ['LetsBox.ShortcodeBuilder'], LETSBOX_VERSION);
+        // Styles for the Admin Dashboard
+        wp_register_style('WPCloudPlugins.Admin.font', 'https://rsms.me/inter/inter.css');
+        wp_register_style('WPCloudPlugins.AdminUI', plugins_url("css/admin.min{$is_rtl_css}.css", __FILE__), ['WPCloudPlugins.Admin.font', 'wp-color-picker', 'WPCloudPlugins.Datatables', 'Flatpickr', 'Eva-Icons'], $version);
+        wp_register_style('WPCloudPlugins.Datatables', plugins_url('vendors/datatables/datatables.min.css', __FILE__), [], $version);
+        wp_register_style('Flatpickr', plugins_url('vendors/flatpickr/flatpickr.min.css', __FILE__), [], $version);
 
         if ('Yes' === $this->settings['always_load_scripts']) {
             wp_enqueue_style('ilightbox');
             wp_enqueue_style('ilightbox-skin-letsbox');
             wp_enqueue_style('Eva-Icons');
-            wp_enqueue_style('LetsBox.CustomStyle');
+            wp_enqueue_style('LetsBox');
         }
+
+        define('LETSBOX_STYLES_LOADED', true);
     }
 
     public function load_integrations()
     {
         require_once 'includes/integrations/load.php';
-
-        new \TheLion\LetsBox\Integrations\Integrations($this);
     }
 
     public function start_process()
@@ -902,15 +1070,11 @@ class Main
             case 'letsbox-create-zip':
             case 'letsbox-create-link':
             case 'letsbox-embedded':
-            case 'letsbox-revoke':
-            case 'letsbox-reset-cache':
-            case 'letsbox-factory-reset':
-            case 'letsbox-reset-statistics':
             case 'letsbox-get-gallery':
             case 'letsbox-upload-file':
             case 'letsbox-delete-entries':
             case 'letsbox-rename-entry':
-            case 'letsbox-copy-entry':
+            case 'letsbox-copy-entries':
             case 'letsbox-move-entries':
             case 'letsbox-edit-description-entry':
             case 'letsbox-create-entry':
@@ -918,10 +1082,12 @@ class Main
             case 'letsbox-shorten-url':
             case 'letsbox-thumbnail':
             case 'letsbox-getads':
-                $this->get_processor()->start_process();
+                Processor::instance()->start_process();
 
                 break;
         }
+
+        exit;
     }
 
     public function check_recaptcha()
@@ -929,7 +1095,7 @@ class Main
         if (!isset($_REQUEST['action']) || !isset($_REQUEST['response'])) {
             echo json_encode(['verified' => false]);
 
-            exit();
+            exit;
         }
 
         check_ajax_referer($_REQUEST['action']);
@@ -950,7 +1116,7 @@ class Main
             echo json_encode(['verified' => false, 'msg' => $resp->getErrorCodes()]);
         }
 
-        exit();
+        exit;
     }
 
     public function create_template($atts = [])
@@ -967,18 +1133,18 @@ class Main
             return '&#9888; <strong>'.esc_html__('This content is not available at this moment unfortunately. Contact the administrators of this site so they can check the plugin involved.', 'wpcloudplugins').'</strong>';
         }
 
-        if (is_null($this->get_purchase_code())) {
+        if (!License::is_valid()) {
             return '&#9888; <strong>'.esc_html__('This content is not available at this moment unfortunately. Contact the administrators of this site so they can check the plugin involved.', 'wpcloudplugins').'</strong>';
         }
 
-        return $this->get_processor()->create_from_shortcode($atts);
+        return Processor::instance()->create_from_shortcode($atts);
     }
 
     public function get_popup()
     {
         switch ($_REQUEST['type']) {
             case 'shortcodebuilder':
-                include LETSBOX_ROOTDIR.'/templates/admin/shortcode_builder.php';
+                ShortcodeBuilder::instance()->render();
 
                 break;
 
@@ -993,7 +1159,7 @@ class Main
                 break;
         }
 
-        exit();
+        exit;
     }
 
     public function preview_shortcode()
@@ -1002,28 +1168,58 @@ class Main
 
         include LETSBOX_ROOTDIR.'/templates/admin/shortcode_previewer.php';
 
-        exit();
+        exit;
     }
 
     public function embed_image()
     {
-        $entryid = isset($_REQUEST['id']) ? $_REQUEST['id'] : null;
+        $entryid = $_REQUEST['id'] ?? null;
 
         if (empty($entryid)) {
             exit('-1');
         }
 
-        $this->get_processor()->embed_image($entryid);
+        if (!isset($_REQUEST['account_id'])) {
+            // Fallback for old embed urls without account info
+            if (empty($account)) {
+                $primary_account = Accounts::instance()->get_primary_account();
+                if (false === $primary_account) {
+                    exit('-1');
+                }
+                $account_id = $primary_account->get_id();
+            }
+        } else {
+            $account_id = $_REQUEST['account_id'];
+        }
 
-        exit();
+        Processor::instance()->embed_image($entryid);
+
+        exit;
     }
 
-    public function send_lost_authorisation_notification()
+    public function send_lost_authorisation_notification($account_id = null)
     {
-        $subject = get_bloginfo().' | '.sprintf(esc_html__('ACTION REQUIRED: WP Cloud Plugin lost authorization to %s account', 'wpcloudplugins'), 'Box');
-        $colors = $this->get_processor()->get_setting('colors');
+        $account = Accounts::instance()->get_account_by_id($account_id);
+
+        // If account isn't longer present in the account list, remove it from the CRON job
+        if (empty($account)) {
+            if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification', ['account_id' => $account_id]))) {
+                wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification', ['account_id' => $account_id]);
+            }
+
+            return false;
+        }
+
+        $subject = get_bloginfo().' | '.sprintf(esc_html__('ACTION REQUIRED: WP Cloud Plugin lost authorization to %s account', 'wpcloudplugins'), 'Box').':'.(!empty($account) ? $account->get_email() : '');
+        $colors = Processor::instance()->get_setting('colors');
 
         $template = apply_filters('letsbox_set_lost_authorization_template', LETSBOX_ROOTDIR.'/templates/notifications/lost_authorization.php', $this);
+
+        $recipients = $this->settings['lostauthorization_notification'];
+        if (Processor::instance()->is_network_authorized()) {
+            $network_settings = get_site_option('letsbox_network_settings', []);
+            $recipients = $network_settings['lostauthorization_notification'];
+        }
 
         ob_start();
 
@@ -1033,7 +1229,7 @@ class Main
         // Send mail
         try {
             $headers = ['Content-Type: text/html; charset=UTF-8'];
-            $recipients = array_unique(array_map('trim', explode(',', $this->settings['lostauthorization_notification'])));
+            $recipients = array_unique(array_map('trim', explode(',', $recipients)));
 
             foreach ($recipients as $recipient) {
                 $result = wp_mail($recipient, $subject, $htmlmessage, $headers);
@@ -1043,18 +1239,18 @@ class Main
         }
     }
 
-    public function ask_for_review($force = false)
+    public static function ask_for_review($force = false)
     {
         $rating_asked = get_option('lets_box_rating_asked', false);
         if (true == $rating_asked) {
-            return;
+            return false;
         }
         $counter = get_option('lets_box_shortcode_opened', 0);
         if ($counter < 10) {
-            return;
+            return false;
         }
 
-        include_once LETSBOX_ROOTDIR.'/templates/admin/ask_review.php';
+        return true;
     }
 
     public function rating_asked()
@@ -1066,9 +1262,13 @@ class Main
     {
         check_ajax_referer('letsbox-create-link');
 
-        $userfolders = new UserFolders($this->get_processor());
+        $userfolders = new UserFolders();
 
-        $linkedto = ['folderid' => rawurldecode($_REQUEST['id']), 'foldertext' => rawurldecode($_REQUEST['text'])];
+        $linkedto = [
+            'folderid' => rawurldecode($_REQUEST['id']),
+            'accountid' => rawurldecode($_REQUEST['account_id']),
+        ];
+
         $userid = $_REQUEST['userid'];
 
         if (Helpers::check_user_role($this->settings['permissions_link_users'])) {
@@ -1080,7 +1280,7 @@ class Main
     {
         check_ajax_referer('letsbox-create-link');
 
-        $userfolders = new UserFolders($this->get_processor());
+        $userfolders = new UserFolders();
 
         $userid = $_REQUEST['userid'];
 
@@ -1091,27 +1291,42 @@ class Main
 
     public function user_folder_create($user_id)
     {
-        $userfolders = new UserFolders($this->get_processor());
+        $userfolders = new UserFolders();
 
-        if ($this->get_app()->has_access_token()) {
+        foreach (Accounts::instance()->list_accounts() as $account_id => $account) {
+            if (false === $account->get_authorization()->has_access_token()) {
+                continue;
+            }
+
+            App::set_current_account($account);
             $userfolders->create_user_folders_for_shortcodes($user_id);
         }
     }
 
     public function user_folder_update($user_id, $old_user_data = false)
     {
-        $userfolders = new UserFolders($this->get_processor());
+        $userfolders = new UserFolders();
 
-        if ($this->get_app()->has_access_token()) {
+        foreach (Accounts::instance()->list_accounts() as $account_id => $account) {
+            if (false === $account->get_authorization()->has_access_token()) {
+                continue;
+            }
+
+            App::set_current_account($account);
             $userfolders->update_user_folder($user_id, $old_user_data);
         }
     }
 
     public function user_folder_delete($user_id)
     {
-        $userfolders = new UserFolders($this->get_processor());
+        $userfolders = new UserFolders();
 
-        if ($this->get_app()->has_access_token()) {
+        foreach (Accounts::instance()->list_accounts() as $account_id => $account) {
+            if (false === $account->get_authorization()->has_access_token()) {
+                continue;
+            }
+
+            App::set_current_account($account);
             $userfolders->remove_user_folder($user_id);
         }
     }
@@ -1129,8 +1344,6 @@ class Main
 
         delete_site_option('letsbox_purchaseid');
         delete_option('lets_box_activated');
-        delete_transient('letsbox_activation_validated');
-        delete_site_transient('letsbox_activation_validated');
 
         delete_option('lets_box_version');
 
@@ -1145,29 +1358,15 @@ class Main
         @rmdir(LETSBOX_CACHEDIR);
     }
 
-    public function get_purchase_code()
-    {
-        $purchasecode = isset($this->settings['purchase_code']) ? $this->settings['purchase_code'] : null;
-        if (is_multisite()) {
-            $site_purchase_code = get_site_option('letsbox_purchaseid');
-
-            if (!empty($site_purchase_code)) {
-                $purchasecode = $site_purchase_code;
-            }
-        }
-
-        return apply_filters('letsbox_purchasecode', $purchasecode);
-    }
-
     // Add MCE buttons and script
 
     public function load_shortcode_buttons()
     {
         // Abort early if the user will never see TinyMCE
         if (
-                !(Helpers::check_user_role($this->settings['permissions_add_shortcodes']))
-                && !(Helpers::check_user_role($this->settings['permissions_add_links']))
-                && !(Helpers::check_user_role($this->settings['permissions_add_embedded']))
+            !Helpers::check_user_role($this->settings['permissions_add_shortcodes'])
+            && !Helpers::check_user_role($this->settings['permissions_add_links'])
+            && !Helpers::check_user_role($this->settings['permissions_add_embedded'])
         ) {
             return;
         }
@@ -1225,40 +1424,39 @@ class Main
     }
 
     /**
-     * @return \TheLion\LetsBox\Events
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Accounts
      */
-    public function get_events()
+    public function get_accounts()
     {
-        if (empty($this->_events)) {
-            $this->_events = new \TheLion\LetsBox\Events($this);
-        }
+        Helpers::is_deprecated('function', 'get_accounts()', '\TheLion\LetsBox\Accounts::instance()');
 
-        return $this->_events;
+        return Accounts::instance();
     }
 
     /**
+     * @deprecated
+     *
      * @return \TheLion\LetsBox\Processor
      */
     public function get_processor()
     {
-        if (empty($this->_processor)) {
-            $this->_processor = new \TheLion\LetsBox\Processor($this);
-        }
+        Helpers::is_deprecated('function', 'get_processor()', '\TheLion\LetsBox\Processor::instance()');
 
-        return $this->_processor;
+        return Processor::instance();
     }
 
     /**
+     * @deprecated
+     *
      * @return \TheLion\LetsBox\App
      */
     public function get_app()
     {
-        if (empty($this->_app)) {
-            $this->_app = new \TheLion\LetsBox\App($this->get_processor());
-            $this->_app->start_client();
-        }
+        Helpers::is_deprecated('function', 'get_app()', '\TheLion\LetsBox\App::instance()');
 
-        return $this->_app;
+        return App::instance();
     }
 }
 
@@ -1267,7 +1465,21 @@ register_activation_hook(__FILE__, __NAMESPACE__.'\letsbox_network_activate');
 register_deactivation_hook(__FILE__, __NAMESPACE__.'\letsbox_network_deactivate');
 register_uninstall_hook(__FILE__, __NAMESPACE__.'\letsbox_network_uninstall');
 
-$LetsBox = new \TheLion\LetsBox\Main();
+$LetsBox = \TheLion\LetsBox\Core::instance();
+
+// Core alias for backwards compatibility
+class_alias('\TheLion\LetsBox\Core', '\TheLion\LetsBox\Main');
+
+// LetsBox() function for backwards compatibility
+function LetsBox()
+{
+    error_log('[WP Cloud Plugin message]: The use of LetsBox() is deprecated. Use \TheLion\LetsBox\Core::instance() instead.');
+
+    return \TheLion\LetsBox\Core::instance();
+}
+
+// API alias
+class_alias('\TheLion\LetsBox\API', '\WPCP_BOX_API');
 
 /**
  * Activate the plugin on network.
@@ -1285,12 +1497,10 @@ function letsbox_network_activate($network_wide)
         $activated = [];
 
         // Get all blogs in the network and activate plugin on each one
-        $sql = 'SELECT blog_id FROM %d';
-        $blog_ids = $wpdb->get_col($wpdb->prepare($sql, $wpdb->blogs));
-        foreach ($blog_ids as $blog_id) {
-            switch_to_blog($blog_id);
+        foreach (get_sites() as $site) {
+            switch_to_blog($site->blog_id);
             letsbox_activate(); // The normal activation function
-            $activated[] = $blog_id;
+            $activated[] = $site->blog_id;
         }
 
         // Switch back to the current blog
@@ -1311,9 +1521,9 @@ function letsbox_activate()
     add_option(
         'lets_box_settings',
         [
+            'accounts' => [],
             'box_app_client_id' => '',
             'box_app_client_secret' => '',
-            'box_account_type' => '',
             'purchase_code' => '',
             'permissions_edit_settings' => ['administrator'],
             'permissions_link_users' => ['administrator', 'editor'],
@@ -1333,12 +1543,13 @@ function letsbox_activate()
             'mediaplayer_ads_skipable' => 'Yes',
             'mediaplayer_ads_skipable_after' => '5',
             'userfolder_name' => '%user_login% (%user_email%)',
+            'userfolder_name_guest_prefix' => esc_html__('Guests', 'wpcloudplugins').' - ',
             'userfolder_oncreation' => 'Yes',
             'userfolder_onfirstvisit' => 'No',
             'userfolder_update' => 'Yes',
             'userfolder_remove' => 'Yes',
             'userfolder_backend' => 'No',
-            'userfolder_backend_auto_root' => '',
+            'userfolder_backend_auto_root' => [],
             'userfolder_noaccess' => '',
             'download_template_subject' => '',
             'download_template_subject_zip' => '',
@@ -1350,6 +1561,7 @@ function letsbox_activate()
             'filelist_template' => '',
             'manage_permissions' => 'Yes',
             'lostauthorization_notification' => get_site_option('admin_email'),
+            'remember_last_location' => 'Yes',
             'gzipcompression' => 'No',
             'always_load_scripts' => 'No',
             'nonce_validation' => 'Yes',
@@ -1358,6 +1570,8 @@ function letsbox_activate()
             'bitly_login' => '',
             'bitly_apikey' => '',
             'shortest_apikey' => '',
+            'tinyurl_apikey' => '',
+            'tinyurl_domain' => '',
             'rebrandly_apikey' => '',
             'rebrandly_domain' => '',
             'rebrandly_workspace' => '',
@@ -1367,6 +1581,8 @@ function letsbox_activate()
             'event_summary' => 'No',
             'event_summary_period' => 'daily',
             'event_summary_recipients' => get_site_option('admin_email'),
+            'webhook_endpoint_url' => '',
+            'webhook_endpoint_secret' => '',
             'uninstall_reset' => 'Yes',
         ]
     );
@@ -1398,11 +1614,9 @@ function letsbox_network_deactivate($network_wide)
         // Get all blogs in the network
         $activated = get_site_option('lets_box_activated'); // An array of blogs with the plugin activated
 
-        $sql = 'SELECT blog_id FROM %d';
-        $blog_ids = $wpdb->get_col($wpdb->prepare($sql, $wpdb->blogs));
-        foreach ($blog_ids as $blog_id) {
-            if (!in_array($blog_id, $activated)) { // Plugin is not activated on that blog
-                switch_to_blog($blog_id);
+        foreach (get_sites() as $site) {
+            if (!in_array($site->blog_id, $activated)) { // Plugin is not activated on that blog
+                switch_to_blog($site->blog_id);
                 letsbox_deactivate();
             }
         }
@@ -1433,6 +1647,12 @@ function letsbox_deactivate()
         $path->isFile() ? @unlink($path->getPathname()) : @rmdir($path->getPathname());
     }
 
+    foreach (Accounts::instance()->list_accounts() as $account_id => $account) {
+        if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification', ['account_id' => $account_id]))) {
+            wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification', ['account_id' => $account_id]);
+        }
+    }
+
     if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification'))) {
         wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification');
     }
@@ -1454,11 +1674,9 @@ function letsbox_network_uninstall($network_wide)
         // Get all blogs in the network
         $activated = get_site_option('lets_box_activated'); // An array of blogs with the plugin activated
 
-        $sql = 'SELECT blog_id FROM %d';
-        $blog_ids = $wpdb->get_col($wpdb->prepare($sql, $wpdb->blogs));
-        foreach ($blog_ids as $blog_id) {
-            if (!in_array($blog_id, $activated)) { // Plugin is not activated on that blog
-                switch_to_blog($blog_id);
+        foreach (get_sites() as $site) {
+            if (!in_array($site->blog_id, $activated)) { // Plugin is not activated on that blog
+                switch_to_blog($site->blog_id);
                 letsbox_uninstall();
             }
         }
@@ -1478,8 +1696,18 @@ function letsbox_uninstall()
     $settings = get_option('lets_box_settings', []);
 
     if (isset($settings['uninstall_reset']) && 'Yes' === $settings['uninstall_reset']) {
-        \TheLion\LetsBox\Main::do_factory_reset();
+        \TheLion\LetsBox\Core::do_factory_reset();
     }
 
-    delete_option('lets_box_version');
+    // Remove pending notifications
+
+    foreach (Accounts::instance()->list_accounts() as $account_id => $account) {
+        if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification', ['account_id' => $account_id]))) {
+            wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification', ['account_id' => $account_id]);
+        }
+    }
+
+    if (false !== ($timestamp = wp_next_scheduled('letsbox_lost_authorisation_notification'))) {
+        wp_unschedule_event($timestamp, 'letsbox_lost_authorisation_notification');
+    }
 }

@@ -1,48 +1,40 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class Mediaplayer
 {
-    /**
-     * @var \TheLion\LetsBox\Processor
-     */
-    private $_processor;
-
-    public function __construct(Processor $_processor)
-    {
-        $this->_processor = $_processor;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
-    }
+    private $_folder;
+    private $_items;
 
     public function getMediaList()
     {
-        $this->_folder = $this->get_processor()->get_client()->get_folder();
+        $this->_folder = Client::instance()->get_folder();
 
-        if ((false === $this->_folder)) {
-            exit();
+        if (false === $this->_folder) {
+            exit;
         }
 
-        $sub_entries = $this->get_processor()->get_client()->get_entries_in_subfolders($this->_folder['folder']);
+        $sub_entries = Client::instance()->get_folder_recursive_filtered($this->_folder['folder']);
         $this->_folder['contents'] = array_merge($sub_entries, $this->_folder['contents']);
-        $this->mediaarray = $this->createMediaArray();
+        $this->_items = $this->createItems();
 
-        if (count($this->mediaarray) > 0) {
-            $response = json_encode($this->mediaarray);
+        if (count($this->_items) > 0) {
+            $response = json_encode($this->_items);
 
-            $cached_request = new CacheRequest($this->get_processor());
+            $cached_request = new CacheRequest();
             $cached_request->add_cached_response($response);
             echo $response;
         }
 
-        exit();
+        exit;
     }
 
     public function setFolder($folder)
@@ -50,7 +42,7 @@ class Mediaplayer
         $this->_folder = $folder;
     }
 
-    public function createMediaArray()
+    public function createItems()
     {
         $covers = [];
         $captions = [];
@@ -68,29 +60,32 @@ class Mediaplayer
                     // Add images to cover array
                     $covers[$child->get_basename()] = $child;
                     unset($this->_folder['contents'][$key]);
-                } elseif ('vtt' === strtolower($child->extension)) {
-                    /**
-                     * VTT files are supported for captions:.
+                } elseif (in_array(strtolower($child->extension), ['vtt', 'srt'])) {
+                    /*
+                     * SRT | VTT files are supported for captions:.
                      *
-                     * Filename: Videoname.Caption Label.Language.VTT
+                     * Filename: Videoname.Caption Label.Language.VTT|SRT
                      */
-                    $caption_values = explode('.', $child->get_basename());
 
-                    if (3 !== count($caption_values)) {
+                    preg_match('/(?<name>.*).(?<label>\w*).(?<language>\w*)\.(srt|vtt)$/Uu', $child->get_name(), $match, PREG_UNMATCHED_AS_NULL, 0);
+
+                    if (0 === count($match) || empty($match['language'])) {
                         continue;
                     }
 
-                    $video_name = $caption_values[0];
+                    $video_name = $match['name'];
 
                     if (!isset($captions[$video_name])) {
                         $captions[$video_name] = [];
                     }
 
-                    $captions[$video_name][] = [
-                        'label' => $caption_values[1],
-                        'language' => $caption_values[2],
-                        'src' => LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.$child->get_id().'&dl=1&caption=1&listtoken='.$this->get_processor()->get_listtoken(),
-                    ];
+                    if (false === array_search($match['label'], array_column($captions[$video_name], 'label'))) {
+                        $captions[$video_name][] = [
+                            'label' => $match['label'],
+                            'language' => $match['language'],
+                            'src' => LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.$child->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&dl=1&caption=1&listtoken='.Processor::instance()->get_listtoken(),
+                        ];
+                    }
 
                     unset($this->_folder['contents'][$key]);
                 }
@@ -99,7 +94,7 @@ class Mediaplayer
 
         $files = [];
 
-        //Create Filelist array
+        // Create Filelist array
         if (count($this->_folder['contents']) > 0) {
             $foldername = $this->_folder['folder']->get_entry()->get_name();
 
@@ -110,7 +105,7 @@ class Mediaplayer
                     continue;
                 }
                 // Check if entry is allowed
-                if (!$this->get_processor()->_is_entry_authorized($node)) {
+                if (!Processor::instance()->_is_entry_authorized($node)) {
                     continue;
                 }
 
@@ -118,14 +113,11 @@ class Mediaplayer
                 $extension = $child->get_extension();
 
                 if (isset($covers[$basename])) {
-                    $poster = $this->get_processor()->get_client()->get_thumbnail($covers[$basename], true, null, 512, false, true);
-                    $thumbnailsmall = $this->get_processor()->get_client()->get_thumbnail($covers[$basename], true, 64, 64, true, false);
+                    $poster = Client::instance()->get_thumbnail($covers[$basename], true, null, 512, false, true);
                 } elseif (isset($covers[$foldername])) {
-                    $poster = $this->get_processor()->get_client()->get_thumbnail($covers[$foldername], true, null, 512, false, true);
-                    $thumbnailsmall = $this->get_processor()->get_client()->get_thumbnail($covers[$foldername], true, 64, 64, true, false);
+                    $poster = Client::instance()->get_thumbnail($covers[$foldername], true, null, 512, false, true);
                 } else {
-                    $poster = $this->get_processor()->get_client()->get_thumbnail($child, true, 256, 256, false, false);
-                    $thumbnailsmall = $this->get_processor()->get_client()->get_thumbnail($child, true, 64, 64, true, false);
+                    $poster = Client::instance()->get_thumbnail($child, true, null, 512, false, false);
                 }
 
                 $folder_str = dirname($node->get_path($this->_folder['folder']->get_id()));
@@ -134,8 +126,8 @@ class Mediaplayer
 
                 // combine same files with different extensions
                 if (!isset($files[$path])) {
-                    $source_url = LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.$child->get_id().'&dl=1&listtoken='.$this->get_processor()->get_listtoken();
-                    if (('Yes' !== $this->get_processor()->get_setting('google_analytics'))) {
+                    $source_url = LETSBOX_ADMIN_URL.'?action=letsbox-stream&id='.$child->get_id().'&account_id='.$this->_folder['folder']->get_account_id().'&dl=1&listtoken='.Processor::instance()->get_listtoken();
+                    if ('Yes' !== Processor::instance()->get_setting('google_analytics')) {
                         $cached_source_url = get_transient('letsbox_stream_'.$child->get_id().'_'.$child->get_extension());
                         if (false !== $cached_source_url && false === filter_var($cached_source_url, FILTER_VALIDATE_URL)) {
                             $source_url = $cached_source_url;
@@ -143,7 +135,7 @@ class Mediaplayer
                     }
 
                     $last_edited = $child->get_last_edited();
-                    $localtime = get_date_from_gmt(date('Y-m-d H:i:s', strtotime($last_edited)));
+                    $localtime = get_date_from_gmt(date('Y-m-d H:i:s', $last_edited));
 
                     $files[$path] = [
                         'title' => $basename,
@@ -152,27 +144,31 @@ class Mediaplayer
                         'is_dir' => false,
                         'folder' => $folder_str,
                         'poster' => $poster,
-                        'thumb' => $thumbnailsmall,
+                        'thumb' => $poster,
                         'size' => $child->get_size(),
+                        'id'=> $child->get_id(),
                         'last_edited' => $last_edited,
                         'last_edited_date_str' => !empty($last_edited) ? date_i18n(get_option('date_format'), strtotime($localtime)) : '',
                         'last_edited_time_str' => !empty($last_edited) ? date_i18n(get_option('time_format'), strtotime($localtime)) : '',
-                        'download' => (('1' === $this->get_processor()->get_shortcode_option('linktomedia')) && $this->get_processor()->get_user()->can_download()) ? str_replace('letsbox-stream', 'letsbox-download', $source_url) : false,
+                        'download' => (User::can_download()) ? str_replace('letsbox-stream', 'letsbox-download', $source_url) : false,
+                        'share' => User::can_share(),
+                        'deeplink' => User::can_deeplink(),                        
                         'source' => $source_url,
                         'captions' => isset($captions[$basename]) ? $captions[$basename] : [],
                         'type' => Helpers::get_mimetype($extension),
                         'width' => $child->get_media('width'),
-                        'duration' => $child->get_media('duration') * 1000, //ms to sec,
-                        'linktoshop' => ('' !== $this->get_processor()->get_shortcode_option('linktoshop')) ? $this->get_processor()->get_shortcode_option('linktoshop') : false,
+                        'height' => $child->get_media('height'),
+                        'duration' => $child->get_media('duration') * 1000, // ms to sec,
+                        'linktoshop' => ('' !== Processor::instance()->get_shortcode_option('linktoshop')) ? Processor::instance()->get_shortcode_option('linktoshop') : false,
                     ];
                 }
             }
 
-            $files = $this->get_processor()->sort_filelist($files);
+            $files = Processor::instance()->sort_filelist($files);
         }
 
-        if ('-1' !== $this->get_processor()->get_shortcode_option('max_files')) {
-            $files = array_slice($files, 0, $this->get_processor()->get_shortcode_option('max_files'));
+        if ('-1' !== Processor::instance()->get_shortcode_option('max_files')) {
+            $files = array_slice($files, 0, Processor::instance()->get_shortcode_option('max_files'));
         }
 
         return array_values($files);
@@ -189,7 +185,7 @@ class Mediaplayer
         $extension = $entry->get_extension();
         $mimetype = $entry->get_mimetype();
 
-        if ('audio' === $this->get_processor()->get_shortcode_option('mode')) {
+        if ('audio' === Processor::instance()->get_shortcode_option('mode')) {
             $allowedextensions = ['mp3', 'm4a', 'ogg', 'oga', 'wav'];
             $allowedimimetypes = ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/x-wav'];
         } else {

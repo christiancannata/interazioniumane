@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -70,7 +77,7 @@ abstract class EntryAbstract
         $entry = (array) $this;
 
         // Remove Unused data
-        //unset($entry['id']);
+        // unset($entry['id']);
         unset($entry['parents'], $entry['mimetype'], $entry['direct_download_link'], $entry['additional_data']);
 
         $entry['size'] = ($entry['size'] > 0) ? $entry['size'] : '';
@@ -185,12 +192,12 @@ abstract class EntryAbstract
 
     public function get_description()
     {
-        return $this->description;
+        return $this->description ?? '';
     }
 
     public function set_description($description)
     {
-        return $this->description = $description;
+        return $this->description = trim($description);
     }
 
     public function get_last_edited()
@@ -198,20 +205,36 @@ abstract class EntryAbstract
         return $this->last_edited;
     }
 
-    public function get_last_edited_str()
+    public function get_last_edited_str($short = true)
     {
-        if (empty($this->last_edited)) {
+        $timestamp = $this->get_last_edited();
+        if (empty($timestamp)) {
             return '';
         }
 
-        // Add datetime string for browser that doen't support toLocaleDateString
-        $last_edited = $this->last_edited;
-        if (!empty($last_edited)) {
-            $localtime = get_date_from_gmt(date('Y-m-d H:i:s', $last_edited));
+        $localtime = get_date_from_gmt(date('Y-m-d H:i:s', $timestamp));
+        $now = time();
+
+        if (false === $short) {
             $this->last_edited_str = date_i18n(get_option('date_format').' '.get_option('time_format'), strtotime($localtime));
+
+            return apply_filters('letsbox_entry_get_last_edited_str', $this->last_edited_str, $localtime, $short);
         }
 
-        return $this->last_edited_str;
+        if ($timestamp > ($now - 86400)) {
+            // Last 24 hours
+            $str = date_i18n(get_option('time_format'), strtotime($localtime));
+        } elseif ($timestamp > strtotime('first day of january this year')) {
+            // Last year
+            $str = date_i18n(str_replace([', Y', ',Y', 'Y-', '-Y', '/Y', 'Y/', ' Y'], '', get_option('date_format')), strtotime($localtime));
+        } else {
+            // More than a year
+            $str = date_i18n(get_option('date_format'), strtotime($localtime));
+        }
+
+        $this->last_edited_str = $str;
+
+        return apply_filters('letsbox_entry_get_last_edited_str', $this->last_edited_str, $localtime, $short);
     }
 
     public function set_last_edited($last_edited)
@@ -435,7 +458,7 @@ abstract class EntryAbstract
 
     public function get_default_thumbnail_icon()
     {
-        return $this->get_icon_large();
+        return str_replace('32x32', '256x256', $this->icon);
     }
 
     public function is_virtual_folder()

@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: YITH WooCommerce Ajax Product Filter\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yith-woocommerce-"
 "ajax-product-filter\n"
-"POT-Creation-Date: 2022-01-12 10:08:55+00:00\n"
+"POT-Creation-Date: 2023-02-08 12:53:00+00:00\n"
 "PO-Revision-Date: 2021-02-12 13:32:05+0000\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -14,66 +14,66 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: GlotPress/3.0.0-alpha.2\n"
 
-#: includes/class-yith-wcan-admin.php:196
+#: includes/class-yith-wcan-admin.php:189
 msgid ""
 "<b>100% mobile friendly:</b> Show filters in a modal view which is purposely "
 "designed for users visiting your site by smartphones or tablets"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:197
+#: includes/class-yith-wcan-admin.php:190
 msgid ""
 "Show filters in the default layout or also in an <b>horizontal toolbar above "
 "products</b> (like Zalando)"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:198
+#: includes/class-yith-wcan-admin.php:191
 msgid ""
 "Allow customers to <b>filter for price ranges</b> (unlimited ranges and the "
-"last range can show: “& above”) or using the <b>price slider</b>\n"
+"last range can show: “& above”) or using the <b>price slider</b>"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:200
+#: includes/class-yith-wcan-admin.php:192
 msgid ""
 "Allow customers to <b>filter for review</b> and <b>for brand</b> (with the "
 "support to YITH WooCommerce Brands plugin)"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:201
+#: includes/class-yith-wcan-admin.php:193
 msgid ""
 "Allow users to <b>order products</b> (by popularity, date, price, date of "
 "publishing, average rating, etc) and see only \tproducts in stock/featured/"
 "on sale"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:202
+#: includes/class-yith-wcan-admin.php:194
 msgid ""
 "<b>Show the active filters</b> (with X to remove them) and choose their "
 "position (above products, above or under filters area)"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:203
+#: includes/class-yith-wcan-admin.php:195
 msgid ""
 "Create <b>color swatches with image support</b> (to better identify "
 "gradients, textures, patterns, etc.) and with 2 colors"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:204
+#: includes/class-yith-wcan-admin.php:196
 msgid "Show the options using <b>custom images or icons</b>"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:205
+#: includes/class-yith-wcan-admin.php:197
 msgid ""
 "Choose the <b>order of the options</b> (alphabetical, terms order, terms "
 "count, etc.), enable tooltips and show each set of filters in toggle"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:206
+#: includes/class-yith-wcan-admin.php:198
 msgid ""
 "Choose how to manage terms not availables: hide them OR shown them in grey "
 "color and not clickables "
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:207
+#: includes/class-yith-wcan-admin.php:199
 msgid "<b>Regular updates, Translations and Premium Support</b>"
 msgstr ""
 
@@ -168,13 +168,7 @@ msgstr "Alle filters resetten"
 msgid "Button Label"
 msgstr "Labelknop"
 
-#: init.php:149
-msgid ""
-"You can't activate the free version of YITH WooCommerce Ajax Product Filter "
-"while you are using the premium one."
-msgstr ""
-
-#: init.php:167
+#: init.php:162
 #, fuzzy
 msgid ""
 "YITH WooCommerce Ajax Product Filter is enabled but not effective. It "
@@ -182,6 +176,12 @@ msgid ""
 msgstr ""
 "YITH WooCommerce Ajax Productfilter is ingeschakeld maar niet effectief. Het "
 "vereist WooCommerce om te kunnen werken."
+
+#: init.php:181
+msgid ""
+"YITH WooCommerce Ajax Product Filter was deactivated as you're running an "
+"higher tier version of the same plugin."
+msgstr ""
 
 #. Description of the plugin/theme
 #, fuzzy
@@ -200,64 +200,71 @@ msgstr ""
 "yithemes.com/\" target=\"_blank\">Verkrijg meer plugins voor je e-commerce "
 "winkel op <strong>YITH</strong></a>"
 
-#: includes/class-yith-wcan-admin.php:107
+#: includes/class-yith-wcan-admin.php:104
 msgctxt "[Admin] Copy confirmation message"
 msgid "Content copied to your clipboard"
 msgstr "Inhoud gekopieerd naar je klembord"
 
-#: includes/class-yith-wcan-admin.php:108
+#: includes/class-yith-wcan-admin.php:105
 msgctxt "[Admin] Confirm filter delete message"
 msgid "Are you sure you want to delete this item?"
 msgstr "Weet je zeker dat je dit item wilt verwijderen?"
 
 #. translators: 1. Number of items that will be added.
-#: includes/class-yith-wcan-admin.php:110
+#: includes/class-yith-wcan-admin.php:107
 msgctxt "[Admin] Confirm add all terms message"
 msgid "Are you sure you want to proceed? This operation will add %s items"
 msgstr "Weet je zeker dat je door wilt gaan? Deze operatie voegt %s items toe"
 
-#: includes/class-yith-wcan-admin.php:111
+#: includes/class-yith-wcan-admin.php:108
 msgctxt "[Admin] Error message"
 msgid "\"Filter title\" is a required field"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:114 templates/admin/preset-filter.php:33
+#: includes/class-yith-wcan-admin.php:111 templates/admin/preset-filter.php:33
 msgctxt "[Admin] Message shown when filter has empty title"
 msgid "&lt; no title &gt;"
 msgstr "&lt; geen titel &gt;"
 
-#: includes/class-yith-wcan-admin.php:115
+#: includes/class-yith-wcan-admin.php:112
 msgctxt "[Admin] Media library title, when selecting images"
 msgid "Select media you want to use"
 msgstr "Selecteer de media die je wilt gebruiken"
 
-#: includes/class-yith-wcan-admin.php:116
+#: includes/class-yith-wcan-admin.php:113
 msgctxt "[Admin] Media library confirm button, when selecting images"
 msgid "Use this media"
 msgstr "Gebruik deze media"
 
-#: includes/class-yith-wcan-admin.php:184
+#: includes/class-yith-wcan-admin.php:177
 msgctxt "[Admin] tab name"
 msgid "Filter presets"
 msgstr "Filter pre-set"
 
-#: includes/class-yith-wcan-admin.php:185
+#: includes/class-yith-wcan-admin.php:178
 msgctxt "[Admin] tab name"
 msgid "General settings"
 msgstr "Algemene instellingen"
 
-#: includes/class-yith-wcan-admin.php:186
+#: includes/class-yith-wcan-admin.php:179
 #, fuzzy
 msgctxt "[Admin] tab name"
 msgid "SEO"
 msgstr "SEO"
 
-#: includes/class-yith-wcan-admin.php:190
+#: includes/class-yith-wcan-admin.php:183
 msgctxt "[Admin] tab name"
 msgid "Legacy"
 msgstr "Nalatenschap"
 
-#: includes/class-yith-wcan-admin.php:217
+#: includes/class-yith-wcan-admin.php:207
+msgctxt "[HELP TAB] Video title"
+msgid ""
+"Check this video to learn how to <b>create a filter preset and show it on "
+"the shop page:</b>"
+msgstr ""
+
+#: includes/class-yith-wcan-admin.php:230
 msgctxt "[Admin] Plugin description"
 msgid ""
 "It allows your users to find the product they are looking for as quickly as "
@@ -266,44 +273,37 @@ msgstr ""
 "Het laat je gebruikers het product het product dat ze zoeken, zo snel "
 "mogelijk vinden."
 
-#: includes/class-yith-wcan-admin.php:230
-msgctxt "[HELP TAB] Video title"
-msgid ""
-"Check this video to learn how to <b>create a filter preset and show it on "
-"the shop page:</b>"
-msgstr ""
-
-#: includes/class-yith-wcan-admin.php:349
+#: includes/class-yith-wcan-admin.php:348
 msgctxt "[Admin] Generic item name, in \"You have no x yet\""
 msgid "item"
 msgstr "Item"
 
-#: includes/class-yith-wcan-admin.php:350
+#: includes/class-yith-wcan-admin.php:349
 msgctxt "[Admin] Preset table empty message second line"
 msgid "But don't worry, here you can create your first one!"
 msgstr "Maar geen zorgen, je kunt hier je eerste aanmaken!"
 
-#: includes/class-yith-wcan-admin.php:500
+#: includes/class-yith-wcan-admin.php:490
 msgctxt "[ADMIN] WooCommerce Tools tab, name of the tool"
 msgid "Clear Product Filter transients"
 msgstr "Product Filter transients legen"
 
-#: includes/class-yith-wcan-admin.php:506
+#: includes/class-yith-wcan-admin.php:496
 msgctxt "[ADMIN] WooCommerce Tools tab, name of the tool"
 msgid "Run filter widgets upgrade"
 msgstr "Filter widgets upgrade uitvoeren"
 
-#: includes/class-yith-wcan-admin.php:501
+#: includes/class-yith-wcan-admin.php:491
 msgctxt "[ADMIN] WooCommerce Tools tab, button for the tool"
 msgid "Clear"
 msgstr "Wissen"
 
-#: includes/class-yith-wcan-admin.php:507
+#: includes/class-yith-wcan-admin.php:497
 msgctxt "[ADMIN] WooCommerce Tools tab, button for the tool"
 msgid "Run"
 msgstr "Uitvoeren"
 
-#: includes/class-yith-wcan-admin.php:502
+#: includes/class-yith-wcan-admin.php:492
 msgctxt "[ADMIN] WooCommerce Tools tab, description of the tool"
 msgid ""
 "This will clear all transients related to the YITH WooCommerce AJAX Product "
@@ -315,7 +315,7 @@ msgstr ""
 "configuratie van je product hebt gewijzigd en filters niet de verwachte "
 "resultaten weergeven."
 
-#: includes/class-yith-wcan-admin.php:508
+#: includes/class-yith-wcan-admin.php:498
 msgctxt "[ADMIN] WooCommerce Tools tab, description of the tool"
 msgid ""
 "This will create a preset for any sidebar of your shop containing filter "
@@ -560,56 +560,56 @@ msgctxt "[Admin] Filter edit form, sorting options"
 msgid "Sort by price: high to low"
 msgstr "Sorteren op prijs: hoog naar laag"
 
-#: includes/class-yith-wcan-filter.php:116
+#: includes/class-yith-wcan-filter.php:123
 msgctxt "[Admin] Default filter title"
 msgid "New filter"
 msgstr "Nieuwe filter"
 
-#: includes/class-yith-wcan-frontend.php:591
-#: includes/filters/class-yith-wcan-filter-tax.php:62
+#: includes/class-yith-wcan-frontend.php:626
+#: includes/filters/class-yith-wcan-filter-tax.php:57
 msgctxt "[FRONTEND] \"All\" label shown when no term is selected"
 msgid "All"
 msgstr "Alle"
 
-#: includes/class-yith-wcan-frontend.php:592
+#: includes/class-yith-wcan-frontend.php:627
 msgctxt "[FRONTEND] Search placeholder shown in terms dropdown"
 msgid "Search..."
 msgstr "Zoeken..."
 
-#: includes/class-yith-wcan-frontend.php:593
+#: includes/class-yith-wcan-frontend.php:628
 msgctxt "[FRONTEND] Empty items list in the dropdown"
 msgid "No item found"
 msgstr "Geen item gevonden"
 
 #. translators: 1. Number of items to show.
-#: includes/class-yith-wcan-frontend.php:595
+#: includes/class-yith-wcan-frontend.php:630
 msgctxt "[FRONTEND] Show more link on terms dropdown"
 msgid "Show %d more"
 msgstr "Toon %d meer"
 
-#: includes/class-yith-wcan-frontend.php:596
+#: includes/class-yith-wcan-frontend.php:631
 msgctxt "[FRONTEND] Alt text for modal close button on mobile"
 msgid "Close"
 msgstr "Sluiten"
 
-#: includes/class-yith-wcan-frontend.php:597
+#: includes/class-yith-wcan-frontend.php:632
 msgctxt "[FRONTEND] Label for filter button, on horizontal layout"
 msgid "Save"
 msgstr ""
 
-#: includes/class-yith-wcan-frontend.php:598
+#: includes/class-yith-wcan-frontend.php:633
 msgctxt "[FRONTEND] Label for filter button, on mobile modal"
 msgid "Show results"
 msgstr "Resultaten weergeven"
 
-#: includes/class-yith-wcan-frontend.php:599
+#: includes/class-yith-wcan-frontend.php:634
 msgctxt ""
 "[FRONTEND] Label for clear selection link, that appears above filter after "
 "selection"
 msgid "Clear"
 msgstr "Wissen"
 
-#: includes/class-yith-wcan-frontend.php:600
+#: includes/class-yith-wcan-frontend.php:635
 msgctxt ""
 "[FRONTEND] Label for clear selection link, that appears above filter after "
 "selection"
@@ -692,28 +692,28 @@ msgctxt "[ADMIN] Name of the preset elementor widget"
 msgid "YITH AJAX Filters Reset Button"
 msgstr "YITH AJAX Filters Reset Knop"
 
-#: includes/elementor/class-yith-wcan-elementor-filters.php:89
+#: includes/elementor/class-yith-wcan-elementor-filters.php:90
 #: includes/shortcodes/class-yith-wcan-shortcode-filters.php:60
 msgctxt "[ELEMENTOR] Default preset option"
 msgid "Choose an option"
 msgstr "Kies een optie"
 
-#: includes/elementor/class-yith-wcan-elementor-filters.php:97
+#: includes/elementor/class-yith-wcan-elementor-filters.php:98
 msgctxt "[ELEMENTOR] Section title"
 msgid "Filters"
 msgstr "Filters"
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:89
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:90
 msgctxt "[ELEMENTOR] Section title"
 msgid "General"
 msgstr "Algemeen"
 
-#: includes/elementor/class-yith-wcan-elementor-filters.php:105
+#: includes/elementor/class-yith-wcan-elementor-filters.php:106
 msgctxt "[ELEMENTOR] Control label"
 msgid "Preset"
 msgstr "Pre-set"
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:100
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:101
 msgctxt "[ELEMENTOR] Widget description"
 msgid ""
 "This widget will display \"Filters reset\" button, wherever it is placed"
@@ -721,7 +721,7 @@ msgstr ""
 "Deze widget zal de \"Filters resetten\" knop weergeven, waar deze ook "
 "geplaatst is"
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:103
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:104
 msgctxt "[ELEMENTOR] Widget description"
 msgid ""
 "It will allow users to reset the filer selection; it will only appear when "
@@ -730,7 +730,7 @@ msgstr ""
 "Het laat gebruikers de filter selectie resetten; het verschijnt alleen "
 "wanneer er een actieve filter is."
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:107
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:108
 msgctxt "[ELEMENTOR] Widget description"
 msgid ""
 "You can use this block to place \"Reset filters\" button inside your page, "
@@ -750,7 +750,7 @@ msgctxt "For multicolor: I.E. white and red T-Shirt"
 msgid "Color 2"
 msgstr "Kleur 2"
 
-#: includes/functions-yith-wcan.php:1026
+#: includes/functions-yith-wcan.php:1032
 msgctxt "[FRONTEND] Star rating template"
 msgid "star"
 msgid_plural "stars"
@@ -758,7 +758,7 @@ msgstr[0] "ster"
 msgstr[1] "sterren"
 
 #. translators: 1. Rating.
-#: includes/functions-yith-wcan.php:1041
+#: includes/functions-yith-wcan.php:1047
 msgctxt "[FRONTEND] Star rating label"
 msgid "Rated %s out of 5"
 msgstr "Waardering %s van de 5"
@@ -826,17 +826,7 @@ msgctxt "[Admin] Preset delete confirm label"
 msgid "Are you sure you want to delete this preset?"
 msgstr "Weet je zeker dat je deze pre-set wilt verwijderen?"
 
-#: includes/tables/class-yith-wcan-filter-presets-table.php:175
-msgctxt "[Admin] on-off yes"
-msgid "YES"
-msgstr "JA"
-
-#: includes/tables/class-yith-wcan-filter-presets-table.php:175
-msgctxt "[Admin] on-off no"
-msgid "NO"
-msgstr "NEE"
-
-#: includes/tables/class-yith-wcan-filter-presets-table.php:195
+#: includes/tables/class-yith-wcan-filter-presets-table.php:200
 msgctxt ""
 "[Admin] Name of the item missing, shown in preset-empty-content template"
 msgid "filter preset"
@@ -848,7 +838,7 @@ msgctxt ""
 msgid "filter"
 msgstr "filter"
 
-#: includes/tables/class-yith-wcan-filter-presets-table.php:196
+#: includes/tables/class-yith-wcan-filter-presets-table.php:201
 msgctxt "[Admin] New preset button label"
 msgid "Create a new preset"
 msgstr "Nieuwe pre-set aanmaken"
@@ -1103,22 +1093,22 @@ msgstr ""
 "Wanneer dit is ingeschakeld, wordt een re=\"nofollow\" eigenschap toegevoegd "
 "aan alle filter ankers over de gehele plugin"
 
-#: plugin-options/seo-options.php:63
+#: plugin-options/seo-options.php:64
 msgctxt "[ADMIN] Seo settings page"
 msgid "URL permalinks"
 msgstr "URL permalinks"
 
-#: plugin-options/seo-options.php:64
+#: plugin-options/seo-options.php:65
 msgctxt "[ADMIN] Seo settings page"
 msgid "Choose how to manage browser URL during filtering"
 msgstr "Bepaal hoe je de browser-URL wilt beheren tijdens het filteren"
 
-#: plugin-options/seo-options.php:70
+#: plugin-options/seo-options.php:71
 msgctxt "[ADMIN] Seo settings page"
 msgid "Add filters parameters to default URL"
 msgstr "Filter parameters aan standaard URL toevoegen"
 
-#: plugin-options/seo-options.php:71
+#: plugin-options/seo-options.php:72
 msgctxt "[ADMIN] Seo settings page"
 msgid "Don't change URL"
 msgstr "URN niet wijzigen"
@@ -1425,12 +1415,13 @@ msgstr ""
 #: templates/admin/upgrade-note-modal.php:51
 msgctxt "[ADMIN] Upgrade note modal content"
 msgid ""
-"We suggest you to <a href=\"%1$s\">check this video</a> or <a href=\"%2$s"
-"\">read the documentation</a> to learn how to use this new feature."
+"We suggest you to <a href=\"%1$s\">check this video</a> or <a "
+"href=\"%2$s\">read the documentation</a> to learn how to use this new "
+"feature."
 msgstr ""
-"We adviseren je <a href=\"%1$s\">deze video te bekijken</a> of <a href=\"%2$s"
-"\">de documentatie te lezen</a> om meer leren hoe je deze nieuwe optie kunt "
-"gebruiken."
+"We adviseren je <a href=\"%1$s\">deze video te bekijken</a> of <a "
+"href=\"%2$s\">de documentatie te lezen</a> om meer leren hoe je deze nieuwe "
+"optie kunt gebruiken."
 
 #. translators: 1. Url to docs.
 #: templates/admin/upgrade-note-modal.php:64
@@ -1479,6 +1470,14 @@ msgstr "Nee bedankt"
 msgctxt "[FRONTEND] Reset button for preset shortcode"
 msgid "Reset filters"
 msgstr "Filters resetten"
+
+#~ msgctxt "[Admin] on-off yes"
+#~ msgid "YES"
+#~ msgstr "JA"
+
+#~ msgctxt "[Admin] on-off no"
+#~ msgid "NO"
+#~ msgstr "NEE"
 
 #~ msgctxt "[Admin] tab name"
 #~ msgid "Premium Version"

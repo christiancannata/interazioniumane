@@ -36,8 +36,8 @@ class WooSEA_skroutz {
 					"woo_suggest" => "image",
 				),
 				"Additional Image" => array(
-					"name" => "additionalimage",
-					"feed_name" => "additionalimage",
+					"name" => "additional_imageurl",
+					"feed_name" => "additional_imageurl",
 					"format" => "optional",
 				),
 				"Category Name" => array(

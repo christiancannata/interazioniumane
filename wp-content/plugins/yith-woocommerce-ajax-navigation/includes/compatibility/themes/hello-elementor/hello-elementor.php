@@ -19,7 +19,7 @@ if ( ! function_exists( 'yith_wcan_hello_elementor_content_selector' ) ) {
 	 * @return string Content selector.
 	 */
 	function yith_wcan_hello_elementor_content_selector( $selector ) {
-		$selector = 'main';
+		$selector = '#main';
 
 		return $selector;
 	}

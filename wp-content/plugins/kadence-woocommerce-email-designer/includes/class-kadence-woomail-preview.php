@@ -192,8 +192,8 @@ if ( ! class_exists( 'Kadence_Woomail_Preview' ) ) {
 		 * @return void
 		 */
 		public function set_up_preview() {
-			// Make sure this is own preview request.
-			if ( ! Kadence_Woomail_Designer::is_own_preview_request() ) {
+			// Make sure this is own preview request, the user is logged in, and has permissions to view and we are in the customizer.
+			if ( ! Kadence_Woomail_Designer::is_own_preview_request() || ! is_customize_preview() || ! is_user_logged_in() || ! Kadence_Woomail_Designer::is_admin() ) {
 				return;
 			}
 			// Load main view.
@@ -277,7 +277,7 @@ if ( ! class_exists( 'Kadence_Woomail_Preview' ) ) {
 
 			if ( is_object( $order ) ) {
 				// Get user ID from order, if guest get current user ID.
-				if ( 0 === ( $user_id = (int) get_post_meta( $order->get_id(), '_customer_user', true ) ) ) {
+				if ( 0 === ( $user_id = (int) $order->get_customer_id() ) ) {
 					$user_id = get_current_user_id();
 				}
 			} else {
@@ -884,7 +884,7 @@ if ( ! class_exists( 'Kadence_Woomail_Preview' ) ) {
 				$scripts .= 'var pl_customer_first_name = "' . self::$current_order->get_billing_first_name() . '";';
 				$scripts .= 'var pl_customer_last_name = "' . self::$current_order->get_billing_last_name() . '";';
 				$scripts .= 'var pl_customer_full_name = "' . self::$current_order->get_formatted_billing_full_name() . '";';
-				if ( 0 === ( $user_id = (int) get_post_meta( self::$current_order->get_id(), '_customer_user', true ) ) ) {
+				if ( 0 === ( $user_id = (int) self::$current_order->get_customer_id() ) ) {
 					$user_id = get_current_user_id();
 				}
 				$scripts .= 'var pl_customer_username = "' . Kadence_Woomail_Designer::get_username_from_id( $user_id ) . '";';

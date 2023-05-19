@@ -30,10 +30,10 @@ use Box\Model\Zip\Zip;
  */
 class Client extends Model
 {
-    const AUTH_URI = 'https://account.box.com/api/oauth2/authorize';
-    const TOKEN_URI = 'https://api.box.com/oauth2/token';
-    const REVOKE_URI = 'https://api.box.com/oauth2/revoke';
-    const SEARCH_URI = 'https://api.box.com/2.0/search';
+    public const AUTH_URI = 'https://account.box.com/api/oauth2/authorize';
+    public const TOKEN_URI = 'https://api.box.com/oauth2/token';
+    public const REVOKE_URI = 'https://api.box.com/oauth2/revoke';
+    public const SEARCH_URI = 'https://api.box.com/2.0/search';
     public $hasnewToken = false;
 
     protected $state;
@@ -98,7 +98,7 @@ class Client extends Model
     /**
      * @param mixed $options
      *
-     * @return File|FileInterface
+     * @return FileInterface|File
      */
     public function getNewFile($options = null)
     {
@@ -108,7 +108,7 @@ class Client extends Model
     /**
      * @param mixed $options
      *
-     * @return Folder|FolderInterface
+     * @return FolderInterface|Folder
      */
     public function getNewFolder($options = null)
     {
@@ -212,10 +212,10 @@ class Client extends Model
      * @param null $limit  leave null to get all; if limit is null but offset is numeric, limit will default to 100
      * @param null $offset leave null to get all; if limit is null but offset is numeric, limit will default to 100
      *
-     * @throws \Box\Exception\Exception
+     * @return array returns an array of User objects that are in the group membership
+     * @return array returns an array of User objects that are in the group membership
      *
-     * @return array returns an array of User objects that are in the group membership
-     * @return array returns an array of User objects that are in the group membership
+     * @throws \Box\Exception\Exception
      */
     public function getGroupMembershipList($group = null, $limit = null, $offset = null)
     {
@@ -607,9 +607,9 @@ class Client extends Model
      * @param bool                                     $ifMatchHeader
      * @param mixed                                    $params
      *
-     * @throws \Exception
-     *
      * @return mixed
+     *
+     * @throws \Exception
      */
     public function updateEntry($entry, $params = [], $ifMatchHeader = false)
     {
@@ -654,9 +654,9 @@ class Client extends Model
      * @param File|FileInterface|Folder|FolderInterface $entry
      * @param bool                                      $ifMatchHeader
      *
-     * @throws \Exception
-     *
      * @return mixed
+     *
+     * @throws \Exception
      */
     public function renameEntry($entry)
     {
@@ -670,9 +670,9 @@ class Client extends Model
      * @param File|FileInterface|Folder|FolderInterface $entry
      * @param bool                                      $ifMatchHeader
      *
-     * @throws \Exception
-     *
      * @return mixed
+     *
+     * @throws \Exception
      */
     public function deleteEntry($entry)
     {
@@ -744,9 +744,9 @@ class Client extends Model
      * @param string                                                                                  $role         see {@link http://developers.box.com/docs/#collaborations box documentation for all possible roles}
      *                                                                                                              default is viewer
      *
-     * @throws \Box\Exception\Exception
-     *
      * @return \Box\Model\Collaboration\Collaboration|\Box\Model\Collaboration\CollaborationInterface
+     *
+     * @throws \Box\Exception\Exception
      */
     public function addCollaboration($folder = null, $collaborator = null, $role = 'viewer')
     {
@@ -976,13 +976,13 @@ class Client extends Model
             // Not available yet
             case 202:
                 return (int) $data['headers']['retry-after'];
-            // Found, but no own thumbnail
+                // Found, but no own thumbnail
             case 302:
                 return $data;
-            // Found, returning contents
+                // Found, returning contents
             case 200:
                 return $data;
-            // Bad request or not found
+                // Bad request or not found
             case 400:
             case 404:
             default:
@@ -1000,9 +1000,9 @@ class Client extends Model
      * @param mixed        $originalFolderId
      * @param mixed        $parentId
      *
-     * @throws Exception
-     *
      * @return \Box\Model\Folder\Folder|\Box\Model\Folder\FolderInterface
+     *
+     * @throws Exception
      *
      * @internal param $destinationId
      */
@@ -1047,9 +1047,9 @@ class Client extends Model
      * @param string $parentId
      * @param string $name
      *
-     * @throws Exception
-     *
      * @return \Box\Model\File\File|\Box\Model\File\FileInterface
+     *
+     * @throws Exception
      */
     public function copyBoxFile($originalFileId, $parentId, $name = null)
     {
@@ -1102,7 +1102,7 @@ class Client extends Model
             if (array_key_exists('type', $data) && 'error' == $data['type']) {
                 if ('item_name_in_use' === $data['code']) {
                     // Auto Rename if possible
-                    $original_name = str_replace(' ('.($autorename_counter).')', '', $file->name);
+                    $original_name = str_replace(' ('.$autorename_counter.')', '', $file->name);
                     $file_info = \TheLion\LetsBox\Helpers::get_pathinfo($original_name);
                     $file->name = $file_info['filename'].' ('.($autorename_counter + 1).')'.(isset($file_info['extension']) ? '.'.$file_info['extension'] : '');
 
@@ -1162,7 +1162,7 @@ class Client extends Model
 
             $parts[] = $uploadChunkedPart;
 
-            //Update remaining and uploaded
+            // Update remaining and uploaded
             $uploaded = $uploaded + $chunkSize;
             $remaining = $remaining - $chunkSize;
 
@@ -1170,7 +1170,7 @@ class Client extends Model
             $status = [
                 'bytes_up_so_far' => $uploaded,
                 'total_bytes_down_expected' => $file->size,
-                'percentage' => (round(($uploaded / $file->size) * 100)),
+                'percentage' => round(($uploaded / $file->size) * 100),
                 'progress' => 'uploading',
             ];
 
@@ -1213,8 +1213,8 @@ class Client extends Model
         }
 
         return json_decode($session['body'], true);
-        //$url_uploaded_parts = $data['session_endpoints']['upload_part'];
-        //$url_commit = $data['session_endpoints']['commit'];
+        // $url_uploaded_parts = $data['session_endpoints']['upload_part'];
+        // $url_commit = $data['session_endpoints']['commit'];
     }
 
     public function finishUploadSession($url_finish_session, $parts, $file)
@@ -1276,6 +1276,7 @@ class Client extends Model
         $params['code'] = $this->getAuthorizationCode();
         $params['client_id'] = $this->getClientId();
         $params['client_secret'] = $this->getClientSecret();
+        $params['scope'] = implode(',', $this->getScopes());
 
         $redirectUri = $this->getRedirectUri();
         if (null !== $redirectUri) {
@@ -1304,7 +1305,7 @@ class Client extends Model
     /**
      * @param mixed $refresh_token
      *
-     * @return \Box\Model\Connection\Token\Token|\Box\Model\Connection\Token\TokenInterface
+     * @return \Box\Model\Connection\Token\Token|\BTokenInterfaceox\Model\Connection\Token\
      */
     public function refreshToken($refresh_token)
     {
@@ -1353,12 +1354,12 @@ class Client extends Model
 
     public function getAuthorizationHeader()
     {
-        $token = $this->getToken();
-
         if ($this->isAccessTokenExpired()) {
             // Call Update function of plugin itself
-            do_action('lets-box-refresh-token');
+            do_action('lets-box-refresh-token', \TheLion\LetsBox\App::get_current_account());
         }
+
+        $token = $this->getToken();
 
         return 'Authorization: Bearer '.$token->getAccessToken();
     }
@@ -1439,6 +1440,11 @@ class Client extends Model
             $params['state'] = $state;
         }
 
+        $scope = implode(',', $this->getScopes());
+        if (!empty($scope)) {
+            $params['scope'] = $scope;
+        }
+
         $query = $this->buildQuery($params); // buildQuery does urlencode
         $uri .= $query;
 
@@ -1507,6 +1513,16 @@ class Client extends Model
     public function getClientSecret()
     {
         return $this->clientSecret;
+    }
+
+    public function setScopes($scopes = [])
+    {
+        return $this->scopes = $scopes;
+    }
+
+    public function getScopes()
+    {
+        return $this->scopes;
     }
 
     public function setRedirectUri($redirectUri = null)
@@ -1708,6 +1724,9 @@ class Client extends Model
         return $this->userClass;
     }
 
+    /**
+     * @return \Box\Model\User\User|\Box\Model\User\UserInterface
+     */
     public function getUserInfo()
     {
         $uri = USER::CURRENT_USER_URI;
@@ -1716,6 +1735,7 @@ class Client extends Model
             'type',
             'id',
             'name',
+            'avatar_url',
             'login',
             'space_amount',
             'space_used',

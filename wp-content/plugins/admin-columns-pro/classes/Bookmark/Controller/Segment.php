@@ -89,7 +89,7 @@ class Segment extends Controller {
 
 		$segments = array_merge( $user_segments, $global_segments );
 
-		$segments = apply_filters( 'acp/search/segments_list', $segments, $this->list_screen );
+		$segments = (array) apply_filters( 'acp/search/segments_list', $segments, $this->list_screen );
 
 		$data = [];
 
@@ -108,7 +108,7 @@ class Segment extends Controller {
 		$data = filter_var_array(
 			$this->request->get_parameters()->all(),
 			[
-				'name'                     => FILTER_SANITIZE_STRING,
+				'name'                     => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
 				'query_string'             => FILTER_DEFAULT,
 				'whitelisted_query_string' => FILTER_DEFAULT,
 				'global'                   => FILTER_SANITIZE_NUMBER_INT,
@@ -132,7 +132,7 @@ class Segment extends Controller {
 		$segment = $this->segment_repository->create(
 			$this->list_screen->get_id(),
 			get_current_user_id(),
-			$data['name'],
+			(string) $data['name'],
 			$whitelisted_url_parameters,
 			$global
 		);

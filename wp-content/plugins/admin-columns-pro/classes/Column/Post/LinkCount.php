@@ -3,12 +3,16 @@
 namespace ACP\Column\Post;
 
 use AC;
+use ACP\ConditionalFormat\Formattable;
+use ACP\ConditionalFormat\IntegerFormattableTrait;
 use ACP\Export;
 use ACP\Settings;
 use ACP\Sorting;
 
 class LinkCount extends AC\Column
-	implements Export\Exportable, Sorting\Sortable {
+	implements Export\Exportable, Sorting\Sortable, Formattable {
+
+	use IntegerFormattableTrait;
 
 	public function __construct() {
 		$this->set_type( 'column-linkcount' )
@@ -22,8 +26,8 @@ class LinkCount extends AC\Column
 		);
 	}
 
-	private function get_internal_domains() {
-		return apply_filters( 'ac/column/linkcount/domains', [ home_url() ] );
+	private function get_internal_domains(): array {
+		return (array) apply_filters( 'ac/column/linkcount/domains', [ home_url() ] );
 	}
 
 	public function register_settings() {

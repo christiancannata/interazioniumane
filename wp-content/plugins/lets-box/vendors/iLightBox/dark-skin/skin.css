@@ -2,36 +2,37 @@
 	background: #000;
 }
 
-.ilightbox-loader.dark {
+.wpcp-lightbox.ilightbox-loader.dark {
 	-webkit-box-shadow: black 0px 0px 85px, black 0px 0px 85px;
-	        box-shadow: black 0px 0px 85px, black 0px 0px 85px;
+	box-shadow: black 0px 0px 85px, black 0px 0px 85px;
 }
-.ilightbox-loader.dark div {
+
+.wpcp-lightbox.ilightbox-loader.dark div {
 	background: #000 url('preloader.gif') no-repeat center;
 }
 
-.ilightbox-holder.dark {
+.wpcp-lightbox.ilightbox-holder.dark {
 	padding: 5px;
 	background: #000;
-	
-	-webkit-box-shadow: 0 0 15px hsla(0,0%,0%,.8);
-	        box-shadow: 0 0 15px hsla(0,0%,0%,.8);
+
+	-webkit-box-shadow: 0 0 15px hsla(0, 0%, 0%, .8);
+	box-shadow: 0 0 15px hsla(0, 0%, 0%, .8);
 }
 
-.ilightbox-holder.dark .ilightbox-container  .ilightbox-caption {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-container .ilightbox-caption {
 	background: url('caption-bg.png');
 	color: #FFF;
 	text-shadow: 0 1px black;
 }
 
-.ilightbox-holder.dark .ilightbox-container .ilightbox-social {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-container .ilightbox-social {
 	background: url('caption-bg.png');
-	
+
 	-webkit-border-radius: 2px;
-	        border-radius: 2px;
+	border-radius: 2px;
 }
 
-.ilightbox-holder.dark .ilightbox-alert {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-alert {
 	background: url('alert.png') no-repeat center top;
 	color: #555;
 }
@@ -58,15 +59,15 @@
 .ilightbox-toolbar.dark a:first-of-type {
 	-webkit-border-bottom-left-radius: 3px;
 	-webkit-border-top-left-radius: 3px;
-		    border-bottom-left-radius: 3px;
-		    border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
 }
 
 .ilightbox-toolbar.dark a:last-of-type {
 	-webkit-border-bottom-right-radius: 3px;
 	-webkit-border-top-right-radius: 3px;
-		    border-bottom-right-radius: 3px;
-		    border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	border-top-right-radius: 3px;
 }
 
 .ilightbox-toolbar.dark a.ilightbox-close:hover {
@@ -106,9 +107,9 @@
 	width: 100%;
 	height: 40px;
 	text-align: center;
-	
-	-webkit-box-shadow: 0 0 25px rgba(0,0,0,.8);
-	        box-shadow: 0 0 25px rgba(0,0,0,.8);
+
+	-webkit-box-shadow: 0 0 25px rgba(0, 0, 0, .8);
+	box-shadow: 0 0 25px rgba(0, 0, 0, .8);
 }
 
 .isMobile .ilightbox-toolbar.dark a {
@@ -126,67 +127,65 @@
 
 .isMobile .ilightbox-toolbar.dark a.ilightbox-fullscreen {
 	background-image: url('fullscreen-icon-64.png');
-	background-image/*\**/: url('fullscreen-icon-ie.png')\9;  /* IE7-8 */
 }
 
 .isMobile .ilightbox-toolbar.dark a.ilightbox-close {
 	background-image: url('x-mark-icon-64.png');
-	background-image/*\**/: url('x-mark-icon-ie.png')\9;  /* IE7-8 */
 }
 
 .isMobile .ilightbox-toolbar.dark a.ilightbox-next-button {
 	background-image: url('arrow-next-icon-64.png');
-	background-image/*\**/: url('arrow-next-icon-ie.png')\9;  /* IE7-8 */
 	background-position: 52% 50%;
 }
 
 .isMobile .ilightbox-toolbar.dark a.ilightbox-prev-button {
 	background-image: url('arrow-prev-icon-64.png');
-	background-image/*\**/: url('arrow-prev-icon-ie.png')\9;  /* IE7-8 */
 	background-position: 48% 50%;
+}
+
+.isMobile .ilightbox-toolbar.dark a.ilightbox-download {
+	background-image: url('download-icon-64.png');
 }
 
 .isMobile .ilightbox-toolbar.dark a.ilightbox-play {
 	background-image: url('play-icon-64.png');
-	background-image/*\**/: url('play-icon-ie.png')\9;  /* IE7-8 */
 }
 
 .isMobile .ilightbox-toolbar.dark a.ilightbox-pause {
 	background-image: url('pause-icon-64.png');
-	background-image/*\**/: url('pause-icon-ie.png')\9;  /* IE7-8 */
 }
 
-.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-title {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-title {
 	font-size: 18px;
 	padding: 10px 8px;
 	padding-right: 60px;
 	color: #FFF;
 }
 
-.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar {
 	left: auto;
 	top: 5px;
 	right: 5px;
 }
 
-.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar a {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar a {
 	-webkit-border-radius: 0;
-	        border-radius: 0;
+	border-radius: 0;
 	float: right;
 }
 
-.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar a:first-of-type {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar a:first-of-type {
 	-webkit-border-bottom-right-radius: 3px;
 	-webkit-border-top-right-radius: 3px;
-		    border-bottom-right-radius: 3px;
-		    border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	border-top-right-radius: 3px;
 }
 
-.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar a:last-of-type {
+.wpcp-lightbox.ilightbox-holder.dark .ilightbox-inner-toolbar .ilightbox-toolbar a:last-of-type {
 	-webkit-border-bottom-left-radius: 3px;
 	-webkit-border-top-left-radius: 3px;
-		    border-bottom-left-radius: 3px;
-		    border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
 }
 
 /* Style thumbnails */
@@ -201,21 +200,20 @@
 /* Configure arrow buttons */
 .ilightbox-button.dark.disabled {
 	opacity: 0.1;
-	filter: alpha(opacity=10);  /* IE7-8 */
 	cursor: default;
 	background-color: #000 !important;
 }
+
 .ilightbox-button.dark span {
 	display: block;
 	width: 100%;
 	height: 100%;
 }
+
 .ilightbox-button.dark {
 	bottom: 0;
 	right: 0;
 	left: 0;
-	left/*\**/: 45%\9;  /* IE7-8 */
-	right/*\**/: auto\9;  /* IE7-8 */
 	width: 95px;
 	height: 75px;
 	margin: auto;
@@ -223,15 +221,17 @@
 	background-color: #000;
 
 	-webkit-border-radius: 0;
-	        border-radius: 0;
+	border-radius: 0;
 	-webkit-border-top-left-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
-		    border-top-left-radius: 5px;
-		    border-top-right-radius: 5px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
 }
+
 .ilightbox-button.ilightbox-button.dark:hover {
 	background-color: #111;
 }
+
 .ilightbox-button.ilightbox-prev-button.dark {
 	top: 0;
 	bottom: auto;
@@ -239,31 +239,31 @@
 	background-position: 50% 35%;
 
 	-webkit-border-radius: 0;
-	        border-radius: 0;
+	border-radius: 0;
 	-webkit-border-bottom-left-radius: 5px;
 	-webkit-border-bottom-right-radius: 5px;
-		    border-bottom-left-radius: 5px;
-		    border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
+
 .ilightbox-button.dark.horizontal {
 	right: 0;
 	left: auto;
 	top: 0;
 	bottom: 0;
-	top/*\**/: 41%\9;  /* IE7-8 */
-	bottom/*\**/: auto\9;  /* IE7-8 */
 	width: 75px;
 	height: 95px;
 	background-image: url('arrow-next-icon-64.png');
 	background-position: 65% 50%;
 
 	-webkit-border-radius: 0;
-	        border-radius: 0;
+	border-radius: 0;
 	-webkit-border-bottom-left-radius: 5px;
 	-webkit-border-top-left-radius: 5px;
-		    border-bottom-left-radius: 5px;
-		    border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	border-top-left-radius: 5px;
 }
+
 .ilightbox-button.ilightbox-prev-button.dark.horizontal {
 	right: auto;
 	left: 0;
@@ -271,9 +271,9 @@
 	background-position: 35% 50%;
 
 	-webkit-border-radius: 0;
-	        border-radius: 0;
+	border-radius: 0;
 	-webkit-border-bottom-right-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
-		    border-bottom-right-radius: 5px;
-		    border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	border-top-right-radius: 5px;
 }

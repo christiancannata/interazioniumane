@@ -156,7 +156,11 @@ class WOE_PDF_MC_Table extends WOE_FPDF {
 
 		$type = strtoupper( pathinfo( $source, PATHINFO_EXTENSION ) );
 
-		$this->Image( $source, $x, $this->GetY(), $width, $height, $type );
+		try {
+			$this->Image( $source, $x, $this->GetY(), $width, $height, $type );
+		} catch ( Exception $e ) {
+
+		}
 		$this->Ln( $height );
 
 		return true;
@@ -284,7 +288,11 @@ class WOE_PDF_MC_Table extends WOE_FPDF {
 				$link   = isset( $data[ $i ]['link'] ) ? $data[ $i ]['link'] : "";
 
 				$type   = strtoupper( pathinfo( $source, PATHINFO_EXTENSION ) );
-				$this->Image( $source, $x + $margin, $y + $margin  + $y_offset, $w - 2 * $margin, $image_height - 2 * $margin, $type );
+				try {
+					$this->Image( $source, $x + $margin, $y + $margin  + $y_offset, $w - 2 * $margin, $image_height - 2 * $margin, $type );
+				} catch ( Exception $e ) {
+
+				}
 
 				if ( $link ) {
 					$this->Link($x + $margin, $y + $margin, $w - 2 * $margin, $h - 2 * $margin, $link);

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -6,12 +14,6 @@ abstract class MediaplayerSkin
 {
     public $url;
     public $template_path;
-    public $processor;
-
-    public function __construct($processor)
-    {
-        $this->processor = $processor;
-    }
 
     public function load_player()
     {
@@ -48,18 +50,5 @@ abstract class MediaplayerSkin
     public function render_template()
     {
         return include $this->get_template_path();
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        if (empty($this->_processor)) {
-            global $LetsBox;
-            $this->_processor = $LetsBox->get_processor();
-        }
-
-        return $this->_processor;
     }
 }

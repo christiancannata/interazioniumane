@@ -262,14 +262,16 @@ function woe_get_all( start, percent, method ) {
 
 					jQuery( '#progress_div .title-download a' ).attr( 'href', ajaxurl + (
 						ajaxurl.indexOf( '?' ) === - 1 ? '?' : '&'
-					) + 'action=order_exporter&method=export_download&format=' + download_format + '&file_id=' + window.file_id + '&tab=' + settings_form.woe_active_tab );
+					) + 'action=order_exporter&method=export_download&format=' + download_format + '&file_id=' + window.file_id +
+						'&tab=' + settings_form.woe_active_tab + '&woe_nonce=' + settings_form.woe_nonce);
 					jQuery( '#progress_div .title-download' ).show();
 					jQuery( '#progress_div .title-cancel' ).hide();
 					jQuery( '#progressBar' ).hide();
 				} else {
 					jQuery( '#export_new_window_frame' ).attr( "src", ajaxurl + (
 						ajaxurl.indexOf( '?' ) === - 1 ? '?' : '&'
-					) + 'action=order_exporter&method=export_download&format=' + download_format + '&file_id=' + window.file_id + '&tab=' + settings_form.woe_active_tab );
+					) + 'action=order_exporter&method=export_download&format=' + download_format + '&file_id=' + window.file_id +
+						'&tab=' + settings_form.woe_active_tab  + '&woe_nonce=' + settings_form.woe_nonce);
 				}
 				woe_export_progress( 100, jQuery( '#progressBar' ) );
 

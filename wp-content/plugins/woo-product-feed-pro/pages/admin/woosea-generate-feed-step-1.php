@@ -8,7 +8,7 @@ function my_footer_text($default) {
 add_filter('admin_footer_text', 'my_footer_text');
 delete_option( 'woosea_cat_mapping' );
 $license_information = get_option( 'license_information' );
-$host = $_SERVER['HTTP_HOST'];
+$host = sanitize_text_field($_SERVER['HTTP_HOST']);
 
 /**
  * Create notification object
@@ -40,6 +40,24 @@ if (array_key_exists('project_hash', $_GET)){
                 }
         }
 } else {
+	// Sanitize values in multi-dimensional POST array        
+        if(is_array($_POST)){
+                foreach($_POST as $p_key => $p_value){
+                        if(is_array($p_value)){
+				foreach($p_value as $pp_key => $pp_value){
+					if(is_array($pp_value)){
+						foreach($pp_value as $ppp_key => $ppp_value){
+                                        		$_POST[$p_key][$pp_key][$ppp_key] = sanitize_text_field($ppp_value);
+						}	
+					}
+                                }
+                        } else {
+                                $_POST[$p_key] = sanitize_text_field($p_value);
+                        }
+                }       
+        } else {
+                $_POST = array();
+        } 
         $project = WooSEA_Update_Project::update_project($_POST);
         $channel_data = WooSEA_Update_Project::get_channel_data(sanitize_text_field($_POST['channel_hash']));
 
@@ -94,7 +112,6 @@ function woosea_hierarchical_term_tree($category, $prev_mapped){
 
 			// These are main categories
 			if($sub_category->parent == 0){
-
     				$args = array(
         				'parent' 	=> $sub_category->term_id,
 					'hide_empty'    => false,
@@ -126,8 +143,32 @@ function woosea_hierarchical_term_tree($category, $prev_mapped){
 			}
 			$r .= $sub_category->term_id !== 0 ? woosea_hierarchical_term_tree($sub_category->term_id, $prev_mapped) : null;
 		}
-    	}
-    	return $r;
+	}
+
+	$allowed_tags = array(
+		'tr' 	=> array(
+			'class'	=> array(),
+		),
+		'td' 	=> array(),
+		'input' => array(
+			'type' 	=> array(),
+			'name' 	=> array(),
+			'value'	=> array(),
+			'class' => array(),
+			'id'	=> array(),
+		),
+		'span' 	=> array(
+			'class'	=> array(),
+			'style'	=> array(),
+			'title'	=> array(),
+		),
+		'div'	=> array(
+			'id'	=> array(),
+		),
+		'>'	=> array(),
+		'&'	=> array(),
+	);
+    	return wp_kses_normalize_entities($r, $allowed_tags);
 }
 ?>
 
@@ -170,8 +211,8 @@ function woosea_hierarchical_term_tree($category, $prev_mapped){
 			?>
         		</tbody>
                              
- 			<form action="" method="post">
-			<input name="nonce_category_mapping" id="nonce_category_mapping" class="nonce_category_mapping" value="<?php print "$nonce";?>" type="hidden">
+			<form action="" method="post">
+ 			<?php wp_nonce_field( 'woosea_ajax_nonce' ); ?>
 
 			<tr>
 				<td colspan="3">
@@ -202,7 +243,7 @@ function woosea_hierarchical_term_tree($category, $prev_mapped){
 
 		<div class="woo-product-feed-pro-table-right">
 				<?php
-                                if($license_information['license_valid'] <> "true"){
+				if($license_information['license_valid'] <> "true"){
                                 ?>
 				<table class="woo-product-feed-pro-table">
                                         <tr>
@@ -217,10 +258,10 @@ function woosea_hierarchical_term_tree($category, $prev_mapped){
                                                                 <li><strong>3.</strong> <?php _e( 'Add GTIN, brand and more fields to your store','woo-product-feed-pro' );?></li>
                                                                 <li><strong>4.</strong> <?php _e( 'Exclude individual products from your feeds','woo-product-feed-pro' );?></li>
                                                                 <li><strong>5.</strong> <?php _e( 'WPML support','woo-product-feed-pro' );?></li>
-                                                                <li><strong>6.</strong> <?php _e( 'Aelia currency switcher support','woo-product-feed-pro' );?></li>
-                                                                <li><strong>7.</strong> <?php _e( 'Facebook pixel feature','woo-product-feed-pro' );?></li>
-								<li><strong>8.</strong> <?php _e( 'Polylang support','woo-product-feed-pro' );?></li>
-								<li><strong>9.</strong> <?php _e( 'TranslatePress support','woo-product-feed-pro' );?></li>
+								<li><strong>6.</strong> <?php _e( 'Aelia currency switcher support','woo-product-feed-pro' );?></li>
+								<li><strong>7.</strong> <?php _e( 'Curcy currency switcher support','woo-product-feed-pro' );?></li>
+								<li><strong>8.</strong> <?php _e( 'Facebook pixel feature','woo-product-feed-pro' );?></li>
+								<li><strong>9.</strong> <?php _e( 'Polylang support','woo-product-feed-pro' );?></li>
 							</ul>
                                                         <strong>
                                                         <a href="https://adtribes.io/pro-vs-elite/?utm_source=<?php print"$host";?>&utm_medium=page1&utm_campaign=why-upgrade-box" target="_blank"><?php _e( 'Upgrade to Elite here!','woo-product-feed-pro' );?></a>
@@ -267,7 +308,7 @@ function woosea_hierarchical_term_tree($category, $prev_mapped){
                                                                 <li><strong>9. <a href="https://adtribes.io/help-my-feed-processing-is-stuck/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=feed stuck" target="_blank"><?php _e( 'Help, my feed is stuck!','woo-product-feed-pro' );?></a></strong></li>
                                                                 <li><strong>10. <a href="https://adtribes.io/help-i-have-none-or-less-products-in-my-product-feed-than-expected/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=too few products" target="_blank"><?php _e( 'Help, my feed has no or too few products!','woo-product-feed-pro' );?></a></strong></li>
 								<li><strong>11. <a href="https://adtribes.io/polylang-support-product-feeds/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=polylang support" target="_blank"><?php _e( 'How to use the Polylang feature', 'woo-product-feed-pro' );?></a></strong></li>
-								<li><strong>12. <a href="https://adtribes.io/translatepress-support-product-feeds/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=translatepress support" target="_blank"><?php _e( 'How to use the TranslatePress feature', 'woo-product-feed-pro' );?></a></strong></li>
+                                                                <li><strong>12. <a href="https://adtribes.io/curcy-currency-switcher-feature/?utm_source=<?php print "$host";?>&utm_medium=page1&utm_campaign=curcy support" target="_blank"><?php _e( 'Enable Curcy currency switcher support','woo-product-feed-pro' );?></a></strong></li>
                                                         </ul>
                                                 </td>
                                         </tr>

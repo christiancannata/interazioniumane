@@ -3,14 +3,14 @@
  * Plugin Name: YITH WooCommerce Ajax Product Filter
  * Plugin URI: https://wordpress.org/plugins/yith-woocommerce-ajax-navigation/
  * Description: <code><strong>YITH WooCommerce AJAX Product Filter</strong></code> allows your users to find the product they are looking for as quickly as possible. Thanks to the plugin you will be able to set up one or more search filters for your WooCommerce products and improve the user experience of your shop. <a href="https://yithemes.com/" target="_blank">Get more plugins for your e-commerce shop on <strong>YITH</strong></a>
- * Version: 4.10.0
+ * Version: 4.21.0
  * Author: YITH
  * Author URI: https://yithemes.com/
  * Text Domain: yith-woocommerce-ajax-navigation
  * Domain Path: /languages/
  *
- * WC requires at least: 6.3
- * WC tested up to: 6.5
+ * WC requires at least: 7.4
+ * WC tested up to: 7.6
  *
  * @author  YITH
  * @package YITH\AjaxProductFilter
@@ -18,7 +18,7 @@
  */
 
 /**
- * Copyright 2022  YITH  (email : plugins@yithemes.com)
+ * Copyright 2023  YITH  (email : plugins@yithemes.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2, as
@@ -45,10 +45,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 ! defined( 'YITH_WCAN_DIR' ) && define( 'YITH_WCAN_DIR', plugin_dir_path( __FILE__ ) );
 ! defined( 'YITH_WCAN_INC' ) && define( 'YITH_WCAN_INC', YITH_WCAN_DIR . 'includes/' );
 ! defined( 'YITH_WCAN_ASSETS' ) && define( 'YITH_WCAN_ASSETS', YITH_WCAN_URL . 'assets/' );
-! defined( 'YITH_WCAN_VERSION' ) && define( 'YITH_WCAN_VERSION', '4.10.0' );
-! defined( 'YITH_WCAN_FREE_INIT' ) && define( 'YITH_WCAN_FREE_INIT', plugin_basename( __FILE__ ) );
+! defined( 'YITH_WCAN_VERSION' ) && define( 'YITH_WCAN_VERSION', '4.21.0' );
 ! defined( 'YITH_WCAN_FILE' ) && define( 'YITH_WCAN_FILE', __FILE__ );
 ! defined( 'YITH_WCAN_SLUG' ) && define( 'YITH_WCAN_SLUG', 'yith-woocommerce-ajax-navigation' );
+! defined( 'YITH_WCAN_INIT' ) && define( 'YITH_WCAN_INIT', plugin_basename( __FILE__ ) );
+! defined( 'YITH_WCAN_FREE_INIT' ) && define( 'YITH_WCAN_FREE_INIT', plugin_basename( __FILE__ ) );
 
 // define required functions.
 
@@ -66,7 +67,7 @@ if ( ! function_exists( 'yith_wcan_register_activation' ) ) {
 			require_once 'plugin-fw/yit-plugin-registration-hook.php';
 		}
 
-		register_activation_hook( YITH_WCAN_FILE, 'yith_plugin_registration_hook' );
+		register_activation_hook( __FILE__, 'yith_plugin_registration_hook' );
 	}
 }
 
@@ -77,23 +78,22 @@ if ( ! function_exists( 'yith_wcan_free_install' ) ) {
 	 * @return void
 	 *
 	 * @since 4.0
-	 * @author Andrea Grillo <andrea.grillo@yithemes.com>
+	 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 	 */
 	function yith_wcan_free_install() {
+		if ( ! function_exists( 'yith_deactivate_plugins' ) ) {
+			require_once 'plugin-fw/yit-deactive-plugin.php';
+		}
 
 		if ( ! function_exists( 'WC' ) ) {
 			add_action( 'admin_notices', 'yith_wcan_install_woocommerce_admin_notice' );
-		} elseif ( defined( 'YITH_WCAN_PREMIUM' ) ) {
-			add_action( 'admin_notices', 'yith_wcan_deactivate_free_version' );
-			deactivate_plugins( plugin_basename( __FILE__ ) );
+		} elseif ( defined( 'YITH_WCAN_PREMIUM' ) || defined( 'YITH_WCAN_EXTENDED' ) ) {
+			yith_deactivate_plugins( 'YITH_WCAN_FREE_INIT' );
 		} else {
 			/**
 			 * Instance main plugin class
 			 */
 			global $yith_wcan;
-
-			// load plugin text domain.
-			load_plugin_textdomain( 'yith-woocommerce-ajax-navigation', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 			$yith_wcan = yith_wcan_initialize();
 		}
@@ -108,8 +108,20 @@ if ( ! function_exists( 'yith_wcan_initialize' ) ) {
 	 * @since 1.0.0
 	 */
 	function yith_wcan_initialize() {
-		// Load required classes and functions.
+		// load plugin text domain.
+		load_plugin_textdomain( 'yith-woocommerce-ajax-navigation', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+
+		// load required classes and functions.
 		require_once YITH_WCAN_INC . 'class-yith-wcan.php';
+
+		if ( defined( 'YITH_WCAN_PREMIUM' ) && file_exists( YITH_WCAN_DIR . 'includes/class-yith-wcan-premium.php' ) ) {
+			require_once YITH_WCAN_INC . 'class-yith-wcan-extended.php';
+			require_once YITH_WCAN_INC . 'class-yith-wcan-premium.php';
+			return YITH_WCAN_Premium();
+		} elseif ( defined( 'YITH_WCAN_EXTENDED' ) && file_exists( YITH_WCAN_DIR . 'includes/class-yith-wcan-extended.php' ) ) {
+			require_once YITH_WCAN_INC . 'class-yith-wcan-extended.php';
+			return YITH_WCAN_Extended();
+		}
 
 		return YITH_WCAN();
 	}
@@ -134,37 +146,40 @@ if ( ! function_exists( 'yith_wcan_install_plugin_framework' ) ) {
 	}
 }
 
-if ( ! function_exists( 'yith_wcan_deactivate_free_version' ) ) {
-	/**
-	 * Print an admin notice if trying to activate free version when premium is already enabled
-	 *
-	 * @return void
-	 * @use    admin_notices hooks
-	 * @since  1.0
-	 * @author Andrea Grillo <andrea.grillo@yithemes.com>
-	 */
-	function yith_wcan_deactivate_free_version() {
-		?>
-		<div class="error">
-			<p><?php esc_html_e( 'You can\'t activate the free version of YITH WooCommerce Ajax Product Filter while you are using the premium one.', 'yith-wocc' ); ?></p>
-		</div>
-		<?php
-	}
-}
-
 if ( ! function_exists( 'yith_wcan_install_woocommerce_admin_notice' ) ) {
 	/**
 	 * Print an admin notice if woocommerce is deactivated
 	 *
 	 * @return void
-	 * @use    admin_notices hooks
-	 * @since  1.0
+	 *
 	 * @author Andrea Grillo <andrea.grillo@yithemes.com>
+	 * @since 1.0
+	 * @use admin_notices hooks
 	 */
 	function yith_wcan_install_woocommerce_admin_notice() {
 		?>
 		<div class="error">
 			<p><?php esc_html_e( 'YITH WooCommerce Ajax Product Filter is enabled but not effective. It requires WooCommerce in order to work.', 'yith-woocommerce-ajax-navigation' ); ?></p>
+		</div>
+		<?php
+	}
+}
+
+if ( ! function_exists( 'yith_wcan_deactivate_lower_tier_notice' ) ) {
+	/**
+	 * Print an admin notice if trying to activate this version when an higher tier is already enabled
+	 *
+	 * @return void
+	 * @use    admin_notices hooks
+	 * @since  1.0
+	 * @author Andrea Grillo <andrea.grillo@yithemes.com>
+	 */
+	function yith_wcan_deactivate_lower_tier_notice() {
+		?>
+		<div class="notice">
+			<p>
+				<?php esc_html_e( 'YITH WooCommerce Ajax Product Filter was deactivated as you\'re running an higher tier version of the same plugin.', 'yith-woocommerce-ajax-navigation' ); ?>
+			</p>
 		</div>
 		<?php
 	}

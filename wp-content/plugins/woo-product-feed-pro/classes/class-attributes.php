@@ -81,13 +81,22 @@ private function get_custom_attributes() {
 
 	if ( ! function_exists( 'woosea_get_meta_keys_for_post_type' ) ) :
 
-    		function woosea_get_meta_keys_for_post_type( $post_type, $sample_size = 5 ) {
-        		$meta_keys = array();
-        		$posts     = get_posts( array( 'post_type' => $post_type, 'limit' => $sample_size ) );
+    		function woosea_get_meta_keys_for_post_type( $post_type, $sample_size = 'modified' ) {
+			$meta_keys = array();
 
-        		foreach ( $posts as $post ) {
-            			$post_meta_keys = get_post_custom_keys( $post->ID );
-            			$meta_keys      = array_merge( $meta_keys, $post_meta_keys );
+                	$add_woosea_basic = get_option ('add_woosea_basic');
+			if($add_woosea_basic == "yes"){
+        			$posts     = get_posts( array( 'post_type' => $post_type, 'limit' => $sample_size ) );
+			} else {	
+				$posts     = get_posts( array( 'post_type' => $post_type, 'numberposts' => -1 ) );
+			}
+
+			foreach ( $posts as $post ) {
+				$post_meta_keys = get_post_custom_keys( $post->ID );
+				if(empty($post_meta_keys)){
+					$post_meta_keys = array();
+				}
+				$meta_keys      = array_merge( $meta_keys, $post_meta_keys );
         		}
 
         		// Use array_unique to remove duplicate meta_keys that we received from all posts
@@ -107,16 +116,6 @@ private function get_custom_attributes() {
                     		$list["custom_attributes_" . $value] = ucfirst($value_display);
 			} else {
                                 $data = @$wpdb->get_results(
-//                                      $wpdb->prepare("
-//                                              SELECT 
-//                                              meta.meta_id, 
-//                                              meta.meta_value AS type 
-//                                              FROM {$wpdb->prefix}postmeta AS meta,
-//                                              {$wpdb->prefix}posts AS posts 
-//                                              WHERE meta.post_id = posts.id 
-//                                              AND posts.post_type LIKE '%product%' 
-//                                              AND meta.meta_key='_product_attributes' AND meta.meta_value NOT LIKE \"%{}\";")
-
                                         $wpdb->prepare("
                                                 SELECT
                                                 meta.meta_id,
@@ -231,6 +230,7 @@ public function get_mapping_attributes_dropdown() {
 			"sku_item_group_id" => "SKU_ITEM_GROUP_ID (Facebook)",
 			"wc_post_id_product_id" => "Wc_post_id_product_id (Facebook)",
 			"title" => "Product name",
+			"title_slug" => "Product name slug",
 			"title_hyphen" => "Product name hyphen",
 			"mother_title" => "Product name parent product",
 			"mother_title_hyphen" => "Product name parent product hyphen",
@@ -302,11 +302,20 @@ public function get_mapping_attributes_dropdown() {
 			"condition" => "Condition",
 			"purchase_note" => "Purchase note",
 			"availability" => "Availability",
+			"availability_date_plus1week" => "Availability date + 1 week",
+			"availability_date_plus2week" => "Availability date + 2 weeks",
+			"availability_date_plus3week" => "Availability date + 3 weeks",
+			"availability_date_plus4week" => "Availability date + 4 weeks",
+			"availability_date_plus5week" => "Availability date + 5 weeks",
+			"availability_date_plus6week" => "Availability date + 6 weeks",
+			"availability_date_plus7week" => "Availability date + 7 weeks",
+			"availability_date_plus8week" => "Availability date + 8 weeks",
 			"region_id" => "Region Id",
 			"stock_status" => "Stock Status WooCommerce",
             		"quantity" => "Quantity [Stock]",
 			"virtual" => "Virtual",
 			"downloadable" => "Downloadable",
+			"publication_date" => "Feed publication date and time",
 			"product_type" => "Product Type",
 			"content_type" => "Content Type",
                         "exclude_from_catalog" => "Excluded from catalog",
@@ -344,7 +353,8 @@ public function get_mapping_attributes_dropdown() {
             		"image_7" => "Additional image 7",
             		"image_8" => "Additional image 8",
             		"image_9" => "Additional image 9",
-            		"image_10" => "Additional image 10",
+			"image_10" => "Additional image 10",
+			"non_local_image" => "Non local image",
 			"all_images" => "All images (comma separated)",
 			"all_gallery_images" => "All gallery images (comma separated)",
 			"all_images_kogan" => "All images Kogan (pipe separated)",
@@ -458,7 +468,8 @@ public function get_mapping_attributes_dropdown() {
 			"sku_item_group_id" => "SKU_ITEM_GROUP_ID (Facebook)",
 			"wc_post_id_product_id" => "Wc_post_id_product_id (Facebook)",
                         "title" => "Product name",
-                        "title_hyphen" => "Product name hyphen",
+			"title_slug" => "Product name slug",
+			"title_hyphen" => "Product name hyphen",
                         "mother_title" => "Product name parent product",
                         "mother_title_hyphen" => "Product name parent product hyphen",
 			"title_lc" => "Product name lowercase",
@@ -476,7 +487,8 @@ public function get_mapping_attributes_dropdown() {
 			"image" => "Main image",
                         "image_all" => "Main image simple and variations",
 			"feature_image" => "Feature image",
-                        "product_type" => "Product Type",
+			"non_local_image" => "Non local image",
+			"product_type" => "Product Type",
                         "content_type" => "Content Type",
 			"exclude_from_catalog" => "Excluded from catalog",
                         "exclude_from_search" => "Excluded from search",
@@ -505,11 +517,17 @@ public function get_mapping_attributes_dropdown() {
 			"condition" => "Condition",
 			"purchase_note" => "Purchase note",
 			"availability" => "Availability",
+		        "availability_date_plus1week" => "Availability date + 1 week",
+                        "availability_date_plus2week" => "Availability date + 2 weeks",
+                        "availability_date_plus3week" => "Availability date + 3 weeks",
+                        "availability_date_plus4week" => "Availability date + 4 weeks",
+                        "availability_date_plus5week" => "Availability date + 5 weeks",	
 			"region_id" => "Region Id",
 			"stock_status" => "Stock Status WooCommerce",
 			"quantity" => "Quantity [Stock]",
 			"virtual" => "Virtual",
-                        "downloadable" => "Downloadable",
+			"downloadable" => "Downloadable",
+			"publication_date" => "Feed publication date and time",
 			"price" => "Price",
                         "regular_price" => "Regular price",
                         "sale_price" => "Sale price",
@@ -577,7 +595,8 @@ public function get_mapping_attributes_dropdown() {
             		"image_7" => "Additional image 7",
             		"image_8" => "Additional image 8",
             		"image_9" => "Additional image 9",
-            		"image_10" => "Additional image 10",
+			"image_10" => "Additional image 10",
+			"non_local_image" => "Non local image",
                         "all_images" => "All images (comma separated)",
                         "all_gallery_images" => "All gallery images (comma separated)",
 			"all_images_kogan" => "All images Kogan (pipe separated)",

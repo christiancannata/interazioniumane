@@ -20,7 +20,7 @@ if ( ! defined( 'YITH_WCAN' ) ) {
 } // Exit if accessed directly
 ?>
 
-<?php if ( $preset->has_filters() ) : ?>
+<?php if ( $preset->has_relevant_filters() ) : ?>
 	<div class="yith-wcan-filters <?php echo esc_attr( $preset->get_additional_classes() ); ?>" id="preset_<?php echo esc_attr( $preset->get_id() ); ?>" data-preset-id="<?php echo esc_attr( $preset->get_id() ); ?>" data-target="<?php echo esc_attr( $selector ); ?>">
 		<div class="filters-container">
 			<form method="POST">

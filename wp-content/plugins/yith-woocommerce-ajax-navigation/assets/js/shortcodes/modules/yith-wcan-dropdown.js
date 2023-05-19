@@ -52,11 +52,11 @@ export default class YITH_WCAN_Dropdown {
 				labels: {
 					emptyLabel: defaultAll
 						? defaultAll
-						: yith_wcan_shortcodes.labels.empty_option,
+						: yith_wcan_shortcodes.labels?.empty_option,
 					searchPlaceholder:
-						yith_wcan_shortcodes.labels.search_placeholder,
-					noItemsFound: yith_wcan_shortcodes.labels.no_items,
-					showMore: yith_wcan_shortcodes.labels.show_more,
+						yith_wcan_shortcodes.labels?.search_placeholder,
+					noItemsFound: yith_wcan_shortcodes.labels?.no_items,
+					showMore: yith_wcan_shortcodes.labels?.show_more,
 				},
 			};
 
@@ -118,7 +118,7 @@ export default class YITH_WCAN_Dropdown {
 				class: 'search-field',
 				type: 'search',
 				placeholder: this.options.labels.searchPlaceholder,
-			} );
+			} ).attr( 'autocomplete', 'off' );
 
 		$container.append( $search ).prependTo( $dropdwonSpan );
 		this.$_search = $search;
@@ -128,7 +128,7 @@ export default class YITH_WCAN_Dropdown {
 	_initShowMoreTemplate( $dropdwonSpan ) {
 		const $showMore = $( '<a/>', {
 			class: 'show-more',
-			text: this.options.labels.showMore.replace(
+			text: this.options.labels.showMore?.replace(
 				'%d',
 				this.options.perPage
 			),
@@ -233,8 +233,11 @@ export default class YITH_WCAN_Dropdown {
 			self.updateLabel();
 		} );
 
-		// close dropdown on external click
-		$( document ).on( 'click', this.closeDropdown.bind( this ) );
+		// close dropdown on external click; do this handler only once for any dropdown in the page
+		if ( ! globalThis?.yith_wcan_dropdown_init ) {
+			$( document ).on( 'click', this._closeAllDropdowns );
+			globalThis.yith_wcan_dropdown_init = true;
+		}
 	}
 
 	// open dropdown
@@ -246,6 +249,21 @@ export default class YITH_WCAN_Dropdown {
 	// close dropdown
 	closeDropdown() {
 		this.$_main?.removeClass( 'open' ).addClass( 'closed' );
+	}
+
+	// close all dropdowns
+	_closeAllDropdowns() {
+		const dropdowns = $( document )
+			.find( 'select.enhanced' )
+			.filter( function ( i, select ) {
+				const $el = $( select );
+
+				return !! $el.data( 'dropdown' );
+			} );
+
+		dropdowns.each( function () {
+			$( this ).data( 'dropdown' ).closeDropdown();
+		} );
 	}
 
 	// close other dropdowns
@@ -408,6 +426,7 @@ export default class YITH_WCAN_Dropdown {
 		$anchor = $( '<a/>', {
 			href: option.length ? option.data( 'filter_url' ) : '#',
 			html: label,
+			rel: 'nofollow',
 			'data-title': option.length ? option.data( 'title' ) : '',
 		} );
 
@@ -469,7 +488,7 @@ export default class YITH_WCAN_Dropdown {
 
 			this.$_items.append( items );
 
-			$( document ).trigger( 'yith_wcan_dropdown_updated' );
+			this.$originalSelect.trigger( 'yith_wcan_dropdown_updated' );
 
 			if ( hasMore ) {
 				this._showLoadMore();

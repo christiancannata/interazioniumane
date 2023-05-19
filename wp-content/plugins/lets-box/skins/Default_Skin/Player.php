@@ -2,28 +2,28 @@
 
 namespace TheLion\LetsBox\MediaPlayers;
 
+use TheLion\LetsBox\Processor;
+
 class Default_Skin extends \TheLion\LetsBox\MediaplayerSkin
 {
     public $url;
     public $template_path = __DIR__.'/Template.php';
 
-    public function __construct($processor)
+    public function __construct()
     {
-        parent::__construct($processor);
-
         $this->url = plugins_url('', __FILE__);
     }
 
     public function load_scripts()
     {
         $dependence = false;
-        if ('Yes' === $this->get_processor()->get_setting('mediaplayer_load_native_mediaelement')) {
+        if ('Yes' === Processor::instance()->get_setting('mediaplayer_load_native_mediaelement')) {
             $dependence = ['wp-mediaelement'];
         }
 
         wp_register_script('Default_Skin.Polyfill', 'https://cdn.polyfill.io/v3/polyfill.min.js?features=es6,html5-elements,NodeList.prototype.forEach,Element.prototype.classList,CustomEvent,Object.entries,Object.assign,document.querySelector&flags=gated');
         wp_register_script('Default_Skin.Library', $this->get_url().'/js/mediaelement-and-player.min.js', $dependence, LETSBOX_VERSION);
-        wp_register_script('LetsBox.Default_Skin.Player', $this->get_url().'/js/Player.js', ['Default_Skin.Polyfill', 'Default_Skin.Library'], LETSBOX_VERSION, true);
+        wp_register_script('LetsBox.Default_Skin.Player', $this->get_url().'/js/Player.js', ['Default_Skin.Polyfill', 'Default_Skin.Library', 'WPCloudplugin.Libraries'], LETSBOX_VERSION, true);
 
         wp_enqueue_script('LetsBox.Default_Skin.Player');
 
@@ -35,10 +35,13 @@ class Default_Skin extends \TheLion\LetsBox\MediaplayerSkin
                 'mejs.fullscreen-off' => esc_html__('Turn off Fullscreen'),
                 'mejs.fullscreen-on' => esc_html__('Go Fullscreen'),
                 'mejs.download-video' => esc_html__('Download Video'),
-                'mejs.download-file' => esc_html__('Download'),
+                'mejs.download-file' => esc_html__('Download', 'wpcloudplugins'),
+                'mejs.share' => esc_html__('Share', 'wpcloudplugins'),
+                'mejs.deeplink' => esc_html__('Direct link', 'wpcloudplugins'),
                 'mejs.purchase' => esc_html__('Purchase', 'wpcloudplugins'),
+                'mejs.search' => esc_html__('Search', 'wpcloudplugins') .'...',
                 'mejs.fullscreen' => esc_html__('Fullscreen'),
-                'mejs.time-jump-forward' => [esc_html__('Jump forward 1 second'), esc_html__('Jump forward %1 seconds')],
+                'mejs.time-jump-forward' => [esc_html__('Jump forward 30 second'), esc_html__('Jump forward %1 seconds')],
                 'mejs.loop' => esc_html__('Toggle Loop'),
                 'mejs.play' => esc_html__('Play'),
                 'mejs.pause' => esc_html__('Pause'),
@@ -50,7 +53,7 @@ class Default_Skin extends \TheLion\LetsBox\MediaplayerSkin
                 'mejs.playlist-shuffle' => esc_html__('Shuffle'),
                 'mejs.time-slider' => esc_html__('Time Slider'),
                 'mejs.time-help-text' => esc_html__('Use Left/Right Arrow keys to advance one second, Up/Down arrows to advance ten seconds.'),
-                'mejs.time-skip-back' => [esc_html__('Skip back 1 second'), esc_html__('Skip back %1 seconds')],
+                'mejs.time-skip-back' => [esc_html__('Skip back 10 second'), esc_html__('Skip back %1 seconds')],
                 'mejs.captions-subtitles' => esc_html__('Captions/Subtitles'),
                 'mejs.captions-chapters' => esc_html__('Chapters'),
                 'mejs.none' => esc_html__('None'),

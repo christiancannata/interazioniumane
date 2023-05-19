@@ -74,6 +74,7 @@ if ( ! class_exists( 'YITH_WCAN_Elementor_Reset_Button' ) ) {
 			return array( 'general', 'yith' );
 		}
 
+
 		/**
 		 * Register YITH_WCAN_Elementor_Reset_Button widget controls.
 		 *
@@ -82,7 +83,7 @@ if ( ! class_exists( 'YITH_WCAN_Elementor_Reset_Button' ) ) {
 		 * @since  1.0.0
 		 * @access protected
 		 */
-		protected function register_controls() { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		protected function register_controls() {
 			$this->start_controls_section(
 				'fields_section',
 				array(
@@ -127,8 +128,19 @@ if ( ! class_exists( 'YITH_WCAN_Elementor_Reset_Button' ) ) {
 		 *
 		 * @since  1.0.0
 		 * @access protected
+		 * @deprecated Elementor 2.9.0
 		 */
-		protected function content_template() { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		protected function _content_template() { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+			$this->content_template();
+		}
+
+		/**
+		 * Render YITH_WCAN_Elementor_Reset_Button widget output on the Elementor editor.
+		 *
+		 * @since  1.0.0
+		 * @access protected
+		 */
+		protected function content_template() {
 			$frontend = new YITH_WCAN_Frontend();
 
 			$_GET['min_price']     = 10;

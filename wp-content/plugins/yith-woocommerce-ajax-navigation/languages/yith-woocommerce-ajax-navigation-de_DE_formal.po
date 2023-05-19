@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: YITH WooCommerce Ajax Product Filter\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yith-woocommerce-"
 "ajax-product-filter\n"
-"POT-Creation-Date: 2022-01-12 10:08:55+00:00\n"
+"POT-Creation-Date: 2023-02-08 12:53:00+00:00\n"
 "PO-Revision-Date: 2021-03-02 11:03+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -16,66 +16,66 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Poedit 2.4.2\n"
 
-#: includes/class-yith-wcan-admin.php:196
+#: includes/class-yith-wcan-admin.php:189
 msgid ""
 "<b>100% mobile friendly:</b> Show filters in a modal view which is purposely "
 "designed for users visiting your site by smartphones or tablets"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:197
+#: includes/class-yith-wcan-admin.php:190
 msgid ""
 "Show filters in the default layout or also in an <b>horizontal toolbar above "
 "products</b> (like Zalando)"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:198
+#: includes/class-yith-wcan-admin.php:191
 msgid ""
 "Allow customers to <b>filter for price ranges</b> (unlimited ranges and the "
-"last range can show: “& above”) or using the <b>price slider</b>\n"
+"last range can show: “& above”) or using the <b>price slider</b>"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:200
+#: includes/class-yith-wcan-admin.php:192
 msgid ""
 "Allow customers to <b>filter for review</b> and <b>for brand</b> (with the "
 "support to YITH WooCommerce Brands plugin)"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:201
+#: includes/class-yith-wcan-admin.php:193
 msgid ""
 "Allow users to <b>order products</b> (by popularity, date, price, date of "
 "publishing, average rating, etc) and see only \tproducts in stock/featured/"
 "on sale"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:202
+#: includes/class-yith-wcan-admin.php:194
 msgid ""
 "<b>Show the active filters</b> (with X to remove them) and choose their "
 "position (above products, above or under filters area)"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:203
+#: includes/class-yith-wcan-admin.php:195
 msgid ""
 "Create <b>color swatches with image support</b> (to better identify "
 "gradients, textures, patterns, etc.) and with 2 colors"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:204
+#: includes/class-yith-wcan-admin.php:196
 msgid "Show the options using <b>custom images or icons</b>"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:205
+#: includes/class-yith-wcan-admin.php:197
 msgid ""
 "Choose the <b>order of the options</b> (alphabetical, terms order, terms "
 "count, etc.), enable tooltips and show each set of filters in toggle"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:206
+#: includes/class-yith-wcan-admin.php:198
 msgid ""
 "Choose how to manage terms not availables: hide them OR shown them in grey "
 "color and not clickables "
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:207
+#: includes/class-yith-wcan-admin.php:199
 msgid "<b>Regular updates, Translations and Premium Support</b>"
 msgstr ""
 
@@ -170,13 +170,7 @@ msgstr "Alle Filter zurücksetzen"
 msgid "Button Label"
 msgstr "Button-Beschriftung"
 
-#: init.php:149
-msgid ""
-"You can't activate the free version of YITH WooCommerce Ajax Product Filter "
-"while you are using the premium one."
-msgstr ""
-
-#: init.php:167
+#: init.php:162
 #, fuzzy
 msgid ""
 "YITH WooCommerce Ajax Product Filter is enabled but not effective. It "
@@ -184,6 +178,12 @@ msgid ""
 msgstr ""
 "YITH WooCommerce AJAX Product Filter ist aktiviert, aber nicht nutzbar. Es "
 "wird WooCommerce benötigt."
+
+#: init.php:181
+msgid ""
+"YITH WooCommerce Ajax Product Filter was deactivated as you're running an "
+"higher tier version of the same plugin."
+msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
@@ -198,70 +198,77 @@ msgstr ""
 "können Ihre Benutzer das gesuchte Produkt so schnell wie möglich finden. "
 "Dank des Plugins können Sie einen oder mehrere Suchfilter für Ihre "
 "WooCommerce-Produkte einrichten, das Benutzererlebnis verbessern und den "
-"Eindruck vermitteln, eines großen und zuverlässigen Shop vermitteln. <a href="
-"\"https://yithemes.com/\" target=\"_blank\">Weitere Plugins für Ihren E-"
+"Eindruck vermitteln, eines großen und zuverlässigen Shop vermitteln. <a "
+"href=\"https://yithemes.com/\" target=\"_blank\">Weitere Plugins für Ihren E-"
 "Commerce-Shop erhalten Sie bei <strong>YITH</strong></a>"
 
-#: includes/class-yith-wcan-admin.php:107
+#: includes/class-yith-wcan-admin.php:104
 msgctxt "[Admin] Copy confirmation message"
 msgid "Content copied to your clipboard"
 msgstr "Inhalt in die Zwischenablage kopiert"
 
-#: includes/class-yith-wcan-admin.php:108
+#: includes/class-yith-wcan-admin.php:105
 msgctxt "[Admin] Confirm filter delete message"
 msgid "Are you sure you want to delete this item?"
 msgstr "Sind Sie sicher, dass Sie dieses Element löschen möchten?"
 
 #. translators: 1. Number of items that will be added.
-#: includes/class-yith-wcan-admin.php:110
+#: includes/class-yith-wcan-admin.php:107
 msgctxt "[Admin] Confirm add all terms message"
 msgid "Are you sure you want to proceed? This operation will add %s items"
 msgstr ""
 "Sind Sie sicher, dass Sie fortfahren möchten? Dieser Vorgang wird %s "
 "Elemente hinzufügen"
 
-#: includes/class-yith-wcan-admin.php:111
+#: includes/class-yith-wcan-admin.php:108
 msgctxt "[Admin] Error message"
 msgid "\"Filter title\" is a required field"
 msgstr ""
 
-#: includes/class-yith-wcan-admin.php:114 templates/admin/preset-filter.php:33
+#: includes/class-yith-wcan-admin.php:111 templates/admin/preset-filter.php:33
 msgctxt "[Admin] Message shown when filter has empty title"
 msgid "&lt; no title &gt;"
 msgstr "&lt; Kein Titel &gt;"
 
-#: includes/class-yith-wcan-admin.php:115
+#: includes/class-yith-wcan-admin.php:112
 msgctxt "[Admin] Media library title, when selecting images"
 msgid "Select media you want to use"
 msgstr "Die zu verwendenden Medien auswählen"
 
-#: includes/class-yith-wcan-admin.php:116
+#: includes/class-yith-wcan-admin.php:113
 msgctxt "[Admin] Media library confirm button, when selecting images"
 msgid "Use this media"
 msgstr "Dieses Medium verwenden"
 
-#: includes/class-yith-wcan-admin.php:184
+#: includes/class-yith-wcan-admin.php:177
 msgctxt "[Admin] tab name"
 msgid "Filter presets"
 msgstr "Filter-Presets"
 
-#: includes/class-yith-wcan-admin.php:185
+#: includes/class-yith-wcan-admin.php:178
 msgctxt "[Admin] tab name"
 msgid "General settings"
 msgstr "Allgemeine Einstellungen"
 
-#: includes/class-yith-wcan-admin.php:186
+#: includes/class-yith-wcan-admin.php:179
 #, fuzzy
 msgctxt "[Admin] tab name"
 msgid "SEO"
 msgstr "SEO"
 
-#: includes/class-yith-wcan-admin.php:190
+#: includes/class-yith-wcan-admin.php:183
 msgctxt "[Admin] tab name"
 msgid "Legacy"
 msgstr "Legacy"
 
-#: includes/class-yith-wcan-admin.php:217
+#: includes/class-yith-wcan-admin.php:207
+msgctxt "[HELP TAB] Video title"
+msgid ""
+"Check this video to learn how to <b>create a filter preset and show it on "
+"the shop page:</b>"
+msgstr ""
+
+#: includes/class-yith-wcan-admin.php:230
 msgctxt "[Admin] Plugin description"
 msgid ""
 "It allows your users to find the product they are looking for as quickly as "
@@ -270,44 +277,37 @@ msgstr ""
 "Ermöglicht Ihren Benutzern, das gesuchte Produkt so schnell wie möglich zu "
 "finden."
 
-#: includes/class-yith-wcan-admin.php:230
-msgctxt "[HELP TAB] Video title"
-msgid ""
-"Check this video to learn how to <b>create a filter preset and show it on "
-"the shop page:</b>"
-msgstr ""
-
-#: includes/class-yith-wcan-admin.php:349
+#: includes/class-yith-wcan-admin.php:348
 msgctxt "[Admin] Generic item name, in \"You have no x yet\""
 msgid "item"
 msgstr "Artikel"
 
-#: includes/class-yith-wcan-admin.php:350
+#: includes/class-yith-wcan-admin.php:349
 msgctxt "[Admin] Preset table empty message second line"
 msgid "But don't worry, here you can create your first one!"
 msgstr "Aber keine Sorge, hier können Sie eine erste erstellen!"
 
-#: includes/class-yith-wcan-admin.php:500
+#: includes/class-yith-wcan-admin.php:490
 msgctxt "[ADMIN] WooCommerce Tools tab, name of the tool"
 msgid "Clear Product Filter transients"
 msgstr "Produktfilter-Tansients löschen"
 
-#: includes/class-yith-wcan-admin.php:506
+#: includes/class-yith-wcan-admin.php:496
 msgctxt "[ADMIN] WooCommerce Tools tab, name of the tool"
 msgid "Run filter widgets upgrade"
 msgstr "Upgrade der Filter-Widgets ausführen"
 
-#: includes/class-yith-wcan-admin.php:501
+#: includes/class-yith-wcan-admin.php:491
 msgctxt "[ADMIN] WooCommerce Tools tab, button for the tool"
 msgid "Clear"
 msgstr "Löschen"
 
-#: includes/class-yith-wcan-admin.php:507
+#: includes/class-yith-wcan-admin.php:497
 msgctxt "[ADMIN] WooCommerce Tools tab, button for the tool"
 msgid "Run"
 msgstr "Start"
 
-#: includes/class-yith-wcan-admin.php:502
+#: includes/class-yith-wcan-admin.php:492
 msgctxt "[ADMIN] WooCommerce Tools tab, description of the tool"
 msgid ""
 "This will clear all transients related to the YITH WooCommerce AJAX Product "
@@ -319,7 +319,7 @@ msgstr ""
 "Konfiguration Ihres Produkts geändert haben und die Filter nicht die "
 "erwarteten Ergebnisse anzeigen. "
 
-#: includes/class-yith-wcan-admin.php:508
+#: includes/class-yith-wcan-admin.php:498
 msgctxt "[ADMIN] WooCommerce Tools tab, description of the tool"
 msgid ""
 "This will create a preset for any sidebar of your shop containing filter "
@@ -567,56 +567,56 @@ msgctxt "[Admin] Filter edit form, sorting options"
 msgid "Sort by price: high to low"
 msgstr "Sortieren nach Preis: Preis absteigend"
 
-#: includes/class-yith-wcan-filter.php:116
+#: includes/class-yith-wcan-filter.php:123
 msgctxt "[Admin] Default filter title"
 msgid "New filter"
 msgstr "Neuer Filter"
 
-#: includes/class-yith-wcan-frontend.php:591
-#: includes/filters/class-yith-wcan-filter-tax.php:62
+#: includes/class-yith-wcan-frontend.php:626
+#: includes/filters/class-yith-wcan-filter-tax.php:57
 msgctxt "[FRONTEND] \"All\" label shown when no term is selected"
 msgid "All"
 msgstr "Alle"
 
-#: includes/class-yith-wcan-frontend.php:592
+#: includes/class-yith-wcan-frontend.php:627
 msgctxt "[FRONTEND] Search placeholder shown in terms dropdown"
 msgid "Search..."
 msgstr "Suchen..."
 
-#: includes/class-yith-wcan-frontend.php:593
+#: includes/class-yith-wcan-frontend.php:628
 msgctxt "[FRONTEND] Empty items list in the dropdown"
 msgid "No item found"
 msgstr "Kein Artikel gefunden"
 
 #. translators: 1. Number of items to show.
-#: includes/class-yith-wcan-frontend.php:595
+#: includes/class-yith-wcan-frontend.php:630
 msgctxt "[FRONTEND] Show more link on terms dropdown"
 msgid "Show %d more"
 msgstr "%d mehr anzeigen"
 
-#: includes/class-yith-wcan-frontend.php:596
+#: includes/class-yith-wcan-frontend.php:631
 msgctxt "[FRONTEND] Alt text for modal close button on mobile"
 msgid "Close"
 msgstr "Schließen"
 
-#: includes/class-yith-wcan-frontend.php:597
+#: includes/class-yith-wcan-frontend.php:632
 msgctxt "[FRONTEND] Label for filter button, on horizontal layout"
 msgid "Save"
 msgstr ""
 
-#: includes/class-yith-wcan-frontend.php:598
+#: includes/class-yith-wcan-frontend.php:633
 msgctxt "[FRONTEND] Label for filter button, on mobile modal"
 msgid "Show results"
 msgstr "Ergebnisse anzeigen"
 
-#: includes/class-yith-wcan-frontend.php:599
+#: includes/class-yith-wcan-frontend.php:634
 msgctxt ""
 "[FRONTEND] Label for clear selection link, that appears above filter after "
 "selection"
 msgid "Clear"
 msgstr "Löschen"
 
-#: includes/class-yith-wcan-frontend.php:600
+#: includes/class-yith-wcan-frontend.php:635
 msgctxt ""
 "[FRONTEND] Label for clear selection link, that appears above filter after "
 "selection"
@@ -699,28 +699,28 @@ msgctxt "[ADMIN] Name of the preset elementor widget"
 msgid "YITH AJAX Filters Reset Button"
 msgstr "YITH AJAX-Filter Reset-Button"
 
-#: includes/elementor/class-yith-wcan-elementor-filters.php:89
+#: includes/elementor/class-yith-wcan-elementor-filters.php:90
 #: includes/shortcodes/class-yith-wcan-shortcode-filters.php:60
 msgctxt "[ELEMENTOR] Default preset option"
 msgid "Choose an option"
 msgstr "Wählen Sie eine Option"
 
-#: includes/elementor/class-yith-wcan-elementor-filters.php:97
+#: includes/elementor/class-yith-wcan-elementor-filters.php:98
 msgctxt "[ELEMENTOR] Section title"
 msgid "Filters"
 msgstr "Filter"
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:89
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:90
 msgctxt "[ELEMENTOR] Section title"
 msgid "General"
 msgstr "Allgemein"
 
-#: includes/elementor/class-yith-wcan-elementor-filters.php:105
+#: includes/elementor/class-yith-wcan-elementor-filters.php:106
 msgctxt "[ELEMENTOR] Control label"
 msgid "Preset"
 msgstr "Preset"
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:100
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:101
 msgctxt "[ELEMENTOR] Widget description"
 msgid ""
 "This widget will display \"Filters reset\" button, wherever it is placed"
@@ -728,7 +728,7 @@ msgstr ""
 "Dieses Widget zeigt den Button \"Filter zurücksetzen\" an, wo immer es "
 "platziert wird"
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:103
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:104
 msgctxt "[ELEMENTOR] Widget description"
 msgid ""
 "It will allow users to reset the filer selection; it will only appear when "
@@ -737,7 +737,7 @@ msgstr ""
 "Wird es dem Benutzer ermöglichen, die Auswahl des Filters zurückzusetzen; es "
 "erscheint nur, wenn ein Filter aktiv ist. "
 
-#: includes/elementor/class-yith-wcan-elementor-reset-button.php:107
+#: includes/elementor/class-yith-wcan-elementor-reset-button.php:108
 msgctxt "[ELEMENTOR] Widget description"
 msgid ""
 "You can use this block to place \"Reset filters\" button inside your page, "
@@ -757,7 +757,7 @@ msgctxt "For multicolor: I.E. white and red T-Shirt"
 msgid "Color 2"
 msgstr "Farbe 2"
 
-#: includes/functions-yith-wcan.php:1026
+#: includes/functions-yith-wcan.php:1032
 msgctxt "[FRONTEND] Star rating template"
 msgid "star"
 msgid_plural "stars"
@@ -765,7 +765,7 @@ msgstr[0] "Stern"
 msgstr[1] "Sternen"
 
 #. translators: 1. Rating.
-#: includes/functions-yith-wcan.php:1041
+#: includes/functions-yith-wcan.php:1047
 msgctxt "[FRONTEND] Star rating label"
 msgid "Rated %s out of 5"
 msgstr "Bewertet mit %s von 5"
@@ -834,17 +834,7 @@ msgctxt "[Admin] Preset delete confirm label"
 msgid "Are you sure you want to delete this preset?"
 msgstr "Sind Sie sicher, dass Sie dieses Preset löschen möchten?"
 
-#: includes/tables/class-yith-wcan-filter-presets-table.php:175
-msgctxt "[Admin] on-off yes"
-msgid "YES"
-msgstr "JA"
-
-#: includes/tables/class-yith-wcan-filter-presets-table.php:175
-msgctxt "[Admin] on-off no"
-msgid "NO"
-msgstr "NEIN"
-
-#: includes/tables/class-yith-wcan-filter-presets-table.php:195
+#: includes/tables/class-yith-wcan-filter-presets-table.php:200
 msgctxt ""
 "[Admin] Name of the item missing, shown in preset-empty-content template"
 msgid "filter preset"
@@ -856,7 +846,7 @@ msgctxt ""
 msgid "filter"
 msgstr "Filter"
 
-#: includes/tables/class-yith-wcan-filter-presets-table.php:196
+#: includes/tables/class-yith-wcan-filter-presets-table.php:201
 msgctxt "[Admin] New preset button label"
 msgid "Create a new preset"
 msgstr "Neues Preset erstellen"
@@ -1115,23 +1105,23 @@ msgstr ""
 "Wenn aktiviert wird das Attribut  rel=\"nofollow\"für alle Filter-Links des "
 "Plugins gesetzt"
 
-#: plugin-options/seo-options.php:63
+#: plugin-options/seo-options.php:64
 msgctxt "[ADMIN] Seo settings page"
 msgid "URL permalinks"
 msgstr "URL Permalinks"
 
-#: plugin-options/seo-options.php:64
+#: plugin-options/seo-options.php:65
 msgctxt "[ADMIN] Seo settings page"
 msgid "Choose how to manage browser URL during filtering"
 msgstr ""
 "Wählen Sie, wie die Browser-URL während der Filterung verwaltet werden soll "
 
-#: plugin-options/seo-options.php:70
+#: plugin-options/seo-options.php:71
 msgctxt "[ADMIN] Seo settings page"
 msgid "Add filters parameters to default URL"
 msgstr "Filterparameter zur Standard-URL hinzufügen "
 
-#: plugin-options/seo-options.php:71
+#: plugin-options/seo-options.php:72
 msgctxt "[ADMIN] Seo settings page"
 msgid "Don't change URL"
 msgstr "URL nicht ändern"
@@ -1439,8 +1429,9 @@ msgstr ""
 #: templates/admin/upgrade-note-modal.php:51
 msgctxt "[ADMIN] Upgrade note modal content"
 msgid ""
-"We suggest you to <a href=\"%1$s\">check this video</a> or <a href=\"%2$s"
-"\">read the documentation</a> to learn how to use this new feature."
+"We suggest you to <a href=\"%1$s\">check this video</a> or <a "
+"href=\"%2$s\">read the documentation</a> to learn how to use this new "
+"feature."
 msgstr ""
 "Wir empfehlen, <a href=\"%1$s\">dieses Video</a> oder <a href=\"%2$s\">die "
 "Dokumentation (engl.)</a> anzusehen, um zu lernen, wie dieses neue Feature "
@@ -1493,6 +1484,14 @@ msgstr "Nein Danke"
 msgctxt "[FRONTEND] Reset button for preset shortcode"
 msgid "Reset filters"
 msgstr "Filter zurücksetzen"
+
+#~ msgctxt "[Admin] on-off yes"
+#~ msgid "YES"
+#~ msgstr "JA"
+
+#~ msgctxt "[Admin] on-off no"
+#~ msgid "NO"
+#~ msgstr "NEIN"
 
 #~ msgctxt "[Admin] tab name"
 #~ msgid "Premium Version"
@@ -1959,8 +1958,8 @@ msgstr "Filter zurücksetzen"
 #~ "product's loop"
 #~ msgstr ""
 #~ "Sie können diesen Block verwenden, um \"Aktive Filter\"-Labels innerhalb "
-#~ "Ihrer Seite zu platzieren, wenn die Option \"Aktive Filter Label Position"
-#~ "\" für den Loop Ihres Produkts nicht funktioniert "
+#~ "Ihrer Seite zu platzieren, wenn die Option \"Aktive Filter Label "
+#~ "Position\" für den Loop Ihres Produkts nicht funktioniert "
 
 #~ msgctxt "[ELEMENTOR] Widget description"
 #~ msgid "This widget will display button to open mobile filters modal opener"
@@ -1985,8 +1984,8 @@ msgstr "Filter zurücksetzen"
 #~ "your page, when \"Show as modal on mobile\" option won't work for your "
 #~ "product's loop"
 #~ msgstr ""
-#~ "Sie können diesen Block verwenden, um das \"Modale Fenster für Mobilgeräte"
-#~ "\" innerhalb Ihrer Seite zu platzieren, wenn die Option \"Auf "
+#~ "Sie können diesen Block verwenden, um das \"Modale Fenster für "
+#~ "Mobilgeräte\" innerhalb Ihrer Seite zu platzieren, wenn die Option \"Auf "
 #~ "Mobilgeräten als modales Fenster\" für den Loop Ihres Produkts nicht "
 #~ "funktioniert "
 

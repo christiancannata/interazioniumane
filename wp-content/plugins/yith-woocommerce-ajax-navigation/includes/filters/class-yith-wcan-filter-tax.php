@@ -38,17 +38,12 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 		}
 
 		/**
-		 * Method that will output content of the filter on frontend
+		 * Checks if filter is relevant to current product selection
 		 *
-		 * @return string Template for current filter
+		 * @return bool Whether filter is relevant or not.
 		 */
-		public function render() {
-			$atts = array(
-				'filter' => $this,
-				'preset' => $this->get_preset(),
-			);
-
-			return yith_wcan_get_template( 'filters/filter-tax.php', $atts, false );
+		public function is_relevant() {
+			return apply_filters( 'yith_wcan_is_filter_relevant', $this->is_enabled() && $this->has_relevant_terms(), $this );
 		}
 
 		/**
@@ -341,7 +336,7 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 		 * @return bool
 		 */
 		public function has_relevant_terms() {
-			return ! ! $this->get_formatted_terms();
+			return apply_filters( 'yith_wcan_filter_has_relevant_terms', ! ! $this->get_formatted_terms(), $this );
 		}
 
 		/**
@@ -355,6 +350,7 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 			}
 
 			$hide_empty = 'yes' === yith_wcan_get_option( 'yith_wcan_hide_empty_terms', 'no' );
+			$taxonomy   = $this->get_taxonomy();
 			$terms      = $this->get_terms_options();
 			$children   = array();
 			$result     = array();
@@ -362,7 +358,7 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 			$sorted_terms = get_terms(
 				array_merge(
 					array(
-						'taxonomy'   => $this->get_taxonomy(),
+						'taxonomy'   => $taxonomy,
 						'order'      => $this->get_order(),
 						'number'     => apply_filters( 'yith_wcan_filter_tax_term_limit', 0 ),
 						'fields'     => 'ids',
@@ -422,9 +418,9 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 				}
 			}
 
-			$this->formatted_terms = $result;
+			$this->formatted_terms = apply_filters( "yith_wcan_filter_get_formatted_terms_for_{$taxonomy}", $result, $this );
 
-			return $result;
+			return $this->formatted_terms;
 		}
 
 		/**
@@ -469,7 +465,8 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 						'include' => array_keys( $terms ),
 					),
 					'term_order' === $this->get_order_by() ? array(
-						'orderby' => 'include',
+						'orderby'  => 'meta_value_num',
+						'meta_key' => 'order', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					) : array(
 						'orderby' => $this->get_order_by(),
 					)
@@ -535,15 +532,17 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Tax' ) ) {
 		 * Checks whether term should be hidden
 		 *
 		 * @param array $term_options Array describing term and its options.
-		 * @return bool Whther to hide term or not
+		 * @return bool Whether to hide term or not
 		 */
 		protected function is_term_hidden( $term_options ) {
+			$hidden = false;
+
 			// hide when term doesn't match current selection.
 			if ( 'hide' === $this->get_adoptive() && ! $term_options['count'] && empty( $term_options['children'] ) ) {
-				return true;
+				$hidden = true;
 			}
 
-			return false;
+			return apply_filters( 'yith_wcan_filter_tax_is_term_hidden', $hidden, $term_options );
 		}
 	}
 }

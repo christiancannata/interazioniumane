@@ -84,49 +84,48 @@ class GFLetsBox extends GFAddOn
     public function gform_editor_js()
     {
         ?>
-            <script type='text/javascript'>
-                (function ($) {
-                'use strict';
-                                    
-                  /* Which settings field should be visible for our custom field*/
-                  fieldSettings["letsbox"] = ".label_setting, .description_setting, .admin_label_setting, .error_message_setting, .css_class_setting, .visibility_setting, .rules_setting, .label_placement_setting, .letsbox_setting, .conditional_logic_field_setting, .conditional_logic_page_setting, .conditional_logic_nextbutton_setting"; //this will show all the fields of the Paragraph Text field minus a couple that I didn't want to appear.
+<script type='text/javascript'>
+(function($) {
+    'use strict';
 
-                  /* binding to the load field settings event to initialize */
-                  $(document).on("gform_load_field_settings", function (event, field, form) {
-                    if (field["LetsBoxShortcode"] !== undefined && field["LetsBoxShortcode"] !== '') {
-                      jQuery("#field_letsbox").val(field["LetsBoxShortcode"]);
-                    } else {
-                      /* Default value */
-                      var defaultvalue = '[letsbox class="gf_upload_box" mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
-                      jQuery("#field_letsbox").val(defaultvalue);
-                    }
-                  });
+    /* Which settings field should be visible for our custom field*/
+    fieldSettings["letsbox"] = ".label_setting, .description_setting, .admin_label_setting, .error_message_setting, .css_class_setting, .visibility_setting, .rules_setting, .label_placement_setting, .letsbox_setting, .conditional_logic_field_setting, .conditional_logic_page_setting, .conditional_logic_nextbutton_setting"; //this will show all the fields of the Paragraph Text field minus a couple that I didn't want to appear.
 
-                  /* Shortcode Generator Popup */
-                  $('.LetsBox-GF-shortcodegenerator').on('click',function (e) {
-                    var shortcode = jQuery("#field_letsbox").val();
-                    shortcode = shortcode.replace('[letsbox ', '').replace('"]', '');
-                    var query = encodeURIComponent(shortcode).split('%3D%22').join('=').split('%22%20').join('&');
-                    tb_show("Build Shortcode for Form", ajaxurl + '?action=letsbox-getpopup&' + query + '&type=shortcodebuilder&asuploadbox=1&callback=wpcp_lb_gf_add_content&TB_iframe=true&height=600&width=800');
-                  });
+    /* binding to the load field settings event to initialize */
+    $(document).on("gform_load_field_settings", function(event, field, form) {
+        if (field["LetsBoxShortcode"] !== undefined && field["LetsBoxShortcode"] !== '') {
+            jQuery("#field_letsbox").val(field["LetsBoxShortcode"]);
+        } else {
+            /* Default value */
+            var defaultvalue = '[letsbox mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
+            jQuery("#field_letsbox").val(defaultvalue);
+        }
+    });
 
-                         /* Callback function to add shortcode to GF field */
-                if (typeof window.wpcp_lb_gf_add_content === 'undefined') {
-                    window.wpcp_lb_gf_add_content = function (data) {
-                        $('#field_letsbox').val(data);
-                        SetFieldProperty('LetsBoxShortcode', data);
+    /* Shortcode Generator Popup */
+    $('.LetsBox-GF-shortcodegenerator').on('click', function(e) {
+        var shortcode = jQuery("#field_letsbox").val();
+        shortcode = shortcode.replace('[letsbox ', '').replace('"]', '');
+        var query = encodeURIComponent(shortcode).split('%3D%22').join('=').split('%22%20').join('&');
+        tb_show("Build Shortcode for Form", ajaxurl + '?action=letsbox-getpopup&' + query + '&type=shortcodebuilder&asuploadbox=1&callback=wpcp_lb_gf_add_content&TB_iframe=true&height=600&width=1024');
+    });
 
-                        tb_remove();
-                    }
-                }
-                })(jQuery);
+    /* Callback function to add shortcode to GF field */
+    if (typeof window.wpcp_lb_gf_add_content === 'undefined') {
+        window.wpcp_lb_gf_add_content = function(data) {
+            $('#field_letsbox').val(data);
+            SetFieldProperty('LetsBoxShortcode', data);
 
-                function SetDefaultValues_letsbox(field) {
-                  field.label = '<?php esc_html_e('Attach your documents', 'wpcloudplugins'); ?>';
-                }
+            tb_remove();
+        }
+    }
+})(jQuery);
 
-            </script>
-            <?php
+function SetDefaultValues_letsbox(field) {
+    field.label = '<?php esc_html_e('Attach your documents', 'wpcloudplugins'); ?>';
+}
+</script>
+<?php
     }
 
     public function letsbox_input($input, $field, $value, $lead_id, $form_id)
@@ -149,13 +148,13 @@ class GFLetsBox extends GFAddOn
     {
         if (1430 == $position) {
             ?>
-                <li class="letsbox_setting field_setting">
-                  <label for="field_letsbox">Lets-Box Shortcode <?php echo gform_tooltip('form_field_letsbox'); ?></label>
-                  <a href="#" class='button-primary LetsBox-GF-shortcodegenerator '><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></a>
-                  <textarea id="field_letsbox" class="fieldwidth-3 fieldheight-2" onchange="SetFieldProperty('LetsBoxShortcode', this.value)"></textarea>
-                  <br/><small>Missing a Lets-Box Gravity Form feature? Please let me <a href="https://florisdeleeuwnl.zendesk.com/hc/en-us/requests/new" target="_blank">know</a>!</small>
-                </li>
-                <?php
+<li class="letsbox_setting field_setting">
+    <label for="field_letsbox">Lets-Box Shortcode <?php echo gform_tooltip('form_field_letsbox'); ?></label>
+    <a href="#" class='button-primary LetsBox-GF-shortcodegenerator '><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></a>
+    <textarea id="field_letsbox" class="fieldwidth-3 fieldheight-2" onchange="SetFieldProperty('LetsBoxShortcode', this.value)"></textarea>
+    <br /><small>Missing a Lets-Box Gravity Form feature? Please let me <a href="https://florisdeleeuwnl.zendesk.com/hc/en-us/requests/new" target="_blank">know</a>!</small>
+</li>
+<?php
         }
     }
 
@@ -281,7 +280,7 @@ class GFLetsBox extends GFAddOn
             return $private_folder_name;
         }
 
-        if ('gf_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('gf_upload_box' !== \TheLion\LetsBox\Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name;
         }
 
@@ -302,11 +301,13 @@ class GFLetsBox extends GFAddOn
      */
     public function rename_private_folder_names_for_guests($private_folder_name_guest, $processor)
     {
-        if ('gf_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('gf_upload_box' !== \TheLion\LetsBox\Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name_guest;
         }
 
-        return str_replace(esc_html__('Guests', 'wpcloudplugins').' - ', '', $private_folder_name_guest);
+        $prefix = \TheLion\LetsBox\Processor::instance()->get_setting('userfolder_name_guest_prefix');
+
+        return str_replace($prefix, '', $private_folder_name_guest);
     }
 }
 

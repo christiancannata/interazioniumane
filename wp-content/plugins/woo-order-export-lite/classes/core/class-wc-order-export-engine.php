@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -202,7 +205,6 @@ class WC_Order_Export_Engine {
 				$format_settings[ $m[1] ] = $val;
 			}
 		}
-
 		self::init_labels( $settings, $labels, $static_vals, $field_formats );
 
 		$class = 'WOE_Formatter_' . $format;
@@ -245,6 +247,8 @@ class WC_Order_Export_Engine {
 				$field_formats[ $segment ] = array_map( "array_unique", $label_data['field_formats'] );
 				//clean up possible duplicates
 //				$field_formats = array_merge_recursive( $field_formats, $label_data['field_formats'] );
+			} else {
+				$field_formats[ $segment ] = array();
 			}
 
 		}
@@ -344,6 +348,7 @@ class WC_Order_Export_Engine {
 		}
 		
 		$options['strip_tags_product_fields'] = ! empty( $settings['strip_tags_product_fields'] );
+        $options['strip_html_tags'] = ! empty( $settings['strip_html_tags'] );
 
 		return $options;
 	}
@@ -403,7 +408,9 @@ class WC_Order_Export_Engine {
 
 	protected static function try_mark_order( $order_id, $settings ) {
 		if ( $settings['mark_exported_orders'] ) {
-			update_post_meta( $order_id, 'woe_order_exported', current_time( 'timestamp' ) );
+            $order = new WC_Order($order_id);
+            $order->add_meta_data('woe_order_exported' . apply_filters("woe_exported_postfix",''), current_time( 'timestamp' ), true);
+            $order->save();
 		}
 	}
 
@@ -456,7 +463,7 @@ class WC_Order_Export_Engine {
                 $sort_field = $settings['sort'];
 		$settings = self::replace_sort_field( $settings );
 		if ( $make_mode == 'estimate' OR $make_mode =='estimate_preview' ) { //if estimate return total count
-			return $wpdb->get_var( str_replace( 'ID AS order_id', 'COUNT(ID) AS order_count', $sql ) );
+			return $wpdb->get_var( str_replace( 'orders.ID AS order_id', 'COUNT(orders.ID) AS order_count', $sql ) );
 		} elseif ( $make_mode == 'preview' ) {
                         if (preg_match('/setup_field_/i', $sort_field)) {
                             $sql .= apply_filters( "woe_sql_get_order_ids_order_by",
@@ -493,7 +500,7 @@ class WC_Order_Export_Engine {
 			if ( $make_mode == 'start_estimate' ) { //Start return total count
 				$duplicate_settings = $formater->get_duplicate_settings();
 				return array(
-					'total' => $wpdb->get_var( str_replace( 'ID AS order_id', 'COUNT(ID) AS order_count', $sql ) ),
+					'total' => $wpdb->get_var( str_replace( 'orders.ID AS order_id', 'COUNT(orders.ID) AS order_count', $sql ) ),
 					'max_line_items' => isset( $duplicate_settings['products']['max_cols'] ) ? $duplicate_settings['products']['max_cols'] : 0,
 					'max_coupons' => isset( $duplicate_settings['coupons']['max_cols'] ) ? $duplicate_settings['coupons']['max_cols'] : 0,
 				);
@@ -650,7 +657,15 @@ class WC_Order_Export_Engine {
 	}
 
 	public static function replace_sort_field( $settings ) {
-		$settings['sort'] = ! in_array( $settings['sort'], self::get_wp_posts_fields() ) ?  'ordermeta_cf_sort.meta_value' : $settings['sort'];
+        $isHPOSEnabled = self::isHPOSEnabled();
+        if ($isHPOSEnabled && ($key = array_search($settings['sort'], self::get_wp_posts_fields())) !== false)
+        {
+            $wcOrdersFields = self::get_wc_orders_fields();
+            $settings['sort'] = $wcOrdersFields[$key];
+        }
+		$settings['sort'] = ! in_array( $settings['sort'],
+            $isHPOSEnabled ? self::get_wc_orders_fields() : self::get_wp_posts_fields() ) ?
+            'ordermeta_cf_sort.meta_value' : $settings['sort'];
 		$settings['sort'] = apply_filters("woe_adjust_sort_field", $settings['sort'], $settings);
 		return $settings;
 	}
@@ -663,8 +678,26 @@ class WC_Order_Export_Engine {
 			'post_status',
 		);
 	}
+
+    public static function get_wc_orders_fields() {
+        return array(
+            'order_id',
+            'date_created_gmt',
+            'date_updated_gmt',
+            'status',
+        );
+    }
+
 	public static function get_filename($prefix, $filename = '') {
 		$filename = ( ! empty( $filename ) ? $filename : self::tempnam( sys_get_temp_dir(), $prefix ) );
 		return apply_filters( 'woe_custom_export_get_filename', $filename );
 	}
+
+    public static function isHPOSEnabled() {
+        $isHPOSEnabled = false;
+        if (class_exists('Automattic\WooCommerce\Utilities\OrderUtil')) {
+            $isHPOSEnabled = OrderUtil::custom_orders_table_usage_is_enabled();
+        }
+        return $isHPOSEnabled;
+    }
 }

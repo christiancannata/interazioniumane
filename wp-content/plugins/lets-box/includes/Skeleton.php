@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -14,26 +21,26 @@ class Skeleton
     {
         for ($i = 0; $i < $amount; ++$i) {
             ?>
-        <div class="entry <?php echo $type; ?> skeleton-entry">
-          <div class="entry_block">
-            <?php
+<div class="entry <?php echo $type; ?> skeleton-entry">
+    <div class="entry_block">
+        <?php
         if ('file' === $type) {
             ?> <div class="entry_thumbnail skeleton skeleton-img"></div><?php
         } ?>
-            <div class="entry-info">
-              <div class="entry-info-icon skeleton skeleton-icon"></div>
-              <div class="entry-info-name"><span class="skeleton skeleton-text"></span></div>
-              <?php
+        <div class="entry-info">
+            <div class="entry-info-icon skeleton skeleton-icon"></div>
+            <div class="entry-info-name"><span class="skeleton skeleton-text"></span></div>
+            <?php
         if ('file' === $type) {
             ?>
-              <div class="entry-info-modified-date skeleton skeleton-text-small"></div>
-              <div class="entry-info-size skeleton skeleton-text-small"></div>
-              <?php
+            <div class="entry-info-modified-date skeleton skeleton-text-small"></div>
+            <div class="entry-info-size skeleton skeleton-text-small"></div>
+            <?php
         } ?>
-            </div>
-          </div>
         </div>
-        <?php
+    </div>
+</div>
+<?php
         }
     }
 
@@ -50,15 +57,12 @@ class Skeleton
         for ($i = 0; $i < $amount; ++$i) {
             $target_width = round($target_height * $dimensions[array_rand($dimensions)]); ?>
 
-        <div class="image-container entry">
-          <a>
-            <img class="skeleton skeleton-gallery-img"
-              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII="
-              width="<?php echo $target_width; ?>" height="<?php echo $target_height; ?>"
-              style="width:<?php echo $target_width; ?>px !important;height:<?php echo $target_height; ?>px !important; ">
-          </a>
-        </div>
-        <?php
+<div class="image-container entry">
+    <a>
+        <img class="skeleton skeleton-gallery-img" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=" width="<?php echo $target_width; ?>" height="<?php echo $target_height; ?>" style="width:<?php echo $target_width; ?>px !important;height:<?php echo $target_height; ?>px !important; ">
+    </a>
+</div>
+<?php
         }
     }
 }

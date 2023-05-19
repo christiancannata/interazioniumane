@@ -17,7 +17,7 @@
 get_header();
 ?>
 
-<main id="site-content" role="main">
+<main id="site-content">
 
 	<?php
 
@@ -25,6 +25,9 @@ get_header();
 	$archive_subtitle = '';
 
 	if ( is_search() ) {
+		/**
+		 * @global WP_Query $wp_query WordPress Query object.
+		 */
 		global $wp_query;
 
 		$archive_title = sprintf(
@@ -98,7 +101,7 @@ get_header();
 			<?php
 			get_search_form(
 				array(
-					'label' => __( 'search again', 'twentytwenty' ),
+					'aria_label' => __( 'search again', 'twentytwenty' ),
 				)
 			);
 			?>

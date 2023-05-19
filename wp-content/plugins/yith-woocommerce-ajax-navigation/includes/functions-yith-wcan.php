@@ -805,6 +805,12 @@ if ( ! function_exists( 'yith_wcan_is_product_attribute' ) ) {
 	 * @return bool
 	 */
 	function yith_wcan_is_product_attribute( $attribute = '' ) {
+		global $wp_query;
+
+		if ( ! $wp_query ) {
+			return false;
+		}
+
 		return preg_match( '/pa_' . $attribute . '.*/', get_query_var( 'taxonomy' ) );
 	}
 }

@@ -40,7 +40,7 @@ class WC_Order_Export_Manage {
 			$name = self::settings_name_actions;
 		}
 
-		return $name;
+		return apply_filters("woe_get_settings_name_for_mode", $name, $mode);
 	}
 
 	// arrays
@@ -347,6 +347,7 @@ class WC_Order_Export_Manage {
 			'export_all_comments'          => 0,
 			'export_refund_notes'          => 0,
 			'strip_tags_product_fields'    => 0,
+            'strip_html_tags'              => 0,
 			'round_item_tax_rate'          => 0,
 			'cleanup_phone'                => 0,
 			'convert_serialized_values'    => 0,
@@ -624,7 +625,11 @@ class WC_Order_Export_Manage {
 			unset( $data['export_rule'] );
 			unset( $data['schedule'] );
 		}
-
+		// don't allow to import PHP code if user has no permissions to add this code 
+		if ( ! WC_Order_Export_Admin::user_can_add_custom_php() ) {
+			$data['custom_php']  = 0;
+			$data['custom_php_code']  = "";
+		}
 		return $data;
 	}
 

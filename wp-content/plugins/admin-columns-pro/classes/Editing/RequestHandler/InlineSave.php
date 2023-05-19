@@ -9,7 +9,6 @@ use AC\Type\ListScreenId;
 use ACP\Editing\ApplyFilter;
 use ACP\Editing\Editable;
 use ACP\Editing\ListScreen;
-use ACP\Editing\Middleware\SaveValue;
 use ACP\Editing\Model;
 use ACP\Editing\RequestHandler;
 use ACP\Editing\Service;
@@ -27,10 +26,9 @@ class InlineSave implements RequestHandler {
 	}
 
 	public function handle( Request $request ) {
-
 		$response = new Response\Json();
 
-		$id = $request->filter( 'id', null, FILTER_SANITIZE_NUMBER_INT );
+		$id = (int) $request->filter( 'id', null, FILTER_SANITIZE_NUMBER_INT );
 
 		if ( ! $id ) {
 			$response->error();
@@ -42,7 +40,7 @@ class InlineSave implements RequestHandler {
 			$response->error();
 		}
 
-		$list_screen = $this->storage->find( new ListScreenId( $list_id ) );
+		$list_screen = $this->storage->find_by_user( new ListScreenId( $list_id ), wp_get_current_user() );
 
 		if ( ! $list_screen instanceof ListScreen ) {
 			$response->error();
@@ -54,8 +52,9 @@ class InlineSave implements RequestHandler {
 			$response->error();
 		}
 
-		if ( ! $strategy->user_has_write_permission( $id ) ) {
-			$response->set_message( __( "You don't have permissions to edit this item", 'codepress-admin-columns' ) )->error();
+		if ( ! $strategy->user_can_edit_item( $id ) ) {
+			$response->set_message( __( "You don't have permissions to edit this item", 'codepress-admin-columns' ) )
+			         ->error();
 		}
 
 		$column = $list_screen->get_column_by_name( $request->get( 'column' ) );
@@ -70,12 +69,21 @@ class InlineSave implements RequestHandler {
 			$response->error();
 		}
 
+		$id = (int) $request->get( 'id' );
+		$form_data = $request->get( 'value' );
+
+		$filter = new ApplyFilter\SaveValue( $id, $column );
+		$form_data = $filter->apply_filters( $form_data );
+
 		try {
-			$request->add_middleware( new SaveValue( new ApplyFilter\SaveValue( $id, $column ) ) );
+			do_action( 'acp/editing/before_save', $column, $id, $form_data );
 
-			$service->update( $request );
+			$service->update(
+				$id,
+				$form_data
+			);
 
-			do_action( 'acp/editing/saved', $column, $id, $request->get( 'value' ) );
+			do_action( 'acp/editing/saved', $column, $id, $form_data );
 		} catch ( Exception $e ) {
 			$response->set_message( $e->getMessage() )
 			         ->error();
@@ -87,7 +95,14 @@ class InlineSave implements RequestHandler {
 			         ->error();
 		}
 
-		$edit_value = ( new ApplyFilter\EditValue( $id, $column ) )->apply_filters( $service->get_value( $id ) );
+		$filter = new ApplyFilter\EditValue( $id, $column );
+
+		try {
+			$edit_value = $filter->apply_filters( $service->get_value( $id ) );
+		} catch ( Exception $e ) {
+			$response->set_message( $e->getMessage() )
+			         ->error();
+		}
 
 		$response
 			->set_parameters( [

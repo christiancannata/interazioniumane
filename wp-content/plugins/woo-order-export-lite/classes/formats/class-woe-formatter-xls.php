@@ -260,7 +260,7 @@ class WOE_Formatter_Xls extends WOE_Formatter_Plain_Format {
 						foreach($this->settings['global_job_settings']['order_fields'] as $order_field) {
 							if ($column === $order_field['key'] || $order_field['key'] === 'plain_orders_'. $column) {
 								if (isset($order_field['sum'])) {
-									$summary_row[$column] = (isset($summary_row[$column]) ? $summary_row[$column] : 0) + floatval(str_replace(',', '.', $cell));
+									$summary_row[$column] = (isset($summary_row[$column]) ? $summary_row[$column] : 0) + apply_filters("woe_summary_row_prepare_value", floatval(str_replace(',', '.', $cell)), $cell);
 								} else {
 									$summary_row[$column] = '';
 								}
@@ -272,6 +272,8 @@ class WOE_Formatter_Xls extends WOE_Formatter_Plain_Format {
 			}
 
                         if (!empty( array_keys($summary_row) ) && array_filter($summary_row, function ($row) { return $row !== ''; })) {
+                            $summary_row = WOE_Formatter::output( $summary_row );
+
                             $summary_row[array_keys($summary_row)[apply_filters("woe_summary_row_title_pos",0)]] = $this->settings['global_job_settings']['summary_row_title'];
                             fwrite( $this->handle,
                                 '<tr style="font-weight:bold"><td>' . join( '</td><td>', $summary_row ) . "</td><tr>\n" );
@@ -400,7 +402,7 @@ class WOE_Formatter_Xls extends WOE_Formatter_Plain_Format {
 					foreach($this->settings['global_job_settings']['order_fields'] as $order_field) {
 						if (isset($order_field['key'])  && ($column === $order_field['key']  || $order_field['key'] === 'plain_orders_'. $column)) {
 							if (isset($order_field['sum'])) {
-								$summary_row[$column] = (isset($summary_row[$column]) ? $summary_row[$column] : 0) + floatval(str_replace(',', '.', $cell));
+								$summary_row[$column] = (isset($summary_row[$column]) ? $summary_row[$column] : 0) + apply_filters("woe_summary_row_prepare_value", floatval(str_replace(',', '.', $cell)), $cell);
 							} else {
 								$summary_row[$column] = '';
 							}
@@ -501,8 +503,20 @@ class WOE_Formatter_Xls extends WOE_Formatter_Plain_Format {
 					 */
 
 					$value = $cell->getValue();
-					if($value)
-						$cell->getHyperlink()->setUrl($value);
+
+                    if ($value) {
+                        //parse html link tag
+                        if (preg_match('/<a[^>]+href=\"(.*?)\"[^>]*>(.*?)<\/a>/', $value, $matches)) {
+                            if (isset($matches[1])) {
+                                $cell->getHyperlink()->setUrl(htmlspecialchars_decode($matches[1]));
+                            }
+                            if (isset($matches[2])) {
+                                $cell->setValue($matches[2]);
+                            }
+                        } else {
+                            $cell->getHyperlink()->setUrl($value);
+                        }
+                    }
 				}
 			}
 

@@ -1,25 +1,19 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace ACP\QuickAdd\Controller;
 
 use AC\ListScreen;
 use AC\ListScreenRepository\Storage;
-use AC\Registrable;
+use AC\Registerable;
 use AC\Request;
 use AC\Type\ListScreenId;
 use ACP\QuickAdd\Model;
 use RuntimeException;
 
-class AjaxNewItem implements Registrable {
+class AjaxNewItem implements Registerable {
 
-	/**
-	 * @var Storage
-	 */
 	private $storage;
 
-	/**
-	 * @var Request
-	 */
 	protected $request;
 
 	public function __construct( Storage $storage, Request $request ) {
@@ -42,18 +36,18 @@ class AjaxNewItem implements Registrable {
 		}
 	}
 
-	private function is_request() {
+	private function is_request(): bool {
 		return $this->request->get( 'ac_action' ) === 'acp_add_new_inline';
 	}
 
-	public function handle_request() {
+	public function handle_request(): void {
 		if ( ! wp_verify_nonce( $this->request->get( '_ajax_nonce' ), 'ac-ajax' ) ) {
 			return;
 		}
 
 		$response = new JsonResponse();
 
-		$list_screen = $this->storage->find( new ListScreenId( $this->request->get( 'layout' ) ) );
+		$list_screen = $this->storage->find_by_user( new ListScreenId( $this->request->get( 'layout' ) ), wp_get_current_user() );
 
 		if ( ! $list_screen ) {
 			$response->error();

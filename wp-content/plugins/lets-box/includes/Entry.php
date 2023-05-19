@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -56,7 +64,7 @@ class Entry extends EntryAbstract
         $full_path .= $this->get_name();
         $this->set_path($full_path);
 
-        $this->set_trashed((null !== $api_entry->getTrashedAt()));
+        $this->set_trashed(null !== $api_entry->getTrashedAt());
 
         $this->set_size($api_entry->getSize());
         $this->set_description($api_entry->getDescription());
@@ -92,16 +100,16 @@ class Entry extends EntryAbstract
 
         // Can File be edited via Box
         $editsupport = [];
-        $editwithbox = (in_array($this->get_extension(), $editsupport));
+        $editwithbox = in_array($this->get_extension(), $editsupport);
         if ($editwithbox) {
             $this->set_can_edit_by_cloud(true);
         }
 
         // Direct Download URL, not always available only for paid accounts. Valid for just 15 minutes!
-        //$shared_link = $api_entry->getSharedLink();
-        //if ($shared_link['download_url']) {
+        // $shared_link = $api_entry->getSharedLink();
+        // if ($shared_link['download_url']) {
         //    $this->set_direct_download_link($shared_link['download_url']);
-        //}
+        // }
         $this->set_save_as($this->create_save_as());
 
         // Icon
@@ -139,7 +147,7 @@ class Entry extends EntryAbstract
         $this->set_thumbnail_medium($thumbnail_icon_large);
         $this->set_thumbnail_large($thumbnail_icon_large);
 
-        //https://developer.box.com/guides/representations/thumbnail/
+        // https://developer.box.com/guides/representations/thumbnail/
         if (empty($this->representations) || empty($this->representations['entries'])) {
             return $this;
         }

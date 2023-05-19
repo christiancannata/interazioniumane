@@ -1,14 +1,30 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
 class Shortcodes
 {
     /**
-     *  @var \TheLion\LetsBox\Processor
+     * The single instance of the class.
+     *
+     * @var Shortcodes
      */
-    private $_processor;
+    protected static $_instance;
 
+    /**
+     * The file name of the requested cache. This will be set in construct.
+     *
+     * @var string
+     */
+    private $_cache_name;
+    
     /**
      * Contains the location to the cache file.
      *
@@ -40,12 +56,10 @@ class Shortcodes
      */
     private $_updated = false;
 
-    public function __construct(Processor $processor)
+    public function __construct()
     {
-        $this->_processor = $processor;
-
         $this->_cache_name = get_current_blog_id();
-        if ($this->_processor->is_network_authorized()) {
+        if (Processor::instance()->is_network_authorized()) {
             $this->_cache_name = 'network';
         }
         $this->_cache_name .= '.shortcodes';
@@ -59,6 +73,24 @@ class Shortcodes
     public function __destruct()
     {
         $this->update_cache();
+    }
+
+    /**
+     * Shortcodes Instance.
+     *
+     * Ensures only one instance is loaded or can be loaded.
+     *
+     * @return Shortcodes - Shortcodes instance
+     *
+     * @static
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+
+        return self::$_instance;
     }
 
     public function remove_shortcode($token)
@@ -119,16 +151,6 @@ class Shortcodes
         return $this->_updated;
     }
 
-    public function get_cache_name()
-    {
-        return $this->_cache_name;
-    }
-
-    public function get_cache_location()
-    {
-        return $this->_cache_location;
-    }
-
     public function reset_cache()
     {
         $this->_nodes = [];
@@ -143,7 +165,17 @@ class Shortcodes
         }
     }
 
-    public function load_cache()
+    private function get_cache_name()
+    {
+        return $this->_cache_name;
+    }
+
+    private function get_cache_location()
+    {
+        return $this->_cache_location;
+    }
+
+    private function load_cache()
     {
         $cache = $this->_read_local_cache('close');
 
@@ -152,25 +184,17 @@ class Shortcodes
         }
     }
 
-    /**
-     * @return \TheLion\LetsBox\Processor
-     */
-    public function get_processor()
-    {
-        return $this->_processor;
-    }
-
-    protected function _set_cache_file_handle($handle)
+    private function _set_cache_file_handle($handle)
     {
         return $this->_cache_file_handle = $handle;
     }
 
-    protected function _get_cache_file_handle()
+    private function _get_cache_file_handle()
     {
         return $this->_cache_file_handle;
     }
 
-    protected function _unlock_local_cache()
+    private function _unlock_local_cache()
     {
         $handle = $this->_get_cache_file_handle();
         if (!empty($handle)) {
@@ -184,7 +208,7 @@ class Shortcodes
         return true;
     }
 
-    protected function _read_local_cache($close = false)
+    private function _read_local_cache($close = false)
     {
         $handle = $this->_get_cache_file_handle();
         if (empty($handle)) {
@@ -206,7 +230,7 @@ class Shortcodes
         return $data;
     }
 
-    protected function _create_local_lock($type)
+    private function _create_local_lock($type)
     {
         // Check if file exists
         $file = $this->get_cache_location();
@@ -216,12 +240,13 @@ class Shortcodes
 
             if (!is_writable($file)) {
                 error_log('[WP Cloud Plugin message]: '.sprintf('Shortcode file (%s) is not writable', $file));
-                die(sprintf('Shortcode file (%s) is not writable', $file));
+
+                exit(sprintf('Shortcode file (%s) is not writable', $file));
             }
         }
 
         // Check if the file is more than 1 minute old.
-        $requires_unlock = ((filemtime($file) + 60) < (time()));
+        $requires_unlock = ((filemtime($file) + 60) < time());
 
         // Temporarily workaround when flock is disabled. Can cause problems when plugin is used in multiple processes
         if (false !== strpos(ini_get('disable_functions'), 'flock')) {
@@ -234,7 +259,8 @@ class Shortcodes
             $handle = fopen($file, 'c+');
             if (!is_resource($handle)) {
                 error_log('[WP Cloud Plugin message]: '.sprintf('Shortcode file (%s) is not writable', $file));
-                die(sprintf('Shortcode file (%s) is not writable', $file));
+
+                exit(sprintf('Shortcode file (%s) is not writable', $file));
             }
             $this->_set_cache_file_handle($handle);
         }
@@ -260,7 +286,7 @@ class Shortcodes
         return true;
     }
 
-    protected function _save_local_cache()
+    private function _save_local_cache()
     {
         if (!$this->_create_local_lock(LOCK_EX)) {
             return false;
@@ -283,7 +309,7 @@ class Shortcodes
     {
         $now = time();
         foreach ($this->_shortcodes as $token => $shortcode) {
-            if (!isset($shortcode['expire']) || ($shortcode['expire']) < $now) {
+            if (!isset($shortcode['expire']) || $shortcode['expire'] < $now) {
                 // Only delete the shortcode once it is marked to prevent issues with multiple shortcodes on the same page
                 if (isset($shortcode['remove']) && true === $shortcode['remove']) {
                     unset($this->_shortcodes[$token]);
@@ -292,6 +318,13 @@ class Shortcodes
                     $this->_shortcodes[$token]['expire'] = strtotime('+1 weeks');
                 }
             }
+        }
+
+        // Only keep the latest 1000 shortcodes used for performance reasons
+        if (count($this->_shortcodes) > 1000) {
+            uasort($this->_shortcodes, fn ($a, $b) => $a['expire'] <=> $b['expire']);
+
+            array_splice($this->_shortcodes, 0, 100);
         }
 
         $data = [

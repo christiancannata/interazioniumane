@@ -185,7 +185,7 @@ jQuery( function ( $ ) {
 	} );
 
 	// Preset status handling
-	$( document ).on( 'change', '.preset-status', function () {
+	$( document ).on( 'change', '#preset-status', function () {
 		const t = $( this ),
 			preset = t.data( 'preset' ),
 			status = t.is( ':checked' );

@@ -3,9 +3,9 @@ Contributors: britner
 Tags: woocommerce, mail, email, email template, email templates, email design, preview, woocommerce emails, customize, customizer
 Donate link: https://www.kadencewp.com/about-us/
 Requires PHP: 5.2.4
-Requires at least: 5.0
-Tested up to: 5.9
-Stable tag: 1.5.1
+Requires at least: 5.3
+Tested up to: 6.2
+Stable tag: 1.5.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,38 @@ After you create your translations make sure to clear your server cache from any
 
 
 == Changelog ==
+
+= 1.5.10 =
+* Fix: style issue in customizer since 6.2
+
+= 1.5.9 =
+* Update: Tweak getting order meta for HPOS support.
+
+= 1.5.8 =
+* Add: Option to Disable additional content.
+* Add: Option to disable mobile messaging.
+* Update: Declare HPOS support.
+* Update: Template file version numbers.
+* Fix: Typo in settings.
+
+= 1.5.7 =
+* Fix: Possible issue with admin+ PHP objection injection in settings importer.
+
+= 1.5.6 =
+* Fix: Prevent email mockup url from direct access.
+
+= 1.5.5 =
+* Fix: Possible bug with placeholders and WPML
+
+= 1.5.4 =
+* Fix: Possible bug with get_id for WPML filter.
+
+= 1.5.3 =
+* Update: Add some filters for body content and subtitle WPML support.
+
+= 1.5.2 =
+* Update: Template version numbers to prevent confusion.
+* Update: Small tweek for outlook styles.
 
 = 1.5.1 =
 * Update: Prevent an error if using old woocommerce.

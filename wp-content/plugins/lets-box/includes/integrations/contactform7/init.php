@@ -2,6 +2,8 @@
 
 namespace TheLion\LetsBox\Integrations;
 
+use TheLion\LetsBox\Processor;
+
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
@@ -9,18 +11,11 @@ if (!defined('ABSPATH')) {
 
 class ContactForm
 {
-    /**
-     * @var \TheLion\LetsBox\Main
-     */
-    private $_main;
-
-    public function __construct(\TheLion\LetsBox\Main $_main)
+    public function __construct()
     {
         if (!defined('WPCF7_VERSION') || false === version_compare(WPCF7_VERSION, '5.0', '>=')) {
             return;
         }
-
-        $this->_main = $_main;
 
         add_action('wpcf7_init', [$this, 'add_shortcode_handler']);
         add_action('wpcf7_admin_init', [$this, 'add_tag_generator'], 60);
@@ -41,14 +36,12 @@ class ContactForm
             return;
         }
 
-        $this->get_main()->load_scripts();
-        $this->get_main()->load_styles();
+        \TheLion\LetsBox\Core::instance()->load_scripts();
+        \TheLion\LetsBox\Core::instance()->load_styles();
 
         wp_enqueue_script('WPCloudplugin.Libraries');
-        wp_enqueue_style('Eva-Icons');
-
         wp_enqueue_script('LetsBox.ShortcodeBuilder');
-        wp_enqueue_style('LetsBox.ShortcodeBuilder');
+        wp_enqueue_style('LetsBox');
     }
 
     public function load_admin_scripts()
@@ -71,54 +64,54 @@ class ContactForm
         $type = 'letsbox';
 
         $description = esc_html__('Generate a form-tag for this upload field.', 'wpcloudplugins'); ?>
-        <div class="control-box">
-          <fieldset>
-            <legend><?php echo sprintf(esc_html($description)); ?></legend>
-            <table class="form-table">
-              <tbody>
+<div class="control-box">
+    <fieldset>
+        <legend><?php echo sprintf(esc_html($description)); ?></legend>
+        <table class="form-table">
+            <tbody>
                 <tr>
-                  <th scope="row"><?php echo esc_html(esc_html__('Field type', 'contact-form-7')); ?></th>
-                  <td>
-                    <fieldset>
-                      <legend class="screen-reader-text"><?php echo esc_html(esc_html__('Field type', 'contact-form-7')); ?></legend>
-                      <label><input type="checkbox" name="required" /> <?php echo esc_html(esc_html__('Required field', 'contact-form-7')); ?></label>
-                    </fieldset>
-                  </td>
+                    <th scope="row"><?php echo esc_html(esc_html__('Field type', 'contact-form-7')); ?></th>
+                    <td>
+                        <fieldset>
+                            <legend class="screen-reader-text"><?php echo esc_html(esc_html__('Field type', 'contact-form-7')); ?></legend>
+                            <label><input type="checkbox" name="required" /> <?php echo esc_html(esc_html__('Required field', 'contact-form-7')); ?></label>
+                        </fieldset>
+                    </td>
                 </tr>
 
                 <tr>
-                  <th scope="row"><label for="<?php echo esc_attr($args['content'].'-name'); ?>"><?php echo esc_html(esc_html__('Name', 'contact-form-7')); ?></label></th>
-                  <td><input type="text" name="name" class="tg-name oneline" id="<?php echo esc_attr($args['content'].'-name'); ?>" /></td>
+                    <th scope="row"><label for="<?php echo esc_attr($args['content'].'-name'); ?>"><?php echo esc_html(esc_html__('Name', 'contact-form-7')); ?></label></th>
+                    <td><input type="text" name="name" class="tg-name oneline" id="<?php echo esc_attr($args['content'].'-name'); ?>" /></td>
                 </tr>
 
                 <tr>
-                  <th scope="row"><label for="<?php echo esc_attr($args['content'].'-shortcode'); ?>"><?php echo esc_html(esc_html__('Shortcode', 'wpcloudplugins')); ?></label></th>
-                  <td>
-                    <input type="hidden" name="shortcode" class="letsbox-shortcode-value large-text option" id="<?php echo esc_attr($args['content'].'-shortcode'); ?>" />
-                    <textarea id="letsbox-shortcode-decoded-value" rows="6" style="margin-bottom:15px;display:none;width: 400px;word-wrap: break-word;"></textarea>
-                    <input type="button" class="button button-primary LetsBox-CF-shortcodegenerator " value="<?php echo esc_attr(esc_html__('Build your shortcode here', 'wpcloudplugins')); ?>" />
-                    <iframe id="letsbox-shortcode-iframe" src="about:blank" data-src='<?php echo LETSBOX_ADMIN_URL; ?>?action=letsbox-getpopup&type=shortcodebuilder&asuploadbox=1&callback=wpcp_lb_cf7_add_content' width='100%' height='500' tabindex='-1' frameborder='0' style="display:none"></iframe>
-                    <p class="lets-box-upload-folder description">You can use the available input fields in your form to name the upload folder based on user input. To do so, just add the <code>letsbox_private_folder_name</code> to the Class attribute of your input field (i.e. <code>[text* your-name class:letsbox_private_folder_name]</code>).</p>
-                  </td>
+                    <th scope="row"><label for="<?php echo esc_attr($args['content'].'-shortcode'); ?>"><?php echo esc_html(esc_html__('Shortcode', 'wpcloudplugins')); ?></label></th>
+                    <td>
+                        <input type="hidden" name="shortcode" class="letsbox-shortcode-value large-text option" id="<?php echo esc_attr($args['content'].'-shortcode'); ?>" />
+                        <textarea id="letsbox-shortcode-decoded-value" rows="6" style="margin-bottom:15px;display:none;width: 400px;word-wrap: break-word;"></textarea>
+                        <input type="button" class="button button-primary LetsBox-CF-shortcodegenerator " value="<?php echo esc_attr(esc_html__('Build your shortcode here', 'wpcloudplugins')); ?>" />
+                        <iframe id="letsbox-shortcode-iframe" src="about:blank" data-src='<?php echo LETSBOX_ADMIN_URL; ?>?action=letsbox-getpopup&type=shortcodebuilder&asuploadbox=1&callback=wpcp_lb_cf7_add_content' width='100%' height='500' tabindex='-1' frameborder='0' style="display:none"></iframe>
+                        <p class="lets-box-upload-folder description">You can use the available input fields in your form to name the upload folder based on user input. To do so, just add the <code>wpcp-use-input-{***}</code> to the Class attribute of your input field (i.e. <code>[text* your-name class:letsbox_private_folder_name]</code>).</p>
+                    </td>
                 </tr>
 
-              </tbody>
-            </table>
-          </fieldset>
-        </div>
+            </tbody>
+        </table>
+    </fieldset>
+</div>
 
-        <div class="insert-box">
-          <input type="text" name="<?php echo $type; ?>" class="tag code" readonly="readonly" onfocus="this.select()" />
+<div class="insert-box">
+    <input type="text" name="<?php echo $type; ?>" class="tag code" readonly="readonly" onfocus="this.select()" />
 
-          <div class="submitbox">
-            <input type="button" class="button button-primary insert-tag" value="<?php echo esc_attr(esc_html__('Insert Tag', 'contact-form-7')); ?>" />
-          </div>
+    <div class="submitbox">
+        <input type="button" class="button button-primary insert-tag" value="<?php echo esc_attr(esc_html__('Insert Tag', 'contact-form-7')); ?>" />
+    </div>
 
-          <br class="clear" />
+    <br class="clear" />
 
-          <p class="description mail-tag"><label for="<?php echo esc_attr($args['content'].'-mailtag'); ?>"><?php echo sprintf(esc_html('To list the uploads in your email, insert the mail-tag (%s) in the Mail tab.'), '<strong><span class="mail-tag"></span></strong>'); ?><input type="text" class="mail-tag code hidden" readonly="readonly" id="<?php echo esc_attr($args['content'].'-mailtag'); ?>" /></label></p>
-        </div>
-        <?php
+    <p class="description mail-tag"><label for="<?php echo esc_attr($args['content'].'-mailtag'); ?>"><?php echo sprintf(esc_html('To list the uploads in your email, insert the mail-tag (%s) in the Mail tab.'), '<strong><span class="mail-tag"></span></strong>'); ?><input type="text" class="mail-tag code hidden" readonly="readonly" id="<?php echo esc_attr($args['content'].'-mailtag'); ?>" /></label></p>
+</div>
+<?php
     }
 
     /**
@@ -191,7 +184,7 @@ class ContactForm
             return $private_folder_name;
         }
 
-        if ('cf7_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('cf7_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name;
         }
 
@@ -212,18 +205,12 @@ class ContactForm
      */
     public function rename_private_folder_names_for_guests($private_folder_name_guest, $processor)
     {
-        if ('cf7_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('cf7_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name_guest;
         }
 
-        return str_replace(esc_html__('Guests', 'wpcloudplugins').' - ', '', $private_folder_name_guest);
-    }
+        $prefix = Processor::instance()->get_setting('userfolder_name_guest_prefix');
 
-    /**
-     * @return \TheLion\LetsBox\Main
-     */
-    public function get_main()
-    {
-        return $this->_main;
+        return str_replace($prefix, '', $private_folder_name_guest);
     }
 }

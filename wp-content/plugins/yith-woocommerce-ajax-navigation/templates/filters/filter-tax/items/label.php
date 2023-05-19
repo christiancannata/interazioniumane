@@ -36,7 +36,7 @@ if ( ! defined( 'YITH_WCAN' ) ) {
 			</span>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $label ) ) : ?>
+		<?php if ( isset( $label ) && '' !== $label ) : ?>
 			<span class="term-label">
 				<?php echo esc_html( $label ); ?>
 				<?php echo $filter->render_term_count( $term, $count ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

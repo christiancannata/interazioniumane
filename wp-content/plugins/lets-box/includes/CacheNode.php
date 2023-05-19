@@ -1,8 +1,15 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
-class CacheNode implements \Serializable
+class CacheNode
 {
     /**
      * ID of the Node = ID of the Cached Entry.
@@ -103,9 +110,9 @@ class CacheNode implements \Serializable
         }
     }
 
-    public function serialize()
+    public function __serialize()
     {
-        $data = [
+        return [
             '_id' => $this->_id,
             '_account_id' => $this->_account_id,
             '_name' => $this->_name,
@@ -121,14 +128,11 @@ class CacheNode implements \Serializable
             '_shared_links' => $this->_shared_links,
             '_temporarily_links' => $this->_temporarily_links,
         ];
-
-        return serialize($data);
     }
 
-    public function unserialize($data)
+    public function __unserialize($data)
     {
-        $values = unserialize($data);
-        foreach ($values as $key => $value) {
+        foreach ($data as $key => $value) {
             $this->{$key} = $value;
         }
     }
@@ -191,6 +195,11 @@ class CacheNode implements \Serializable
     public function get_parents()
     {
         return $this->_parents;
+    }
+
+    public function get_first_parent()
+    {
+        return reset($this->_parents);
     }
 
     public function set_parent(CacheNode $pnode)
@@ -466,7 +475,7 @@ class CacheNode implements \Serializable
             }
         }
 
-        $manually_linked_users = (get_users(['meta_query' => $meta_query]));
+        $manually_linked_users = get_users(['meta_query' => $meta_query]);
 
         foreach ($manually_linked_users as $userdata) {
             $linked_users[$userdata->ID] = $userdata;
@@ -574,34 +583,48 @@ class CacheNode implements \Serializable
         return $this->_temporarily_links[$format]['url'];
     }
 
-    public function add_shared_link($url, $type, $scope, $expires = false)
+    public function add_shared_link($shared_link, $link_settings)
     {
-        if (!isset($this->_shared_links[$type])) {
-            $this->_shared_links[$type] = [];
+        $url = $shared_link['url'];
+        $expires = null;
+
+        if (!empty($shared_link['unshared_at'])) {
+            $dtime = \DateTime::createFromFormat(DATE_RFC3339, $shared_link['unshared_at'], new \DateTimeZone('UTC'));
+
+            if ($dtime) {
+                $expires = $dtime->getTimestamp();
+            }
         }
 
-        $this->_shared_links[$type][$scope] = [
+        // Don't store shared links with expire date. Those are unique anyway
+        if (!empty($link_settings['unshared_at'])) {
+            return $url;
+        }
+
+        $hash = md5(serialize($link_settings));
+
+        $this->_shared_links[$hash] = array_merge($link_settings, [
             'url' => $url,
             'expires' => $expires,
-        ];
+        ]);
 
-        return $this->get_shared_link($type, $scope);
+        return $this->get_shared_link($link_settings);
     }
 
-    public function get_shared_link($type = 'view', $scope = 'anonymous')
+    public function get_shared_link($link_settings)
     {
-        if (!isset($this->_shared_links[$type])) {
+        $hash = md5(serialize($link_settings));
+
+        if (!isset($this->_shared_links[$hash])) {
             return false;
         }
 
-        if (!isset($this->_shared_links[$type][$scope])) {
-            return false;
+        if (!empty($this->_shared_links[$hash]['expires'])) {
+            if ($this->_shared_links[$hash]['expires'] < time() + 30) {
+                return false;
+            }
         }
 
-        if (!(empty($this->_shared_links[$type][$scope]['expires'])) && $this->_shared_links[$type][$scope]['expires'] < time() + 60) {
-            return false;
-        }
-
-        return $this->_shared_links[$type][$scope]['url'];
+        return $this->_shared_links[$hash]['url'];
     }
 }

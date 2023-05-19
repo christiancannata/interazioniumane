@@ -89,6 +89,7 @@ class Gutenberg
                 'ajaxUrl' => admin_url('admin-ajax.php'),
                 'i18n' => $i18n,
                 'wpnonce' => \wp_create_nonce('wpcp-letsbox-block'),
+                'editable' => \TheLion\LetsBox\Helpers::check_user_role(\TheLion\LetsBox\Core::get_setting('permissions_add_shortcodes')) ? 1  : 0,
             ]
         );
 

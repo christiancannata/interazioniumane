@@ -1,7 +1,7 @@
-.button.insert-box,
-.button.insert-box:hover,
-.button.insert-box:active,
-.button.insert-box:focus {
+.button.wpcp-insert-box-content,
+.button.wpcp-insert-box-content:hover,
+.button.wpcp-insert-box-content:active,
+.button.wpcp-insert-box-content:focus {
   float: right;
   margin-right: 7px;
   background-image: url("../../../css/images/box_logo.svg");

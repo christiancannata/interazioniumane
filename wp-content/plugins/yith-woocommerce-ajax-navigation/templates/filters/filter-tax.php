@@ -20,28 +20,27 @@ if ( ! defined( 'YITH_WCAN' ) ) {
 } // Exit if accessed directly
 ?>
 
-<?php if ( $filter->has_relevant_terms() ) : ?>
-	<div
-		class="yith-wcan-filter <?php echo esc_attr( $filter->get_additional_classes() ); ?>"
-		id="filter_<?php echo esc_attr( $preset->get_id() ); ?>_<?php echo esc_attr( $filter->get_id() ); ?>"
-		data-filter-type="<?php echo esc_attr( $filter->get_type() ); ?>"
-		data-filter-id="<?php echo esc_attr( $filter->get_id() ); ?>"
-		data-taxonomy="<?php echo esc_attr( $filter->get_formatted_taxonomy() ); ?>"
-		data-multiple="<?php echo esc_attr( $filter->is_multiple_allowed() ? 'yes' : 'no' ); ?>"
-		data-relation="<?php echo esc_attr( $filter->get_relation() ); ?>"
-	>
-		<?php echo $filter->render_title(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-		<div class="filter-content">
-			<?php echo $filter->render_start(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+<div
+	class="yith-wcan-filter <?php echo esc_attr( $filter->get_additional_classes() ); ?>"
+	id="filter_<?php echo esc_attr( $preset->get_id() ); ?>_<?php echo esc_attr( $filter->get_id() ); ?>"
+	data-filter-type="<?php echo esc_attr( $filter->get_type() ); ?>"
+	data-filter-id="<?php echo esc_attr( $filter->get_id() ); ?>"
+	data-taxonomy="<?php echo esc_attr( $filter->get_formatted_taxonomy() ); ?>"
+	data-multiple="<?php echo esc_attr( $filter->is_multiple_allowed() ? 'yes' : 'no' ); ?>"
+	data-relation="<?php echo esc_attr( $filter->get_relation() ); ?>"
+>
+	<?php echo $filter->render_title(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-			<?php
-			foreach ( $filter->get_formatted_terms() as $term_id => $term_options ) :
-				echo $filter->render_item( $term_id, $term_options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			endforeach;
-			?>
+	<div class="filter-content">
+		<?php echo $filter->render_start(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-			<?php echo $filter->render_end(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		</div>
+		<?php
+		foreach ( $filter->get_formatted_terms() as $term_id => $term_options ) :
+			echo $filter->render_item( $term_id, $term_options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		endforeach;
+		?>
+
+		<?php echo $filter->render_end(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</div>
-<?php endif; ?>
+</div>

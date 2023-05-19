@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace ACP\Admin\Page;
 
 use AC\Admin\RenderableHead;
@@ -16,13 +18,13 @@ use ACP\Access\ActivationStorage;
 use ACP\Access\PermissionsStorage;
 use ACP\ActivationTokenFactory;
 use ACP\LicenseKeyRepository;
-use ACP\PluginRepository;
 use ACP\Type\LicenseKey;
 use ACP\Type\SiteUrl;
+use ACP\Type\Url\Changelog;
 
 class License implements Asset\Enqueueables, Renderable, RenderableHead {
 
-	const NAME = 'license';
+	public const NAME = 'license';
 
 	/**
 	 * @var Location\Absolute
@@ -60,16 +62,20 @@ class License implements Asset\Enqueueables, Renderable, RenderableHead {
 	private $license_key_repository;
 
 	/**
-	 * @var PluginRepository
-	 */
-	private $plugin_repository;
-
-	/**
 	 * @var bool
 	 */
 	private $network_active;
 
-	public function __construct( Location\Absolute $location, Renderable $head, SiteUrl $site_url, ActivationTokenFactory $activation_token_factory, ActivationStorage $activation_storage, PermissionsStorage $permission_storage, LicenseKeyRepository $license_key_repository, PluginRepository $plugin_repository, $network_active ) {
+	public function __construct(
+		Location\Absolute $location,
+		Renderable $head,
+		SiteUrl $site_url,
+		ActivationTokenFactory $activation_token_factory,
+		ActivationStorage $activation_storage,
+		PermissionsStorage $permission_storage,
+		LicenseKeyRepository $license_key_repository,
+		bool $network_active
+	) {
 		$this->location = $location;
 		$this->head = $head;
 		$this->site_url = $site_url;
@@ -77,8 +83,7 @@ class License implements Asset\Enqueueables, Renderable, RenderableHead {
 		$this->activation_storage = $activation_storage;
 		$this->permission_storage = $permission_storage;
 		$this->license_key_repository = $license_key_repository;
-		$this->plugin_repository = $plugin_repository;
-		$this->network_active = (bool) $network_active;
+		$this->network_active = $network_active;
 	}
 
 	public function render_head() {
@@ -95,13 +100,13 @@ class License implements Asset\Enqueueables, Renderable, RenderableHead {
 	/**
 	 * @param string $plugin_name
 	 *
-	 * @return ACP\Type\Url\Changelog
+	 * @return Changelog
 	 */
-	private function get_changelog_url( $plugin_name ) {
-		return new ACP\Type\Url\Changelog( $this->network_active, $plugin_name );
+	private function get_changelog_url( $plugin_name ): Changelog {
+		return new Changelog( $this->network_active, $plugin_name );
 	}
 
-	private function show_render_section_updates() {
+	private function show_render_section_updates(): bool {
 
 		// update section is hidden on subsites
 		if ( is_multisite() && ! is_network_admin() ) {
@@ -124,21 +129,22 @@ class License implements Asset\Enqueueables, Renderable, RenderableHead {
 		return $view->set_template( 'admin/page/license' );
 	}
 
-	private function render_section_updates() {
+	private function render_section_updates(): View {
 		$content = '';
 
 		$updates_available = false;
 		$updates_available_with_package = false;
 
-		foreach ( $this->plugin_repository->find_all()->all() as $plugin ) {
-			$content .= $this->render_section_update( $plugin )->render();
+		$plugin = PluginInformation::create_by_file( ACP_FILE );
+		$plugin_update = $plugin->get_update();
 
-			if ( $plugin->has_update() ) {
-				$updates_available = true;
+		$content .= $this->render_section_update( $plugin )->render();
 
-				if ( $plugin->get_update()->has_package() ) {
-					$updates_available_with_package = true;
-				}
+		if ( $plugin_update ) {
+			$updates_available = true;
+
+			if ( $plugin_update->has_package() ) {
+				$updates_available_with_package = true;
 			}
 		}
 
@@ -157,27 +163,18 @@ class License implements Asset\Enqueueables, Renderable, RenderableHead {
 		return $view->set_template( 'admin/section-updates' );
 	}
 
-	private function get_update_link( $basename ) {
-		$url = add_query_arg(
-			[
-				'action' => 'upgrade-plugin',
-				'plugin' => $basename,
-			],
-			self_admin_url( 'update.php' )
-		);
-
-		return wp_nonce_url( $url, sprintf( 'upgrade-plugin_%s', $basename ) );
-	}
-
 	private function render_section_update( PluginInformation $plugin ) {
-		$can_be_updated = $plugin->has_update() && $plugin->get_update()->has_package() && current_user_can( 'update_plugins' );
+		$update_ready = $plugin->has_update() && $plugin->get_update()->has_package() && current_user_can( 'update_plugins' );
 
 		$view = new View( [
-			'plugin_update_link' => $can_be_updated ? $this->get_update_link( $plugin->get_basename() ) : null,
-			'plugin_label'       => $plugin->get_name(),
-			'current_version'    => $plugin->get_version()->get_value(),
-			'available_version'  => $plugin->has_update() ? $plugin->get_update()->get_version()->get_value() : null,
-			'changelog_link'     => $this->get_changelog_url( $plugin->get_dirname() )->get_url(),
+			'plugin_update_basename' => $plugin->get_basename(),
+			'plugin_update_slug'     => $plugin->get_dirname(),
+			'plugin_update_nonce'    => wp_create_nonce( 'updates' ),
+			'plugin_update_ready'    => $update_ready,
+			'plugin_label'           => $plugin->get_name(),
+			'current_version'        => $plugin->get_version()->get_value(),
+			'available_version'      => $plugin->has_update() ? $plugin->get_update()->get_version()->get_value() : null,
+			'changelog_link'         => $this->get_changelog_url( $plugin->get_dirname() )->get_url(),
 		] );
 
 		return $view->set_template( 'admin/section-update' );
@@ -236,7 +233,7 @@ class License implements Asset\Enqueueables, Renderable, RenderableHead {
 		return $view->set_template( 'admin/page/settings-section' );
 	}
 
-	private function render_license_section() {
+	private function render_license_section(): View {
 		$account_url = new Url\UtmTags( new Url\Site( Url\Site::PAGE_ACCOUNT_SUBSCRIPTIONS ), 'license-activation' );
 
 		$license_key = $this->license_key_repository->find();

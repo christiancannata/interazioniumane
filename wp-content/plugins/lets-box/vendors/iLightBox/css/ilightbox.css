@@ -1,33 +1,54 @@
 /* Reset Styles */
-.ilightbox-overlay, .ilightbox-loader, .ilightbox-loader *, .ilightbox-holder, .ilightbox-holder .ilightbox-container, .ilightbox-holder .ilightbox-container img.ilightbox-image, .ilightbox-holder .ilightbox-container .ilightbox-caption, .ilightbox-toolbar, .ilightbox-toolbar *, .ilightbox-thumbnails, .ilightbox-thumbnails *, .ilightbox-holder .ilightbox-container .ilightbox-social, .ilightbox-holder .ilightbox-container .ilightbox-social * {
-    float:none;
-    margin:0;
-    padding:0;
-    border:0;
-    outline:0;
-    font-size:100%;
-    line-height:100%;
-    vertical-align:baseline;
-    background:transparent;
-	
+.ilightbox-overlay,
+.ilightbox-loader,
+.ilightbox-loader *,
+.ilightbox-holder,
+.ilightbox-holder .ilightbox-container,
+.ilightbox-holder .ilightbox-container img.ilightbox-image,
+.ilightbox-holder .ilightbox-container .ilightbox-caption,
+.ilightbox-toolbar,
+.ilightbox-toolbar *,
+.ilightbox-thumbnails,
+.ilightbox-thumbnails *,
+.ilightbox-holder .ilightbox-container .ilightbox-social,
+.ilightbox-holder .ilightbox-container .ilightbox-social * {
+	float: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	line-height: 100%;
+	vertical-align: baseline;
+	background: transparent;
+
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
-	   -moz-user-select: -moz-none;
-	 -khtml-user-select: none;
-	     -o-user-select: none;
-	        user-select: none;
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-o-user-select: none;
+	user-select: none;
 }
-.ilightbox-overlay, .ilightbox-loader, .ilightbox-loader *, .ilightbox-holder .ilightbox-container .ilightbox-caption, .ilightbox-toolbar, .ilightbox-thumbnails, .ilightbox-thumbnails *, .ilightbox-holder .ilightbox-container .ilightbox-social {
+
+.ilightbox-overlay,
+.ilightbox-loader,
+.ilightbox-loader *,
+.ilightbox-holder .ilightbox-container .ilightbox-caption,
+.ilightbox-toolbar,
+.ilightbox-thumbnails,
+.ilightbox-thumbnails *,
+.ilightbox-holder .ilightbox-container .ilightbox-social {
 	-webkit-transform: translateZ(0);
-	   -moz-transform: translateZ(0);
+	-moz-transform: translateZ(0);
 }
 
 /* Disable & Hide Scrollbar */
 .ilightbox-noscroll {
 	overflow: hidden;
 }
+
 .ilightbox-closedhand * {
-	cursor: url(closedhand.cur),default !important;
+	cursor: url(closedhand.cur), default !important;
 }
 
 .ilightbox-overlay {
@@ -49,32 +70,32 @@
 	opacity: 0.9;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
 	filter: alpha(opacity=90);
-			
+
 	-webkit-border-radius: 0 100px 100px 0;
-	        border-radius: 0 100px 100px 0;
+	border-radius: 0 100px 100px 0;
 }
 
 .ilightbox-loader div {
 	width: 72px;
 	height: 72px;
-	
+
 	-webkit-border-radius: 0 100px 100px 0;
-	        border-radius: 0 100px 100px 0;
+	border-radius: 0 100px 100px 0;
 }
 
-.ilightbox-loader.horizontal {
+.wpcp-lightbox.ilightbox-loader.horizontal {
 	left: 45%;
 	top: -192px;
 	padding: 0;
 	padding-top: 30px;
-			
+
 	-webkit-border-radius: 0 0 100px 100px;
-	        border-radius: 0 0 100px 100px;
+	border-radius: 0 0 100px 100px;
 }
 
-.ilightbox-loader.horizontal  div {
+.wpcp-lightbox.ilightbox-loader.horizontal div {
 	-webkit-border-radius: 0 0 100px 100px;
-	        border-radius: 0 0 100px 100px;
+	border-radius: 0 0 100px 100px;
 }
 
 .ilightbox-toolbar {
@@ -89,7 +110,8 @@
 }
 
 .ilightbox-toolbar .ilightbox-prev-button,
-.ilightbox-toolbar .ilightbox-next-button {
+.ilightbox-toolbar .ilightbox-next-button,
+.ilightbox-toolbar .ilightbox-download {
 	display: none;
 }
 
@@ -134,7 +156,7 @@
 	position: absolute;
 
 	-webkit-transform: translateZ(0);
-	   -moz-transform: translateZ(0);
+	-moz-transform: translateZ(0);
 }
 
 .ilightbox-thumbnails .ilightbox-thumbnails-grid .ilightbox-thumbnail {
@@ -147,10 +169,10 @@
 .ilightbox-thumbnails .ilightbox-thumbnails-grid .ilightbox-thumbnail img {
 	width: 100%;
 	height: 100%;
-	
+
 	-webkit-border-radius: 2px;
-	        border-radius: 2px;
-	
+	border-radius: 2px;
+
 	-ms-interpolation-mode: bicubic;
 }
 
@@ -173,10 +195,11 @@
 	z-index: 100003;
 
 	-webkit-transform: none;
-	   -moz-transform: none;
+	-moz-transform: none;
 }
 
-.ilightbox-holder.ilightbox-next, .ilightbox-holder.ilightbox-prev {
+.wpcp-lightbox.ilightbox-holder.ilightbox-next,
+.wpcp-lightbox.ilightbox-holder.ilightbox-prev {
 	cursor: pointer;
 }
 
@@ -186,7 +209,7 @@
 	height: 100%;
 }
 
-.ilightbox-holder.supportTouch div.panzoom-container{
+.wpcp-lightbox.ilightbox-holder.supportTouch div.panzoom-container {
 	overflow: scroll;
 	-webkit-overflow-scrolling: touch;
 }
@@ -206,16 +229,16 @@
 	padding: 5px 10px;
 	margin: 0 auto;
 	font-size: 12px;
-    line-height: 150%;
+	line-height: 150%;
 	word-wrap: break-word;
 	z-index: 20003;
-	
+
 	-webkit-box-sizing: border-box;
-	   -moz-box-sizing: border-box;
-	        box-sizing: border-box;
-	
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+
 	-webkit-border-radius: 3px 3px 0 0;
-	        border-radius: 3px 3px 0 0;
+	border-radius: 3px 3px 0 0;
 }
 
 .ilightbox-holder .ilightbox-container .ilightbox-social {
@@ -269,7 +292,7 @@
 }
 
 .ilightbox-holder .ilightbox-container .ilightbox-social ul li.googleplus a {
-	background-image: url('../social_icons/box_plus_16.png');
+	background-image: url('../social_icons/onedrive_plus_16.png');
 }
 
 .ilightbox-holder .ilightbox-alert {
@@ -316,6 +339,7 @@
 }
 
 .is_mobile .ilightbox-toolbar .ilightbox-prev-button,
-.is_mobile .ilightbox-toolbar .ilightbox-next-button {
+.is_mobile .ilightbox-toolbar .ilightbox-next-button,
+.is_mobile .ilightbox-toolbar .ilightbox-download {
 	display: block;
 }

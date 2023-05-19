@@ -100,10 +100,21 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   z-index: 1000;
 }
 
-#LetsBox .wpcp__container-fullscreen .wpcp__mediaelement,
+#LetsBox .wpcp__container-fullscreen .wpcp__mediaelement div {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 #LetsBox .wpcp__container-fullscreen video {
   height: 100% !important;
   width: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  -o-object-position: center;
+  object-position: center;
+  -o-object-fit: contain;
+  object-fit: contain;
+  margin: 0 auto;
 }
 
 
@@ -127,12 +138,15 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__poster {
   background-position: 50% 50%;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain;
   left: 0;
   position: absolute;
   top: 0;
   z-index: 1;
+  height: 100%;
+  width: 100%;
 }
+
 
 :root #LetsBox .wpcp__poster-img {
   display: none;
@@ -144,21 +158,14 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 }
 
 #LetsBox .wpcp__overlay {
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
   left: 0;
   position: absolute;
   top: 0;
+  height: 100%;
+  width: 100%;
 }
 
 #LetsBox .wpcp__layer {
@@ -173,6 +180,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   background-position: 0 -39px;
   height: 80px;
   width: 80px;
+  min-width: 80px;
 }
 
 #LetsBox .wpcp__overlay:hover>.wpcp__overlay-button {
@@ -195,14 +203,12 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 @-webkit-keyframes wpcp__loading-spinner {
   100% {
-    -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
 }
 
 @keyframes wpcp__loading-spinner {
   100% {
-    -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
 }
@@ -213,9 +219,6 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__controls {
   /*rtl:begin:ignore*/
   bottom: 0;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   height: 40px;
   left: 0;
@@ -225,12 +228,15 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   position: absolute;
   width: 100%;
   z-index: 3;
+  background: var(--wpcp--present--color--accent, #590e54);
   /*rtl:end:ignore*/
 }
 
-#LetsBox .wpcp__controls:not([style*='display: none']) {
-  background: rgba(255, 0, 0, 0.7);
-  background: -webkit-linear-gradient(transparent, rgba(0, 0, 0, 0.35));
+#LetsBox .wpcp__audio .wpcp__controls {
+  position: relative;
+}
+
+#LetsBox .wpcp__video .wpcp__controls {
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.35));
 }
 
@@ -310,13 +316,10 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__time-rail {
   /*rtl:begin:ignore*/
   direction: ltr;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
   flex-grow: 1;
   height: 40px;
   margin: 0 10px;
-  padding-top: 10px;
+  padding-top: 0;
   position: relative;
   /*rtl:end:ignore*/
 }
@@ -339,14 +342,13 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__time-total {
   background: rgba(255, 255, 255, 0.3);
-  margin: 5px 0 0;
+  margin: 0;
   width: 100%;
 }
 
 #LetsBox .wpcp__time-buffering {
   -webkit-animation: buffering-stripes 2s linear infinite;
   animation: buffering-stripes 2s linear infinite;
-  background: -webkit-linear-gradient(135deg, rgba(255, 255, 255, 0.4) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.4) 75%, transparent 75%, transparent);
   background: linear-gradient(-45deg, rgba(255, 255, 255, 0.4) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.4) 75%, transparent 75%, transparent);
   background-size: 15px 15px;
   width: 100%;
@@ -376,7 +378,10 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   background: rgba(255, 255, 255, 0.3);
 }
 
-#LetsBox .wpcp__time-current,
+#LetsBox .wpcp__time-current {
+  background-color: var(--wpcp--present--color--accent, #590e54);
+}
+
 #LetsBox .wpcp__time-handle-content {
   background: rgba(255, 255, 255, 0.9);
 }
@@ -396,32 +401,22 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__time-hovered {
   /*rtl:begin:ignore*/
   left: 0;
-  -webkit-transform: scaleX(0);
-  -ms-transform: scaleX(0);
   transform: scaleX(0);
-  -webkit-transform-origin: 0 0;
-  -ms-transform-origin: 0 0;
   transform-origin: 0 0;
-  -webkit-transition: 0.15s ease-in all;
   transition: 0.15s ease-in all;
   width: 100%;
   /*rtl:end:ignore*/
 }
 
 #LetsBox .wpcp__time-buffering {
-  -webkit-transform: scaleX(1);
-  -ms-transform: scaleX(1);
   transform: scaleX(1);
 }
 
 #LetsBox .wpcp__time-hovered {
-  -webkit-transition: height 0.1s cubic-bezier(0.44, 0, 1, 1);
   transition: height 0.1s cubic-bezier(0.44, 0, 1, 1);
 }
 
 #LetsBox .wpcp__time-hovered.no-hover {
-  -webkit-transform: scaleX(0) !important;
-  -ms-transform: scaleX(0) !important;
   transform: scaleX(0) !important;
 }
 
@@ -432,8 +427,6 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   cursor: pointer;
   left: 0;
   position: absolute;
-  -webkit-transform: translateX(0);
-  -ms-transform: translateX(0);
   transform: translateX(0);
   z-index: 11;
   /*rtl:end:ignore*/
@@ -446,8 +439,6 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   height: 10px;
   left: -7px;
   top: -4px;
-  -webkit-transform: scale(0);
-  -ms-transform: scale(0);
   transform: scale(0);
   width: 10px;
   /*rtl:end:ignore*/
@@ -456,8 +447,6 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__time-rail:hover .wpcp__time-handle-content,
 #LetsBox .wpcp__time-rail .wpcp__time-handle-content:focus,
 #LetsBox .wpcp__time-rail .wpcp__time-handle-content:active {
-  -webkit-transform: scale(1);
-  -ms-transform: scale(1);
   transform: scale(1);
 }
 
@@ -471,8 +460,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   margin-bottom: 9px;
   position: absolute;
   text-align: center;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
+
+
   transform: translateX(-50%);
   width: 36px;
 }
@@ -498,8 +487,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   line-height: 0;
   position: absolute;
   top: 100%;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
+
+
   transform: translateX(-50%);
   width: 0;
   /*rtl:end:ignore*/
@@ -561,8 +550,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   left: 50%;
   margin: 0;
   position: absolute;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
+
+
   transform: translateX(-50%);
   width: 25px;
   z-index: 1;
@@ -579,14 +568,14 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   margin: 0;
   position: absolute;
   top: 8px;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
+
+
   transform: translateX(-50%);
   width: 2px;
 }
 
 #LetsBox .wpcp__volume-current {
-  background: rgba(255, 255, 255, 0.9);
+  background-color: var(--wpcp--present--color--accent, rgba(255, 255, 255, 0.9));
   left: 0;
   margin: 0;
   position: absolute;
@@ -600,8 +589,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   height: 6px;
   left: 50%;
   position: absolute;
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
+
+
   transform: translateX(-50%);
   width: 16px;
 }
@@ -662,8 +651,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__captions-button>.wpcp__captions-selector,
 #LetsBox .wpcp__chapters-button>.wpcp__chapters-selector {
-  background: rgba(50, 50, 50, 0.7);
-  border: solid 1px transparent;
+  background: var(--wpcp--present--color--background);
+  border: none;
   border-radius: 0;
   bottom: 100%;
   margin-right: -43px;
@@ -672,7 +661,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   position: absolute;
   right: 50%;
   visibility: visible;
-  width: 86px;
+  width: 125px;
 }
 
 #LetsBox .wpcp__chapters-button>.wpcp__chapters-selector {
@@ -690,19 +679,19 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__captions-selector-list-item,
 #LetsBox .wpcp__chapters-selector-list-item {
-  color: #fff;
+  color: var(--wpcp--present--color--black);
   cursor: pointer;
   display: block;
   list-style-type: none !important;
-  margin: 0 0 6px;
+  margin: 5px;
   overflow: hidden;
   padding: 0;
 }
 
 #LetsBox .wpcp__captions-selector-list-item:hover,
 #LetsBox .wpcp__chapters-selector-list-item:hover {
-  background-color: rgb(200, 200, 200) !important;
-  background-color: rgba(255, 255, 255, 0.4) !important;
+  color: var(--wpcp--present--color--white);
+  background-color: var(--wpcp--present--color--accent) !important;
 }
 
 #LetsBox .wpcp__captions-selector-input,
@@ -727,7 +716,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__captions-selected,
 #LetsBox .wpcp__chapters-selected {
-  color: rgba(33, 248, 248, 1);
+  font-weight: bold;
+  text-decoration: underline;
 }
 
 #LetsBox .wpcp__captions-translations {
@@ -743,6 +733,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   line-height: 20px;
   position: absolute;
   text-align: center;
+  width: 100%;
 }
 
 #LetsBox .wpcp__captions-layer a {
@@ -882,7 +873,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 }
 
 #LetsBox .wpcp__speed-selected {
-  color: #21f8f8
+  color: var(--wpcp--present--color--accent, #590e54);
 }
 
 #LetsBox .wpcp__speed-selector {
@@ -911,7 +902,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 /* 5: Contextmenu */
 .wpcp__contextmenu {
-  background: #fff;
+  background-color: var(--wpcp--present--color--background, #fff);
   border-radius: 0px;
   left: 0;
   padding: 10px;
@@ -924,33 +915,33 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 }
 
 .wpcp__contextmenu-separator {
-  background: #333;
+  background-color: var(--wpcp--present--color--dark1, #333);
   font-size: 0;
   height: 1px;
   margin: 5px 6px
 }
 
 .wpcp__contextmenu-item {
-  color: #333;
+  color: var(--wpcp--present--color--dark1, #333);
   cursor: pointer;
   font-size: 12px;
   padding: 8px 6px
 }
 
 .wpcp__contextmenu-item:hover {
-  background: #2c7c91;
-  color: #fff
+  background-color: var(--wpcp--present--color--accent, #590e54);
+  color: var(--wpcp--present--color--white, #fff);
 }
 
 /* 6: Playlist CSS */
 #LetsBox .wpcp__main-container {
-  background-size: cover;
   position: relative;
-  margin: 20px 0px;
-  min-height: 50px;
+  min-height: 45px;
   margin: 0 auto;
   padding: 0;
   outline: 0;
+  border-radius: var(--wpcp--present--border--radius, 10px);
+  overflow: hidden;
 }
 
 /* Start: Loading/Error screens */
@@ -962,10 +953,9 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__main-container.wpcp__loading.wpcp__video {
   background-image: url(../assets/placeholder_video.png);
   background-repeat: no-repeat;
-  height: 0;
-  padding-bottom: 75%;
-  /* 4:3 ratio old school tv */
-  padding-bottom: 56.25%;
+  background-color: #a8aaac;
+  background-position: bottom left;
+  aspect-ratio: 16 / 9;
 }
 
 #LetsBox .wpcp__main-container.wpcp__loading.wpcp__video.error {
@@ -974,6 +964,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__main-container.wpcp__loading.wpcp__audio {
   background-image: url(../assets/placeholder_audio.png);
+  background-size: auto 45px;
 }
 
 #LetsBox .wpcp__main-container.wpcp__loading.wpcp__audio.error {
@@ -984,6 +975,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__main-container audio {
   opacity: 1;
   transition: all .8s ease-in-out;
+  width: 100% !important;
 }
 
 #LetsBox .wpcp__main-container.wpcp__loading video,
@@ -1002,7 +994,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   position: relative;
 }
 
-#LetsBox .wpcp__playlist-button>.wpcp__playlist-selector {
+#LetsBox .wpcp__playlist-button>.wpcp__playlist-layer {
   background: rgba(50, 50, 50, 0.7);
   border: solid 1px transparent;
   border-radius: 0;
@@ -1020,88 +1012,147 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   display: none;
 }
 
-#LetsBox .wpcp__playlist-selector-list {
-  padding: 0;
-  margin: 0;
-  height: auto;
-  overflow-y: auto;
-  transition: all .8s ease-in-out;
-  opacity: 1;
-  max-height: 400px;
-  background: #fff;
-}
-
-
 /* Start: Playlist */
-
-#LetsBox .wpcp__playlist-selector-list-item {
-  padding: 3px 16px;
-  margin: 0;
-  display: block;
-  font-size: 14px;
-  cursor: pointer;
-  position: relative;
-  color: #222;
-  opacity: 0.9;
-}
-
-#LetsBox .wpcp__playlist-item-inner {
-  display: table-row;
-  overflow: hidden;
-}
-
-#LetsBox .wpcp__playlist-selector-list-item:hover {
-  opacity: 1;
-}
-
-#LetsBox .wpcp__playlist-selector-list-item:focus {
-  outline: none;
-}
-
-#LetsBox .wpcp__playlist-selector-label {
-  cursor: pointer;
-  float: left;
-  font-size: 1.3em;
-  margin: 0;
-}
-
-#LetsBox .wpcp__playlist-selector-label>span {
-  -webkit-background-clip: text;
-  background-clip: text;
-  background-color: #eb5802;
-  background-image: -webkit-linear-gradient(top, #eb5802, #f3ad39);
-  background-image: linear-gradient(to bottom, #eb5802, #f3ad39);
-  color: transparent;
-  font-size: 0.65em;
-  vertical-align: middle;
-}
-
-#LetsBox .wpcp__playlist-selected {
-  opacity: 1;
-}
-
 #LetsBox .wpcp__playlist-layer {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--wpcp--present--border--radius, 10px);
   position: relative;
   z-index: 3;
-  overflow: auto;
   text-align: left;
   line-height: 1;
+  background: var(--wpcp--present--color--background);
+  display: flex;
+  flex-direction: column;
+}
+
+#LetsBox .wpcp__playlist-hidden {
+  display: none;
 }
 
 #LetsBox .wpcp__playlist-layer.wpcp__playlist-inline {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  max-height: calc(100% - 90px);
+  top: clamp(0px, 2vw, 50px);
+  left: clamp(0px, 2vw, 50px);
+  right: clamp(0px, 2vw, 50px);
+  bottom: 50px;
+  z-index: 1;
   width: auto !important;
-  height: inherit !important;
+  padding: 6px;
   opacity: 1;
   transition: all .3s ease-in-out;
+  background: var(--wpcp--present--color--background--90);
+  border-radius: var(--wpcp--present--border--radius, 10px);
 }
+
+#LetsBox .wpcp__playlist-layer ul:first-of-type {
+  margin: 0;
+  padding: 12px 6px;
+  opacity: 1;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#LetsBox .wpcp__playlist-layer ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: max(var(--wpcp--present--gap, 10px), 5px);
+  list-style-type: none;
+  grid-column: 1/-1;
+  padding: 12px;
+  border-radius: 0 0 var(--wpcp--present--border--radius, 10px) var(--wpcp--present--border--radius, 10px);
+  grid-auto-rows: 1fr;
+  grid-template-rows: repeat(var(--wpcp--playlist--folder-count, 0), auto);
+}
+
+#LetsBox [data-layout="grid"] .wpcp__playlist-layer ul {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+#LetsBox.audio [data-layout="list"] .wpcp__playlist-layer ul {
+  grid-template-columns: unset;
+}
+
+#LetsBox .wpcp__playlist-layer.wpcp__playlist-inline ul:first-of-type {
+  max-height: unset !important;
+}
+
+#LetsBox .wpcp__playlist-layer ul ul {
+  background: var(--wpcp--present--color--background);
+}
+
+#LetsBox .wpcp__playlist-layer ul ul {
+  margin: 0 -12px;
+}
+
+#LetsBox .wpcp__playlist-search {
+  padding: 6px;
+  display: none;
+}
+
+#LetsBox .has-search .wpcp__playlist-search {
+  display: block;
+}
+
+#LetsBox .wpcp__playlist-search input {
+  padding: 6px 18px;
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, .1);
+}
+
+#LetsBox [data-layout="list"] .wpcp__playlist-item.entry {
+  display: block;
+  padding: 0;
+}
+
+#LetsBox .wpcp__playlist-item {
+  padding: 0;
+  margin: 0;
+  color: var(--wpcp--present--color--black, #222);
+  transition: 250ms ease-in;
+  border-radius: var(--wpcp--present--border--radius, 10px);
+}
+
+#LetsBox .wpcp__playlist-item-folder+.wpcp__playlist-item-file {
+  grid-column-start: 1;
+}
+
+#LetsBox .wpcp__playlist-item.is-selected,
+#LetsBox .wpcp__playlist-item:hover {
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, .4);
+  transform: scale(1);
+}
+
+#LetsBox .wpcp__playlist-item:focus {
+  outline: none;
+}
+
+#LetsBox .wpcp__playlist-item.is-hidden {
+  display: none !important;
+}
+
+#LetsBox .wpcp__playlist-item-card {
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 18px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+  height: 100%;
+  flex-wrap: wrap;
+  border-radius: var(--wpcp--present--border--radius, 10px);
+  overflow: hidden;
+}
+
+#LetsBox [data-layout="grid"] .wpcp__playlist-item-card {
+  flex-wrap: nowrap;
+  flex-direction: column;
+}
+
+
 
 #LetsBox .wpcp__container.wpcp__active+.wpcp__playlist-layer.wpcp__playlist-inline {
   opacity: 0;
@@ -1115,161 +1166,181 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   top: 40px;
 }
 
-#LetsBox .wpcp__playlist-hidden {
-  display: none;
-  -webkit-transition: 0.5s;
-  transition: 0.5s;
-}
 
 #LetsBox .wpcp__playlist-item-thumbnail {
-  min-width: 100px;
-  max-width: 100px;
-  max-height: 100px;
-  display: table-cell;
-  vertical-align: middle;
-  text-align: center;
   position: relative;
-  overflow: hidden;
+  padding: 0;
+  box-sizing: content-box;
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  flex: 0;
+  flex-basis: clamp(120px, 30%, 360px);
 }
 
-#LetsBox.audio .wpcp__playlist-item-thumbnail {
-  min-width: 64px;
+#LetsBox .wpcp__playlist-item-thumbnail img[src*="css/icons/256x256"] {
+  max-height: 70%;
+  -o-object-fit: contain;
+  object-fit: contain;
 }
 
-#LetsBox .nothumbnails .wpcp__playlist-item-thumbnail {
+#LetsBox.audio [data-layout="list"] .wpcp__playlist-item-thumbnail {
+  aspect-ratio: 1 / 1;
+  flex-basis: clamp(60px, 96px, 128px);
+}
+
+#LetsBox.audio [data-layout="list"] .wpcp__playlist-item-thumbnail img {
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+#LetsBox.audio .wpcp__playlist-item-thumbnail img {
+  aspect-ratio: 1 / 1;
+}
+
+#LetsBox .no-thumbnails .wpcp__playlist-item-thumbnail {
   display: none;
 }
 
 #LetsBox .wpcp__playlist-item-duration {
   position: absolute;
   background: black;
-  background-color: rgba(0, 0, 0, 0.80);
+  background-color: rgb(0 0 0 / 0.8);
   color: white;
   padding: 0 5px;
   display: block;
   font-weight: 500;
   border-radius: 2px;
-  right: 0px;
-  bottom: 0px;
+  right: 2px;
+  bottom: 2px;
   line-height: 1.7em;
   z-index: 1;
+  font-size: 12px;
 }
 
 #LetsBox .wpcp__playlist-item-thumbnail>img {
-  transform: translateX(-50%);
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  margin-left: 50%;
+  -o-object-position: center;
+  object-position: center;
+  -o-object-fit: cover;
+  object-fit: cover;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
   max-width: 100%;
   max-height: 100%;
-  display: block;
+  transition: opacity 0.6s ease-out, transform 0.3s ease-out;
 }
 
 #LetsBox .wpcp__playlist-item-content {
-  overflow: hidden;
-  padding: 8px 20px;
-  font-weight: bold;
-  display: table-cell;
-  vertical-align: middle;
-  line-height: 18px;
-  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  flex: 1;
+  flex-basis: 1e-9px;
+  margin: 12px;
+}
+
+#LetsBox .wpcp__playlist-item-title-wrapper {
+  display: flex;
+  justify-content: space-between;
   width: 100%;
 }
 
-#LetsBox .wpcp__playlist-item-content div,
-#LetsBox .wpcp__playlist-item-content span {
-  margin-right: 5px;
+#LetsBox .wpcp__playlist-item-title {
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 3em;
+}
+
+#LetsBox .no-thumbnails .wpcp__playlist-item-title {
+  -webkit-line-clamp: 1;
+}
+
+#LetsBox .wpcp__playlist-item-title-button {
+  flex: 0 0 30px;
+  position: relative;
+}
+
+
+#LetsBox .wpcp__playlist-item-title-button .entry-action-menu-button {
+  position: absolute;
+  top: -6px;
+}
+
+#LetsBox .wpcp__playlist-item.is-selected .entry-info-button,
+#LetsBox .wpcp__playlist-item:hover .entry-info-button {
+  display: inline-block;
 }
 
 #LetsBox .wpcp__playlist-item-content i.eva-volume-up-outline {
   transition: all .8s ease-in-out;
-  opacity: 0;
-  margin-left: 5px;
+  display: none;
 }
 
-#LetsBox .wpcp__container.wpcp__active .wpcp__playlist-selected i.eva-volume-up-outline,
-#LetsBox .wpcp__container.wpcp__active+.wpcp__playlist-layer .wpcp__playlist-selected i.eva-volume-up-outline {
+#LetsBox .is-selected .wpcp__playlist-item-content i.eva-volume-up-outline {
+  opacity: 0;
+  margin-left: 5px;
+  display: inline-block;
+}
+
+
+#LetsBox .wpcp__container.wpcp__active .is-selected i.eva-volume-up-outline,
+#LetsBox .wpcp__container.wpcp__active+.wpcp__playlist-layer .is-selected i.eva-volume-up-outline {
   opacity: 1;
 }
 
 #LetsBox .wpcp__playlist-item-description {
-  font-size: 90%;
-  opacity: .5;
+  opacity: .6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 3em;
 }
 
 #LetsBox .wpcp__playlist-item-description:empty {
   display: none;
 }
 
-
-#LetsBox .wpcp__playlist-item-lastedited {
-  overflow: hidden;
-  padding: 8px 10px;
-  font-weight: bold;
-  display: table-cell;
-  vertical-align: middle;
-  line-height: 15px;
-  font-size: 90%;
-  opacity: .5;
+#LetsBox .wpcp__playlist-item-metadata {
+  padding-bottom: 5px;
 }
 
-#LetsBox .nodate .wpcp__playlist-item-lastedited {
+#LetsBox .no-date .wpcp__playlist-item-metadata {
   display: none;
 }
 
-#LetsBox .wpcp__playlist-item-lastedited div {
-  display: block;
-  width: 175px;
+#LetsBox .wpcp__playlist-item-lastedited {
+  overflow: hidden;
+  font-weight: bold;
+  line-height: 15px;
+  font-size: 90%;
+  opacity: .5;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   font-size: 90%;
+  display: block;
 }
 
-#LetsBox .wpcp__playlist-item-download,
-#LetsBox .wpcp__playlist-item-purchase {
-  text-decoration: none;
-  opacity: .33;
-  color: inherit;
-  width: 25px;
-  vertical-align: middle;
-  display: table-cell;
-  padding-left: 15px;
-}
-
-#LetsBox .wpcp__playlist-item-download:hover,
-#LetsBox .wpcp__playlist-item-purchase:hover {
-  opacity: .8;
-}
-
-#LetsBox .wpcp__playlist-selector-list-item-folder {
-  padding: 0;
-  margin: 0;
-  height: auto;
-  overflow: hidden;
-  transition: all .8s ease-in-out;
-  opacity: 1;
-}
-
-#LetsBox .wpcp__playlist-selector-list-item-folder.wpcp__playlist-selector-list-item-folder-hidden {
-  opacity: 0;
-  height: 0px;
-}
-
-#LetsBox .wpcp__playlist-selector-list-item.wpcp__playlist-selector-list-item-folder-header {
-  font-weight: bold !important;
-  text-transform: uppercase;
+#LetsBox .wpcp__playlist-item.wpcp__playlist-item-folder {
+  font-weight: bold;
   padding: 3px 0;
   font-size: 95%;
+  align-self: self-start;
+  transform: scale(1) !important;
 }
 
-#LetsBox .wpcp__playlist-selector-list-item-folder[data-folder='/'] {
-  border-top: 1px #D2D2D2 dashed;
-}
-
-#LetsBox .wpcp__playlist-selected .wpcp__playlist-item-download:hover,
-#LetsBox .wpcp__playlist-selected .wpcp__playlist-item-purchase:hover {
-  color: white;
+#LetsBox .wpcp__playlist-item.wpcp__playlist-item-folder.wpcp__playlist-item-folder-open {
+  grid-column: 1/-1;
 }
 
 #LetsBox .wpcp__playlist-current {
@@ -1307,9 +1378,8 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 }
 
 #LetsBox .wpcp__ads-skip-block {
-  background: #000;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  background-color: var(--wpcp--present--color--accent, rgba(0, 0, 0, 0.5));
+  color: var(--wpcp--present--color--white, #fff);
   display: block;
   padding: 10px;
   position: absolute;
@@ -1329,13 +1399,19 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 
 /* Customization for Skin */
+#LetsBox .wpcp__container {
+  border-radius: var(--wpcp--present--border--radius, 10px);
+}
 
 #LetsBox .wpcp__mediaelement {
   position: relative;
+  border-radius: var(--wpcp--present--border--radius, 10px);
+  overflow: hidden;
 }
 
 #LetsBox .wpcp__container-fullscreen .wpcp__mediaelement {
   position: absolute;
+  border-radius: 0px;
 }
 
 #LetsBox .wpcp__overlay-loading .loading {
@@ -1344,6 +1420,9 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__container.wpcp__video {
   overflow: visible;
+}
+
+#LetsBox .wpcp__poster {
 }
 
 #LetsBox .wpcp__overlay-play {
@@ -1467,12 +1546,11 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 #LetsBox .wpcp__time-handle {
   /*rtl:begin:ignore*/
   background: white;
-  height: 6px;
+  height: 5px;
   width: 18px;
   top: 0px;
   border: 0;
   left: -8px;
-  -webkit-transition: 0.15s ease-in all;
   transition: 0.15s ease-in all;
   /*rtl:end:ignore*/
 }
@@ -1515,10 +1593,6 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   #LetsBox .plyr__time+.plyr__time {
     display: none;
   }
-
-  #LetsBox .wpcp__playlist-item-lastedited {
-    display: none;
-  }
 }
 
 @media (max-width: 320px) {
@@ -1535,39 +1609,31 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 @media (max-width: 480px) {
   #LetsBox .wpcp__playlist-layer.wpcp__playlist-inline {
     position: relative;
-    left: 0;
-    top: 0;
-    right: 0;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    border-radius: 0px;  
+  }
+
+  #LetsBox .wpcp__container.wpcp__active+.wpcp__playlist-layer.wpcp__playlist-inline {
+    opacity: 1;
+    visibility: visible;
   }
 
   #LetsBox .wpcp__playlist-item-content {
-    font-weight: normal;
     font-size: 90%;
   }
 
-  #LetsBox .wpcp__playlist-selector-list-item {
-    padding-left: 3px;
+  #LetsBox .wpcp__playlist-item.is-selected .wpcp__playlist-item-download,
+  #LetsBox .wpcp__playlist-item.is-selected .wpcp__playlist-item-purchase {
+    display: inline-block;
   }
 
-  #LetsBox .wpcp__playlist-item-lastedited,
-  #LetsBox .wpcp__playlist-item-download,
-  #LetsBox .wpcp__playlist-item-purchase {
-    display: none;
-  }
-
-  #LetsBox .wpcp__playlist-selector-list-item.wpcp__playlist-selected .wpcp__playlist-item-download,
-  #LetsBox wpcp__playlist-selector-list-item.wpcp__playlist-selected .wpcp__playlist-item-purchase {
-    display: table-cell;
-  }
-
-  #LetsBox .wpcp__playlist-item-thumbnail {
-    min-width: 60px;
-    max-width: 60px;
-  }
-
-  #LetsBox .wpcp__playlist-item-thumbnail img {
-    height: 40px;
-    min-height: 40px;
+  #LetsBox .wpcp__video .wpcp__button.wpcp__playpause-button,
+  #LetsBox .wpcp__video .wpcp__button.wpcp__prev-button,
+  #LetsBox .wpcp__video .wpcp__button.wpcp__next-button {
+    display: none
   }
 }
 
@@ -1576,10 +1642,11 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 
 #LetsBox .wpcp__controls {
   display: block;
-  height: 50px;
+  height: 45px;
   /*rtl:begin:ignore*/
   direction: ltr;
   /*rtl:end:ignore*/
+  border-radius: var(--wpcp--present--border--radius, 10px);
 }
 
 #LetsBox .wpcp__button,
@@ -1598,6 +1665,12 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   vertical-align: initial;
 }
 
+@media only screen and (max-width: 768px) and (pointer: coarse) {
+  #LetsBox .wpcp__volume-slider {
+    display:none!important;
+  }
+}
+
 #LetsBox .wpcp__overlay-button {
   opacity: 0.8;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
@@ -1605,11 +1678,15 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   background-repeat: no-repeat;
   background-size: 40px;
   background-position: 50% !important;
+  background-color: var(--wpcp--present--color--accent, #590e54);
+  color: var(--wpcp--present--color--white, #fff);
 }
 
 #LetsBox .wpcp__overlay-button:hover,
 #LetsBox .wpcp__overlay:hover>.wpcp__overlay-button {
   opacity: 1;
+  background-color: var(--wpcp--present--color--accent, #590e54);
+  color: var(--wpcp--present--color--white, #fff);
 }
 
 #LetsBox .wpcp__time,
@@ -1717,6 +1794,14 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   background-image: url("data:image/svg+xml,%0A%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='white' d='M348.5 264l-148 148.5c-4.7 4.7-12.3 4.7-17 0L35.5 264c-4.7-4.7-4.7-12.3 0-17l7.1-7.1c4.7-4.7 12.3-4.7 17 0l115.4 116V44c0-6.6 5.4-12 12-12h10c6.6 0 12 5.4 12 12v311.9L324.4 240c4.7-4.7 12.3-4.7 17 0l7.1 7.1c4.7 4.6 4.7 12.2 0 16.9zM384 468v-8c0-6.6-5.4-12-12-12H12c-6.6 0-12 5.4-12 12v8c0 6.6 5.4 12 12 12h360c6.6 0 12-5.4 12-12z'%3E%3C/path%3E%3C/svg%3E");
 }
 
+#LetsBox .wpcp__share-button>button {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='white' d='M448 112c0 44.2-35.8 80-80 80-22.9 0-43.6-9.6-58.1-25.9l-151 76.4c.7 4.4 1.1 8.9 1.1 13.5s-.4 9.1-1.1 13.5l151 75.5c14.5-15.4 35.2-25 58.1-25 44.2 0 80 35.8 80 80s-35.8 80-80 80-80-35.8-80-80c0-9.7 1.7-19.9 4.9-27.7l-145.7-72.8c-14.3 22-39 36.5-67.2 36.5-44.18 0-80-35.8-80-80s35.82-80 80-80c28.2 0 52.9 14.5 67.2 36.5l145.7-72.8c-3.2-8.7-4.9-18-4.9-27.7 0-44.18 35.8-80 80-80s80 35.82 80 80zM79.1 304c27.4 0 48-21.5 48-48s-20.6-48-48-48c-25.61 0-48 21.5-48 48s22.39 48 48 48zM368 64c-26.5 0-48 21.49-48 48 0 26.5 21.5 48 48 48s48-21.5 48-48c0-26.51-21.5-48-48-48zm0 384c26.5 0 48-21.5 48-48s-21.5-48-48-48-48 21.5-48 48 21.5 48 48 48z'/%3E%3C/svg%3E");
+}
+
+#LetsBox .wpcp__deeplink-button>button {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3Cpath fill='white' d='M0 256C0 167.6 71.63 96 160 96h112c8.8 0 16 7.2 16 16s-7.2 16-16 16H160c-70.69 0-128 57.3-128 128s57.31 128 128 128h112c8.8 0 16 7.2 16 16s-7.2 16-16 16H160C71.63 416 0 344.4 0 256zm480 160H368c-8.8 0-16-7.2-16-16s7.2-16 16-16h112c70.7 0 128-57.3 128-128s-57.3-128-128-128H368c-8.8 0-16-7.2-16-16s7.2-16 16-16h112c88.4 0 160 71.6 160 160s-71.6 160-160 160zm-32-176c8.8 0 16 7.2 16 16s-7.2 16-16 16H192c-8.8 0-16-7.2-16-16s7.2-16 16-16h256z'/%3E%3C/svg%3E");
+}
+
 #LetsBox .wpcp__zip-button>button {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='white' d='M464,128H272L208,64H48A48,48,0,0,0,0,112V400a48,48,0,0,0,48,48H464a48,48,0,0,0,48-48V176A48,48,0,0,0,464,128ZM364.44,283.36,268,379.06a17.05,17.05,0,0,1-24,0l-96.42-95.7A16,16,0,0,1,158.81,256H224V208a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16v48h65.18A16,16,0,0,1,364.44,283.36Z'%3E%3C/path%3E%3C/svg%3E");
 }
@@ -1767,19 +1852,6 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
   background: rgba(255, 255, 255, 0.95)
 }
 
-#LetsBox.light .wpcp__playlist-layer::-webkit-scrollbar-track,
-#LetsBox.light .wpcp__playlist-selector-list::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
-  background-color: #F5F5F5;
-}
-
-#LetsBox.light .wpcp__playlist-layer::-webkit-scrollbar,
-#LetsBox.light .wpcp__playlist-selector-list::-webkit-scrollbar {
-  width: 8px;
-  background-color: #ffffff;
-}
-
 #LetsBox .wpcp__overlay-error {
   height: 100%;
   width: 100%;
@@ -1828,4 +1900,7 @@ Reference: http://blog.rrwd.nl/2015/04/04/the-screen-reader-text-class-why-and-h
 .wpcp__floating-container video {
   max-width: 280px !important;
   max-height: 158px !important;
+  width: 100% !important;
+  -o-object-position: right;
+  object-position: right;
 }

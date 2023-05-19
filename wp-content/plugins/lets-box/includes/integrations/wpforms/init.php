@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -42,9 +50,9 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
         add_filter('letsbox_private_folder_name_guests', [$this, 'rename_private_folder_names_for_guests'], 10, 2);
     }
 
-    ////////////////////////////////
+    // //////////////////////////////
     // **** **** PUBLIC **** **** //
-    ////////////////////////////////
+    // //////////////////////////////
 
     // Field display on the form front-end.
     public function field_display($field, $deprecated, $form_data)
@@ -71,7 +79,7 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
             $value = $field['value'];
         }
 
-        $ashtml = (in_array($type, ['entry-single', 'entry-table', 'email-html', 'smart-tag']));
+        $ashtml = in_array($type, ['entry-single', 'entry-table', 'email-html', 'smart-tag']);
 
         return apply_filters('letsbox_render_formfield_data', $value, $ashtml, $this);
     }
@@ -94,9 +102,9 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
         return $export_data;
     }
 
-    ///////////////////////////////
+    // /////////////////////////////
     // **** **** ADMIN **** **** //
-    ///////////////////////////////
+    // /////////////////////////////
 
     /**
      * Format field value which is stored.
@@ -124,12 +132,10 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
     // Enqueue Lets-Box scripts
     public function enqueues()
     {
-        global $LetsBox;
+        \TheLion\LetsBox\Core::instance()->load_scripts();
+        \TheLion\LetsBox\Core::instance()->load_styles();
 
-        $LetsBox->load_scripts();
-        $LetsBox->load_styles();
-
-        wp_enqueue_style('LetsBox.CustomStyle');
+        wp_enqueue_style('LetsBox');
 
         wp_enqueue_script('WPCP-'.$this->type.'-WPForms', plugins_url('WPForms.js', __FILE__), ['WPCloudplugin.Libraries'], false, true);
         wp_enqueue_style('WPCP-'.$this->type.'-WPForms', plugins_url('WPForms.css', __FILE__));
@@ -188,7 +194,7 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
                 'slug' => 'shortcode',
                 'name' => 'shortcode',
                 'rows' => 5,
-                'value' => isset($field['shortcode']) ? $field['shortcode'] : '[letsbox class="wpforms_upload_box" mode="upload" upload="1" upload_auto_start="0" uploadrole="all" userfolders="auto" viewuserfoldersrole="none"]',
+                'value' => isset($field['shortcode']) ? $field['shortcode'] : '[letsbox mode="upload" upload="1" upload_auto_start="0" uploadrole="all" userfolders="auto" viewuserfoldersrole="none"]',
             ],
             false
         );
@@ -259,7 +265,7 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
         }
     }
 
-    //The function that will help us create the buttons in the form builder
+    // The function that will help us create the buttons in the form builder
     public function custom_option_field($field_id, $field_class_mark, $label, $field_info, $echo = true)
     {
         if ('button' === $field_info['html_type']) {
@@ -287,7 +293,7 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
             return $private_folder_name;
         }
 
-        if ('wpforms_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('wpforms_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name;
         }
 
@@ -308,11 +314,13 @@ class WPForms_Field_Upload_Box extends \WPForms_Field
      */
     public function rename_private_folder_names_for_guests($private_folder_name_guest, $processor)
     {
-        if ('wpforms_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('wpforms_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name_guest;
         }
 
-        return str_replace(esc_html__('Guests', 'wpcloudplugins').' - ', '', $private_folder_name_guest);
+        $prefix = Processor::instance()->get_setting('userfolder_name_guest_prefix');
+
+        return str_replace($prefix, '', $private_folder_name_guest);
     }
 }
 

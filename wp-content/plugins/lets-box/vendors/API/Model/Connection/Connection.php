@@ -56,9 +56,9 @@ class Connection extends Model implements ConnectionInterface
 
     public function getHandler()
     {
-        //if (empty($this->handler)){
+        // if (empty($this->handler)){
         $this->handler = curl_init();
-        //}
+        // }
 
         return $this->handler;
     }
@@ -75,9 +75,6 @@ class Connection extends Model implements ConnectionInterface
         return $ch;
     }
 
-    /**
-     * @param $ch
-     */
     public function initCurlOpts($ch)
     {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -105,7 +102,7 @@ class Connection extends Model implements ConnectionInterface
     }
 
     /**
-     * @param $ch
+     * @param mixed $ch
      *
      * @return mixed
      */
@@ -139,28 +136,28 @@ class Connection extends Model implements ConnectionInterface
                 // CURLOPT_HTTPHEADER, CURLOPT_QUOTE, CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE require array or object arguments
 
                 switch ($opt) {
-          case 'CURLOPT_HTTPHEADER':
-          case 'CURLOPT_QUOTE':
-          case 'CURLOPT_HTTP200ALIASES':
-          case 'CURLOPT_POSTQUOTE':
-            // throw exception so it doesn't throw a warning
-            if (!is_array($optValue)) {
-                $this->error(
-                    [
-                        'error' => 'curl opt ('.$opt.') needs to be an array or object',
-                        'error_description' => 'curl opt ('.$opt.') needs to be an array or object',
-                    ]
-                );
-            }
-            curl_setopt($ch, constant($opt), $optValue);
+                    case 'CURLOPT_HTTPHEADER':
+                    case 'CURLOPT_QUOTE':
+                    case 'CURLOPT_HTTP200ALIASES':
+                    case 'CURLOPT_POSTQUOTE':
+                        // throw exception so it doesn't throw a warning
+                        if (!is_array($optValue)) {
+                            $this->error(
+                                [
+                                    'error' => 'curl opt ('.$opt.') needs to be an array or object',
+                                    'error_description' => 'curl opt ('.$opt.') needs to be an array or object',
+                                ]
+                            );
+                        }
+                        curl_setopt($ch, constant($opt), $optValue);
 
-            break;
+                        break;
 
-          default:
-            curl_setopt($ch, constant($opt), $optValue);
+                    default:
+                        curl_setopt($ch, constant($opt), $optValue);
 
-            break;
-        }
+                        break;
+                }
             }
         }
 
@@ -170,6 +167,8 @@ class Connection extends Model implements ConnectionInterface
     public function doCurlRequest($ch)
     {
         // Uncomment code to debug communication if needed
+        // file_put_contents(LETSBOX_CACHEDIR.'api.log', "\r\n\r\n".' ***********'.date('c')."************* \r\n", FILE_APPEND);
+
         // curl_setopt($ch, CURLOPT_VERBOSE, true);
         // $this->verbose = fopen('php://temp', 'w+');
         // curl_setopt($ch, CURLOPT_STDERR, $this->verbose);
@@ -179,6 +178,16 @@ class Connection extends Model implements ConnectionInterface
         // rewind($this->verbose);
         // $verboseLog = stream_get_contents($this->verbose);
         // file_put_contents(LETSBOX_CACHEDIR.'api.log', $verboseLog, FILE_APPEND);
+
+        // extract(curl_getinfo($ch));
+        // $metrics = <<<EOD
+        // URL....: {$url}
+        // Code...: {$http_code} ({$redirect_count} redirect(s) in {$redirect_time} secs)
+        // Content: {$content_type} Size: {$download_content_length} (Own: {$size_download}) Filetime: {$filetime}
+        // Time...: {$total_time} Start @ {$starttransfer_time} (DNS: {$namelookup_time} Connect: {$connect_time} Request: {$pretransfer_time})
+        // Speed..: Down: {$speed_download} (avg.) Up: {$speed_upload} (avg.)
+        // EOD;
+        // file_put_contents(LETSBOX_CACHEDIR.'api.log', $metrics, FILE_APPEND);
 
         // Get Body & Header
         $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -212,7 +221,7 @@ class Connection extends Model implements ConnectionInterface
     /**
      * GET.
      *
-     * @param $uri
+     * @param mixed $uri
      *
      * @return mixed
      */
@@ -296,9 +305,9 @@ class Connection extends Model implements ConnectionInterface
     /**
      * POST.
      *
-     * @param              $uri
      * @param array|string $params        will convert array to string
      * @param bool         $nameValuePair
+     * @param mixed        $uri
      *
      * @return mixed
      */
@@ -319,7 +328,7 @@ class Connection extends Model implements ConnectionInterface
             $postParams = $params;
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postParams);
-        //curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        // curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
         $ch = $this->initAdditionalCurlOpts($ch);
 
         return $this->doCurlRequest($ch);
@@ -328,7 +337,7 @@ class Connection extends Model implements ConnectionInterface
     public function postFile($uri, $file, $parentId = 0)
     {
         // @todo allow Content-MD5 header to be set
-        //Post 1-n files, each element of $files array assumed to be absolute
+        // Post 1-n files, each element of $files array assumed to be absolute
         // path to a file.  $files can be array (multiple) or string (one file).
         // Data will be posted in a series of POST vars named $file0, $file1...
         // $fileN

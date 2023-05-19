@@ -2,7 +2,7 @@
 
 /* global globalThis, jQuery, yith_wcan_shortcodes, accounting */
 
-import { $ } from '../config.js';
+import { $, $body } from '../config.js';
 
 export default class YITH_WCAN_Filter {
 	// currently executing xhr
@@ -17,19 +17,30 @@ export default class YITH_WCAN_Filter {
 	// flag set once init has executed
 	initialized = false;
 
+	// flag set when page has at least one active filter.
+	filtered = false;
+
 	// init object
 	constructor() {
-		const head = $( 'head' ).html(),
-			pageTitle = document.title,
-			alternativeUrl = this.searchAlternativeUrl( head );
-
-		alternativeUrl &&
-			! this.doingAjax &&
-			! this.initialized &&
-			! yith_wcan_shortcodes.ajax_filters &&
-			this.pushUrlToHistory( alternativeUrl, pageTitle );
-
+		this.initPopState();
 		this.initialized = true;
+	}
+
+	// init page reload when popstate event alter filters
+	initPopState() {
+		if ( ! yith_wcan_shortcodes.reload_on_back ) {
+			return;
+		}
+
+		this.pushUrlToHistory( window.location, document.title, null, true );
+
+		$( window ).on( 'popstate', function () {
+			if ( ! window.history.state?._yithWcan ) {
+				return;
+			}
+
+			window.location.reload( true );
+		} );
 	}
 
 	// execute call to filter products in current view
@@ -39,9 +50,10 @@ export default class YITH_WCAN_Filter {
 			customFilters;
 
 		// filter properties
-		customFilters = $(
-			document
-		).triggerHandler( 'yith_wcan_filters_parameters', [ filters ] );
+		customFilters = $( document ).triggerHandler(
+			'yith_wcan_filters_parameters',
+			[ filters ]
+		);
 
 		if ( !! customFilters ) {
 			filters = customFilters;
@@ -55,6 +67,8 @@ export default class YITH_WCAN_Filter {
 
 		// if no ajax, simply change page url
 		if ( ! yith_wcan_shortcodes.ajax_filters ) {
+			this.pushUrlToHistory( targetUrl, document.title, filters );
+
 			window.location = targetUrl;
 			return;
 		}
@@ -68,7 +82,8 @@ export default class YITH_WCAN_Filter {
 			this._beforeFilter( response, filters );
 
 			this.refreshFragments( target, preset, response );
-			this.pushUrlToHistory( targetUrl, response.pageTitle );
+			this.pushUrlToHistory( targetUrl, response.pageTitle, filters );
+			this.originalSearch = location.search;
 
 			$target && this.unblock( $target );
 
@@ -96,17 +111,16 @@ export default class YITH_WCAN_Filter {
 			}
 		);
 
-		if ( filters && !! Object.keys( filters ).length ) {
-			$( 'body' ).addClass( 'filtered' );
-		} else {
-			$( 'body' ).removeClass( 'filtered' );
-		}
+		this.filtered = filters && !! Object.keys( filters ).length;
+		this.filtered
+			? $body.addClass( 'filtered' )
+			: $body.removeClass( 'filtered' );
 
 		$( window ).trigger( 'scroll' );
 
 		$( document )
 			.trigger( 'yith-wcan-ajax-filtered', [ response, filters ] )
-			.trigger( 'yith_wcwl_reload_fragments' );
+			.trigger( 'yith_wcwl_reload_after_ajax' );
 	}
 
 	// build url to show
@@ -203,7 +217,7 @@ export default class YITH_WCAN_Filter {
 	}
 
 	// push url to browser history
-	pushUrlToHistory( url, title ) {
+	pushUrlToHistory( url, title, filters, current ) {
 		if (
 			! yith_wcan_shortcodes.change_browser_url ||
 			navigator.userAgent.match( /msie/i )
@@ -211,9 +225,17 @@ export default class YITH_WCAN_Filter {
 			return;
 		}
 
-		window.history.pushState(
+		let method = 'pushState';
+
+		if ( !! current ) {
+			method = 'replaceState';
+		}
+
+		window.history[ method ](
 			{
+				_yithWcan: true,
 				pageTitle: title,
+				filters,
 			},
 			'',
 			url
@@ -342,11 +364,10 @@ export default class YITH_WCAN_Filter {
 			customParams;
 
 		// filter properties
-		customParams = $(
-			document
-		).triggerHandler( 'yith_wcan_supported_filters_parameters', [
-			supportedParams,
-		] );
+		customParams = $( document ).triggerHandler(
+			'yith_wcan_supported_filters_parameters',
+			[ supportedParams ]
+		);
 
 		if ( !! customParams ) {
 			supportedParams = customParams;

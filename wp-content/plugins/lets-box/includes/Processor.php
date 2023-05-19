@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author WP Cloud Plugins
+ * @copyright Copyright (c) 2022, WP Cloud Plugins
+ *
+ * @since       2.0
+ * @see https://www.wpcloudplugins.com
+ */
 
 namespace TheLion\LetsBox;
 
@@ -6,55 +13,27 @@ class Processor
 {
     public $options = [];
     public $mobile = false;
+    public $settings = [];
+
+    /**
+     * The single instance of the class.
+     *
+     * @var Processor
+     */
+    protected static $_instance;
     protected $listtoken = '';
     protected $_rootFolder;
     protected $_lastFolder;
     protected $_folderPath;
     protected $_requestedEntry;
-    protected $_load_scripts = ['general' => false, 'files' => false, 'upload' => false, 'mediaplayer' => false];
-
-    /**
-     * @var \TheLion\LetsBox\Main
-     */
-    private $_main;
-
-    /**
-     * @var \TheLion\LetsBox\App
-     */
-    private $_app;
-
-    /**
-     * @var \TheLion\LetsBox\Client
-     */
-    private $_client;
-
-    /**
-     * @var \TheLion\LetsBox\User
-     */
-    private $_user;
-
-    /**
-     * @var \TheLion\LetsBox\UserFolders
-     */
-    private $_userfolders;
-
-    /**
-     * @var \TheLion\LetsBox\Cache
-     */
-    private $_cache;
-
-    /**
-     * @var \TheLion\LetsBox\Shortcodes
-     */
-    private $_shortcodes;
+    protected $_load_scripts = ['general' => false, 'files' => false, 'upload' => false, 'mediaplayer' => false, 'carousel' => false];
 
     /**
      * Construct the plugin object.
      */
-    public function __construct(Main $_main)
+    public function __construct()
     {
-        $this->_main = $_main;
-        register_shutdown_function([$this, 'do_shutdown']);
+        register_shutdown_function([static::class, 'do_shutdown']);
 
         $this->settings = get_option('lets_box_settings');
 
@@ -71,111 +50,128 @@ class Processor
         }
     }
 
+    /**
+     * Processor Instance.
+     *
+     * Ensures only one instance is loaded or can be loaded.
+     *
+     * @return Processor - Processor instance
+     *
+     * @static
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+
+        return self::$_instance;
+    }
+
     public function start_process()
     {
         if (!isset($_REQUEST['action'])) {
             error_log('[WP Cloud Plugin message]: '." Function startProcess() requires an 'action' request");
 
-            exit();
+            exit;
         }
-        do_action('letsbox_before_start_process', $_REQUEST['action'], $this);
 
-        if (('letsbox-revoke' === $_REQUEST['action'])) {
-            $is_authorized = check_ajax_referer('letsbox-admin-action', false, false);
-            if ($is_authorized && Helpers::check_user_role($this->settings['permissions_edit_settings'])) {
-                $app = new \TheLion\LetsBox\App($this);
-                $app->revoke_token();
+        if (isset($_REQUEST['account_id'])) {
+            $requested_account = Accounts::instance()->get_account_by_id($_REQUEST['account_id']);
+            if (null !== $requested_account) {
+                App::set_current_account($requested_account);
+            } else {
+                error_log(sprintf('[WP Cloud Plugin message]: '." Function start_process() cannot use the requested account (ID: %s) as it isn't linked with the plugin", $_REQUEST['account_id']));
+
+                exit;
             }
-
-            exit(1);
         }
+
+        do_action('letsbox_before_start_process', $_REQUEST['action'], $this);
 
         $authorized = $this->_is_action_authorized();
 
-        if ('letsbox-factory-reset' === $_REQUEST['action']) {
+        if ((true === $authorized) && ('letsbox-revoke' === $_REQUEST['action'])) {
+            $data = ['account_id' => App::get_current_account()->get_id(), 'action' => 'revoke', 'success' => false];
             if (Helpers::check_user_role($this->settings['permissions_edit_settings'])) {
-                $this->get_main()->do_factory_reset();
+                if (null === App::get_current_account()) {
+                    echo json_encode($data);
+
+                    exit;
+                }
+
+                if ('true' === $_REQUEST['force']) {
+                    Accounts::instance()->remove_account(App::get_current_account()->get_id());
+                } else {
+                    App::instance()->revoke_token(App::get_current_account());
+                }
+
+                $data['success'] = true;
             }
 
-            exit(1);
+            echo json_encode($data);
+
+            exit;
         }
 
-        if ('letsbox-reset-cache' === $_REQUEST['action']) {
-            if (Helpers::check_user_role($this->settings['permissions_edit_settings'])) {
-                $this->reset_complete_cache();
-            }
-
-            exit(1);
-        }
-
-        if ('letsbox-reset-statistics' === $_REQUEST['action']) {
-            if (Helpers::check_user_role($this->settings['permissions_edit_settings'])) {
-                Events::truncate_database();
-            }
-
-            exit(1);
-        }
-
-        if ((!isset($_REQUEST['listtoken']))) {
-            $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '"url unknown"';
-            $request = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        if (!isset($_REQUEST['listtoken'])) {
+            $url = Helpers::get_page_url();
+            $request = $_SERVER['REQUEST_URI'] ?? '';
             error_log('[WP Cloud Plugin message]: '." Function start_process() requires a 'listtoken' on {$url} requested via {$request}");
             error_log(var_export($_REQUEST, true));
 
-            exit();
+            exit;
         }
 
         $this->listtoken = $_REQUEST['listtoken'];
-        $this->options = $this->get_shortcodes()->get_shortcode_by_id($this->listtoken);
+        $this->options = Shortcodes::instance()->get_shortcode_by_id($this->listtoken);
 
         if (false === $this->options) {
-            $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-            error_log('[WP Cloud Plugin message]: '.' Function start_process('.$_REQUEST['action'].") hasn't received a valid listtoken (".$this->listtoken.") on: {$url} \n");
+            $url = Helpers::get_page_url();
+            error_log('[WP Cloud Plugin message]:  Function start_process('.$_REQUEST['action'].") hasn't received a valid listtoken (".$this->listtoken.") on: {$url} \n");
 
-            exit();
+            exit;
         }
 
-        if (false === $this->get_user()->can_view()) {
-            $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-            $request = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        if (false === User::can_view()) {
+            $url = Helpers::get_page_url();
+            $request = $_SERVER['REQUEST_URI'] ?? '';
             error_log('[WP Cloud Plugin message]: '." Function start_process() discovered that an user didn't have the permission to view the plugin on {$url} requested via {$request}");
 
-            exit();
+            exit;
         }
 
-        if (is_wp_error($authorized)) {
-            error_log('[WP Cloud Plugin message]: '." Function startProcess() isn't authorized");
+        if (null === App::get_current_account() || false === App::get_current_account()->get_authorization()->has_access_token()) {
+            error_log('[WP Cloud Plugin message]: '." Function _is_action_authorized() discovered that the plugin doesn't have an access token");
 
-            if ('1' === $this->options['debug']) {
-                exit($authorized->get_error_message());
-            }
-
-            exit();
+            return new \WP_Error('broke', '<strong>'.sprintf(esc_html__('%s needs your help!', 'wpcloudplugins'), 'Lets-Box').'</strong> '.esc_html__('Authorize the plugin!', 'wpcloudplugins').'.');
         }
+
+        Client::instance();
 
         // Remove all cache files for current shortcode when refreshing, otherwise check for new changes
         if (defined('FORCE_REFRESH')) {
             CacheRequest::clear_request_cache();
-            $this->get_cache()->reset_cache();
+            Cache::instance()->reset_cache();
         } else {
             // Pull for changes if needed
-            $this->get_cache()->pull_for_changes();
+            Cache::instance()->pull_for_changes();
         }
 
         // Set rootFolder
         if ('manual' === $this->options['user_upload_folders']) {
-            $userfolder = $this->get_user_folders()->get_manually_linked_folder_for_user();
+            $userfolder = UserFolders::instance()->get_manually_linked_folder_for_user();
             if (is_wp_error($userfolder) || false === $userfolder) {
-                error_log('[WP Cloud Plugin message]: '.'Cannot find a manually linked folder for user');
+                error_log('[WP Cloud Plugin message]: Cannot find a manually linked folder for user');
 
                 exit('-1');
             }
             $this->_rootFolder = $userfolder->get_id();
         } elseif (('auto' === $this->options['user_upload_folders']) && !Helpers::check_user_role($this->options['view_user_folders_role'])) {
-            $userfolder = $this->get_user_folders()->get_auto_linked_folder_for_user();
+            $userfolder = UserFolders::instance()->get_auto_linked_folder_for_user();
 
             if (is_wp_error($userfolder) || false === $userfolder) {
-                error_log('[WP Cloud Plugin message]: '.'Cannot find a auto linked folder for user');
+                error_log('[WP Cloud Plugin message]: Cannot find a auto linked folder for user');
 
                 exit('-1');
             }
@@ -187,10 +183,10 @@ class Processor
         // Open Sub Folder if needed
         if (!empty($this->options['subfolder']) && '/' !== $this->options['subfolder']) {
             $sub_folder_path = apply_filters('letsbox_set_subfolder_path', Helpers::apply_placeholders($this->options['subfolder'], $this), $this->options, $this);
-            $subfolder = $this->get_client()->get_sub_folder_by_path($this->_rootFolder, $sub_folder_path, true);
+            $subfolder = API::get_sub_folder_by_path($this->_rootFolder, $sub_folder_path, true);
 
             if (is_wp_error($subfolder) || false === $subfolder) {
-                error_log('[WP Cloud Plugin message]: '.'Cannot find or create the subfolder');
+                error_log('[WP Cloud Plugin message]: Cannot find or create the subfolder');
 
                 exit('-1');
             }
@@ -231,11 +227,11 @@ class Processor
             $this->_set_gzip_compression();
 
             if (!defined('FORCE_REFRESH')) {
-                $cached_request = new CacheRequest($this);
+                $cached_request = new CacheRequest();
                 if ($cached_request->is_cached()) {
                     echo $cached_request->get_cached_response();
 
-                    exit();
+                    exit;
                 }
             }
         }
@@ -244,7 +240,7 @@ class Processor
 
         switch ($_REQUEST['action']) {
             case 'letsbox-get-filelist':
-                $filebrowser = new Filebrowser($this);
+                $filebrowser = new Filebrowser();
 
                 if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && '1' === $this->options['search']) { // Search files
                     $filelist = $filebrowser->searchFiles();
@@ -255,46 +251,46 @@ class Processor
                 break;
 
             case 'letsbox-preview':
-                $file = $this->get_client()->preview_entry();
+                $file = Client::instance()->preview_entry();
 
                 break;
 
             case 'letsbox-edit':
-                if (false === $this->get_user()->can_edit()) {
-                    exit();
+                if (false === User::can_edit()) {
+                    exit;
                 }
 
-                $file = $this->get_client()->edit_entry();
+                $file = Client::instance()->edit_entry();
 
                 break;
 
             case 'letsbox-thumbnail':
-                $file = $this->get_client()->build_thumbnail();
+                $file = Client::instance()->build_thumbnail();
 
                 break;
 
             case 'letsbox-download':
-                if (false === $this->get_user()->can_download()) {
-                    exit();
+                if (false === User::can_download()) {
+                    exit;
                 }
-                $this->get_client()->download_entry();
+                Client::instance()->download_entry();
 
                 break;
 
             case 'letsbox-stream':
-                $this->get_client()->stream_entry();
+                Client::instance()->stream_entry();
 
                 break;
 
             case 'letsbox-shorten-url':
-                if (false === $this->get_user()->can_deeplink()) {
-                    exit();
+                if (false === User::can_deeplink()) {
+                    exit;
                 }
 
-                $cached_node = $this->get_client()->get_entry();
+                $cached_node = Client::instance()->get_entry();
                 $url = esc_url_raw($_REQUEST['url']);
 
-                $shortened_url = $this->get_client()->shorten_url($cached_node, $url);
+                $shortened_url = API::shorten_url($url, null, ['name' => $cached_node->get_name()]);
 
                 $data = [
                     'id' => $cached_node->get_id(),
@@ -304,19 +300,19 @@ class Processor
 
                 echo json_encode($data);
 
-                exit();
+                exit;
 
             case 'letsbox-create-zip':
-                if (false === $this->get_user()->can_download()) {
-                    exit();
+                if (false === User::can_download()) {
+                    exit;
                 }
 
                 switch ($_REQUEST['type']) {
                     case 'do-zip':
-                        $zip = new Zip($this);
+                        $zip = new Zip();
                         $zip->do_zip();
 
-                        exit();
+                        exit;
 
                         break;
                 }
@@ -327,34 +323,51 @@ class Processor
             case 'letsbox-embedded':
                 if (isset($_REQUEST['entries'])) {
                     foreach ($_REQUEST['entries'] as $entry_id) {
-                        $link['links'][] = $this->get_client()->get_shared_link_for_output($entry_id);
+                        $link['links'][] = Client::instance()->get_shared_link_for_output($entry_id);
                     }
                 } else {
-                    $link = $this->get_client()->get_shared_link_for_output();
+                    $link = Client::instance()->get_shared_link_for_output();
                 }
                 echo json_encode($link);
 
                 break;
 
             case 'letsbox-get-gallery':
-                $gallery = new Gallery($this);
+                if (is_wp_error($authorized)) {
+                    echo json_encode(['lastpath' => '', 'folder' => '', 'html' => '']);
 
-                if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && '1' === $this->options['search']) { // Search files
-                    $imagelist = $gallery->searchImageFiles();
-                } else {
-                    $imagelist = $gallery->getImagesList(); // Read folder
+                    exit;
+                }
+
+                switch ($_REQUEST['type']) {
+                    case 'carousel':
+                        $carousel = new Carousel($this);
+                        $carousel->get_images_list();
+
+                        break;
+
+                    default:
+                        $gallery = new Gallery();
+
+                        if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && '1' === $this->options['search']) { // Search files
+                            $imagelist = $gallery->searchImageFiles();
+                        } else {
+                            $imagelist = $gallery->getImagesList(); // Read folder
+                        }
+
+                        break;
                 }
 
                 break;
 
             case 'letsbox-upload-file':
-                $user_can_upload = $this->get_user()->can_upload();
+                $user_can_upload = User::can_upload();
 
                 if (false === $user_can_upload) {
-                    exit();
+                    exit;
                 }
 
-                $upload_processor = new Upload($this);
+                $upload_processor = new Upload();
 
                 switch ($_REQUEST['type']) {
                     case 'upload-preprocess':
@@ -388,18 +401,16 @@ class Processor
                         break;
                 }
 
-                exit();
-
-                break;
+                exit;
 
             case 'letsbox-delete-entries':
-// Check if user is allowed to delete entry
-                $user_can_delete = $this->get_user()->can_delete_files() || $this->get_user()->can_delete_folders();
+                // Check if user is allowed to delete entry
+                $user_can_delete = User::can_delete_files() || User::can_delete_folders();
 
                 if (false === $user_can_delete) {
-                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to delete entry', 'wpcloudplugins')]);
+                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to delete file.', 'wpcloudplugins')]);
 
-                    exit();
+                    exit;
                 }
 
                 $entries_to_delete = [];
@@ -407,81 +418,79 @@ class Processor
                     $entries_to_delete[] = $requested_id;
                 }
 
-                $entries = $this->get_client()->delete_entries($entries_to_delete);
+                $entries = Client::instance()->delete_entries($entries_to_delete);
 
                 foreach ($entries as $entry) {
                     if (false === $entry) {
-                        echo json_encode(['result' => '-1', 'msg' => esc_html__('Not all entries could be deleted', 'wpcloudplugins')]);
+                        echo json_encode(['result' => '-1', 'msg' => esc_html__('Not all files could be deleted.', 'wpcloudplugins')]);
 
-                        exit();
+                        exit;
                     }
                 }
-                echo json_encode(['result' => '1', 'msg' => esc_html__('Entry was deleted', 'wpcloudplugins')]);
+                echo json_encode(['result' => '1', 'msg' => esc_html__('File was deleted.', 'wpcloudplugins')]);
 
-                exit();
-
-                break;
-
-            case 'letsbox-copy-entry':
-                // Check if user is allowed to rename entry
-                $user_can_copy = $this->get_user()->can_copy_files() || $this->get_user()->can_copy_folders();
-
-                if (false === $user_can_copy) {
-                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to copy entry', 'wpcloudplugins')]);
-
-                    exit();
-                }
-
-                // Strip unsafe characters
-                $newname = rawurldecode($_REQUEST['newname']);
-                $new_filename = Helpers::filter_filename($newname, false);
-
-                $file = $this->get_client()->copy_entry(null, null, $new_filename);
-
-                if (is_wp_error($file)) {
-                    echo json_encode(['result' => '-1', 'msg' => $file->get_error_message()]);
-                } else {
-                    echo json_encode(['result' => '1', 'msg' => esc_html__('Entry was copied', 'wpcloudplugins')]);
-                }
-
-                exit();
-
-                break;
+                exit;
 
             case 'letsbox-rename-entry':
                 // Check if user is allowed to rename entry
-                $user_can_rename = $this->get_user()->can_rename_files() || $this->get_user()->can_rename_folders();
+                $user_can_rename = User::can_rename_files() || User::can_rename_folders();
 
                 if (false === $user_can_rename) {
-                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to rename entry', 'wpcloudplugins')]);
+                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to rename file.', 'wpcloudplugins')]);
 
-                    exit();
+                    exit;
                 }
 
                 // Strip unsafe characters
                 $newname = rawurldecode($_REQUEST['newname']);
                 $new_filename = Helpers::filter_filename($newname, false);
 
-                $file = $this->get_client()->rename_entry($new_filename);
+                $file = Client::instance()->rename_entry($new_filename);
 
                 if (is_wp_error($file)) {
                     echo json_encode(['result' => '-1', 'msg' => $file->get_error_message()]);
                 } else {
-                    echo json_encode(['result' => '1', 'msg' => esc_html__('Entry was renamed', 'wpcloudplugins')]);
+                    echo json_encode(['result' => '1', 'msg' => esc_html__('File was renamed.', 'wpcloudplugins')]);
                 }
 
-                exit();
+                exit;
 
-                break;
+            case 'letsbox-copy-entries':
+                // Check if user is allowed to copy entry
+                $user_can_copy = User::can_copy_files() || User::can_copy_folders();
+
+                if (false === $user_can_copy) {
+                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to copy file.', 'wpcloudplugins')]);
+
+                    exit;
+                }
+
+                $entries_to_copy = [];
+                foreach ($_REQUEST['entries'] as $requested_id) {
+                    $entries_to_copy[] = $requested_id;
+                }
+
+                $entries = Client::instance()->move_entries($entries_to_copy, $_REQUEST['target'], true);
+
+                foreach ($entries as $entry) {
+                    if (is_wp_error($entry) || empty($entry)) {
+                        echo json_encode(['result' => '-1', 'msg' => esc_html__('Not all files could be copied.', 'wpcloudplugins')]);
+
+                        exit;
+                    }
+                }
+                echo json_encode(['result' => '1', 'msg' => esc_html__('Successfully copied to new location', 'wpcloudplugins')]);
+
+                exit;
 
             case 'letsbox-move-entries':
                 // Check if user is allowed to move entry
-                $user_can_move = $this->get_user()->can_move_files() || $this->get_user()->can_move_folders();
+                $user_can_move = User::can_move_files() || User::can_move_folders();
 
                 if (false === $user_can_move) {
-                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to move', 'wpcloudplugins')]);
+                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to move file.', 'wpcloudplugins')]);
 
-                    exit();
+                    exit;
                 }
 
                 $entries_to_move = [];
@@ -489,60 +498,56 @@ class Processor
                     $entries_to_move[] = $requested_id;
                 }
 
-                $entries = $this->get_client()->move_entries($entries_to_move, $_REQUEST['target']);
+                $entries = Client::instance()->move_entries($entries_to_move, $_REQUEST['target']);
 
                 foreach ($entries as $entry) {
                     if (is_wp_error($entry) || empty($entry)) {
-                        echo json_encode(['result' => '-1', 'msg' => esc_html__('Not all entries could be moved', 'wpcloudplugins')]);
+                        echo json_encode(['result' => '-1', 'msg' => esc_html__('Not all files could be moved.', 'wpcloudplugins')]);
 
-                        exit();
+                        exit;
                     }
                 }
-                echo json_encode(['result' => '1', 'msg' => esc_html__('Successfully moved to new location', 'wpcloudplugins')]);
+                echo json_encode(['result' => '1', 'msg' => esc_html__('Successfully moved to new location.', 'wpcloudplugins')]);
 
-                exit();
-
-                break;
+                exit;
 
             case 'letsbox-edit-description-entry':
                 // Check if user is allowed to rename entry
-                $user_can_editdescription = $this->get_user()->can_edit_description();
+                $user_can_editdescription = User::can_edit_description();
 
                 if (false === $user_can_editdescription) {
-                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to edit description', 'wpcloudplugins')]);
+                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to edit description.', 'wpcloudplugins')]);
 
-                    exit();
+                    exit;
                 }
 
                 $newdescription = sanitize_textarea_field(wp_unslash($_REQUEST['newdescription']));
-                $result = $this->get_client()->update_description($newdescription);
+                $result = Client::instance()->update_description($newdescription);
 
                 if (is_wp_error($result)) {
                     echo json_encode(['result' => '-1', 'msg' => $result->get_error_message()]);
                 } else {
-                    echo json_encode(['result' => '1', 'msg' => esc_html__('Description was edited', 'wpcloudplugins'), 'description' => $result]);
+                    echo json_encode(['result' => '1', 'msg' => esc_html__('Description was edited.', 'wpcloudplugins'), 'description' => $result]);
                 }
 
-                exit();
-
-                break;
+                exit;
 
             case 'letsbox-create-entry':
-// Strip unsafe characters
+                // Strip unsafe characters
                 $_name = rawurldecode($_REQUEST['name']);
                 $new_name = Helpers::filter_filename($_name, false);
                 $mimetype = $_REQUEST['mimetype'];
 
                 // Check if user is allowed
-                $user_can_create_entry = $this->get_user()->can_add_folders();
+                $user_can_create_entry = User::can_add_folders();
 
                 if (false === $user_can_create_entry) {
-                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to add entry', 'wpcloudplugins')]);
+                    echo json_encode(['result' => '-1', 'msg' => esc_html__('Failed to add file.', 'wpcloudplugins')]);
 
-                    exit();
+                    exit;
                 }
 
-                $file = $this->get_client()->add_folder($new_name);
+                $file = Client::instance()->add_folder($new_name);
 
                 if (is_wp_error($file)) {
                     echo json_encode(['result' => '-1', 'msg' => $file->get_error_message()]);
@@ -550,12 +555,10 @@ class Processor
                     echo json_encode(['result' => '1', 'msg' => $new_name.' '.esc_html__('was added', 'wpcloudplugins'), 'lastFolder' => $file->get_id()]);
                 }
 
-                exit();
-
-                break;
+                exit;
 
             case 'letsbox-get-playlist':
-                $mediaplayer = new Mediaplayer($this);
+                $mediaplayer = new Mediaplayer();
                 $playlist = $mediaplayer->getMediaList();
 
                 break;
@@ -569,15 +572,15 @@ class Processor
                 header('Content-Type: text/xml; charset=UTF-8');
                 echo wp_remote_retrieve_body($response);
 
-                exit();
+                exit;
 
             default:
                 error_log('[WP Cloud Plugin message]: '.sprintf('No valid AJAX request: %s', $_REQUEST['action']));
 
-                exit('Lets-Box: '.esc_html__('No valid AJAX request', 'wpcloudplugins'));
+                exit('Lets-Box: '.esc_html__('No valid AJAX request.', 'wpcloudplugins'));
         }
 
-        exit();
+        exit;
     }
 
     public function create_from_shortcode($atts)
@@ -586,12 +589,15 @@ class Processor
         $atts = $this->remove_deprecated_options($atts);
 
         $defaults = [
+            'singleaccount' => '1',
+            'account' => false,
+            'startaccount' => false,
             'dir' => false,
             'subfolder' => false,
             'class' => '',
             'startid' => false,
             'mode' => 'files',
-            'userfolders' => '0',
+            'userfolders' => 'off',
             'usertemplatedir' => '',
             'viewuserfoldersrole' => 'administrator',
             'userfoldernametemplate' => '',
@@ -601,19 +607,28 @@ class Processor
             'showfolders' => '1',
             'filesize' => '1',
             'filedate' => '1',
+            'fileinfo_on_hover' => '0',
             'hoverthumbs' => '1',
             'filedescription' => '0',
             'filelayout' => 'grid',
+            'allow_switch_view' => '1',
             'showext' => '1',
             'sortfield' => 'name',
             'sortorder' => 'asc',
+            'show_header' => '1',
             'showbreadcrumb' => '1',
             'candownloadzip' => '0',
             'lightboxnavigation' => '1',
+            'lightboxthumbs' => '1',
             'showsharelink' => '0',
+            'share_password' => '',
+            'share_expire_after' => '',
+            'share_allow_download' => '1',
             'showrefreshbutton' => '1',
+            'use_custom_roottext' => '1',
             'roottext' => esc_html__('Start', 'wpcloudplugins'),
             'search' => '1',
+            'searchrole' => 'all',
             'searchfrom' => 'parent',
             'searchterm' => '',
             'searchcontents' => '1',
@@ -623,8 +638,8 @@ class Processor
             'excludeext' => '*',
             'maxwidth' => '100%',
             'maxheight' => '',
+            'scrolltotop' => '1',
             'viewrole' => 'administrator|editor|author|contributor|subscriber|guest',
-            'allowpreview' => '1',
             'previewrole' => 'all',
             'downloadrole' => 'administrator|editor|author|contributor|subscriber|guest',
             'sharerole' => 'all',
@@ -632,25 +647,46 @@ class Processor
             'editrole' => 'administrator|editor|author',
             'previewinline' => '1',
             'quality' => '90',
+            'maximages' => '25',
+            'lightbox_open' => '0',
             'slideshow' => '0',
             'pausetime' => '5000',
             'showfilenames' => '0',
+            'show_descriptions' => '0',
             'showdescriptionsontop' => '0',
             'targetheight' => '300',
             'folderthumbs' => '0',
             'mediaskin' => '',
             'mediabuttons' => 'prevtrack|playpause|nexttrack|volume|current|duration|fullscreen',
+            'media_ratio' => '16:9',
             'autoplay' => '0',
-            'hideplaylist' => '0',
+            'showplaylist' => '1',
             'showplaylistonstart' => '1',
             'playlistinline' => '0',
+            'playlistautoplay' => '1',
             'playlistthumbnails' => '1',
-            'linktomedia' => '0',
+            'playlist_search' => '0',
             'linktoshop' => '',
             'ads' => '0',
             'ads_tag_url' => '',
             'ads_skipable' => '1',
             'ads_skipable_after' => '',
+            'axis' => 'horizontal',
+            'padding' => '',
+            'border_radius' => '',
+            'description_position' => 'hover',
+            'navigation_dots' => '1',
+            'navigation_arrows' => '1',
+            'slide_items' => '3',
+            'slide_height' => '300px',
+            'slide_by' => '1',
+            'slide_speed' => '300',
+            'slide_center' => '0',
+            'slide_auto_size' => '0',
+            'carousel_autoplay' => '1',
+            'pausetime' => '5000',
+            'hoverpause' => '0',
+            'direction' => 'forward',
             'notificationupload' => '0',
             'notificationdownload' => '0',
             'notificationdeletion' => '0',
@@ -658,9 +694,12 @@ class Processor
             'notification_skipemailcurrentuser' => '0',
             'notification_from_name' => '',
             'notification_from_email' => '',
+            'notification_replyto_email' => '',
             'upload' => '0',
             'upload_folder' => '1',
             'upload_auto_start' => '1',
+            'upload_filename' => '%file_name%%file_extension%',
+            'upload_create_shared_link' => '0',
             'upload_button_text' => '',
             'upload_button_text_plural' => '',
             'overwrite' => '0',
@@ -670,11 +709,14 @@ class Processor
             'maxfilesize' => '0',
             'maxnumberofuploads' => '-1',
             'delete' => '0',
-            'deleterole' => 'administrator|editor',
+            'deletefilesrole' => 'administrator|editor',
+            'deletefoldersrole' => 'administrator|editor',
             'rename' => '0',
-            'renamerole' => 'administrator|editor',
+            'renamefilesrole' => 'administrator|editor',
+            'renamefoldersrole' => 'administrator|editor',
             'move' => '0',
-            'moverole' => 'administrator|editor',
+            'movefilesrole' => 'administrator|editor',
+            'movefoldersrole' => 'administrator|editor',
             'copy' => '0',
             'copyfilesrole' => 'administrator|editor',
             'copyfoldersrole' => 'administrator|editor',
@@ -686,9 +728,9 @@ class Processor
             'createdocumentrole' => 'administrator|editor',
             'deeplink' => '0',
             'deeplinkrole' => 'all',
-            'mcepopup' => '0',
-            'post_id' => get_the_ID(),
-            'debug' => '0',
+            'popup' => '0',
+            'post_id' => empty($atts['popup']) ? get_the_ID() : null,
+            'themestyle' => 'default',
             'demo' => '0',
         ];
 
@@ -697,32 +739,62 @@ class Processor
         $this->listtoken = md5(serialize($defaults).serialize($shortcode));
         extract($shortcode);
 
-        $cached_shortcode = $this->get_shortcodes()->get_shortcode_by_id($this->listtoken);
+        $cached_shortcode = Shortcodes::instance()->get_shortcode_by_id($this->listtoken);
 
         if (false === $cached_shortcode) {
             $authorized = $this->_is_action_authorized();
 
             if (is_wp_error($authorized)) {
-                if ('1' === $debug) {
-                    return "<div id='message' class='error'><p>".$autorized->get_error_message().'</p></div>';
-                }
-
                 return '&#9888; <strong>'.esc_html__('Module cannot be rendered due to an authorization issue. Contact the administrator to get access.', 'wpcloudplugins').'</strong>';
             }
 
             switch ($mode) {
                 case 'gallery':
+                    $includeext = ('*' == $includeext) ? 'gif|jpg|jpeg|png|bmp|tif|tiff|webp|heic|mp4|m4v|ogg|ogv|webmv' : $includeext;
+                    $uploadext = ('.' == $uploadext) ? 'gif|jpg|jpeg|png|bmp|tif|tiff|webp|heic|mp4|m4v|ogg|ogv|webmv' : $uploadext;
+
+                    break;
+
+                case 'carousel':
                     $includeext = ('*' == $includeext) ? 'gif|jpg|jpeg|png|bmp|tif|tiff|webp|heic' : $includeext;
-                    $uploadext = ('.' == $uploadext) ? 'gif|jpg|jpeg|png|bmp|tif|tiff|webp|heic' : $uploadext;
-                    // no break
+
+                    break;
+
                 case 'search':
                     $searchfrom = 'root';
-                    // no break
+
+                    break;
+
                 default:
                     break;
             }
 
-            $rootfolder = $this->get_client()->get_root_folder();
+            if (!empty($account)) {
+                $singleaccount = '1';
+            }
+
+            if ('0' === $singleaccount) {
+                $dir = '0';
+                $account = false;
+            }
+
+            if (empty($account)) {
+                $primary_account = Accounts::instance()->get_primary_account();
+                if (null !== $primary_account) {
+                    $account = $primary_account->get_id();
+                }
+            }
+
+            $account_class = Accounts::instance()->get_account_by_id($account);
+            if (null === $account_class || false === $account_class->get_authorization()->is_valid()) {
+                error_log('[WP Cloud Plugin message]: Module cannot be rendered as the requested account is not linked with the plugin');
+
+                return '&#9888; <strong>'.esc_html__('Module cannot be rendered as the requested content is not (longer) accessible. Contact the administrator to get access.', 'wpcloudplugins').'</strong>';
+            }
+
+            App::set_current_account($account_class);
+
+            $rootfolder = API::get_root_folder();
 
             if (empty($rootfolder)) {
                 error_log('[WP Cloud Plugin message]: Module cannot be rendered as the requested folder is not (longer) accessible');
@@ -747,20 +819,26 @@ class Processor
             $sharerole = explode('|', $sharerole);
             $editrole = explode('|', $editrole);
             $uploadrole = explode('|', $uploadrole);
-            $deleterole = explode('|', $deleterole);
-            $renamerole = explode('|', $renamerole);
-            $moverole = explode('|', $moverole);
+            $deletefilesrole = explode('|', $deletefilesrole);
+            $deletefoldersrole = explode('|', $deletefoldersrole);
+            $renamefilesrole = explode('|', $renamefilesrole);
+            $renamefoldersrole = explode('|', $renamefoldersrole);
+            $movefilesrole = explode('|', $movefilesrole);
+            $movefoldersrole = explode('|', $movefoldersrole);
             $copyfilesrole = explode('|', $copyfilesrole);
             $copyfoldersrole = explode('|', $copyfoldersrole);
             $editdescriptionrole = explode('|', $editdescriptionrole);
             $addfolderrole = explode('|', $addfolderrole);
             $createdocumentrole = explode('|', $createdocumentrole);
-
             $viewuserfoldersrole = explode('|', $viewuserfoldersrole);
             $deeplinkrole = explode('|', $deeplinkrole);
             $mediabuttons = explode('|', $mediabuttons);
+            $searchrole = explode('|', $searchrole);
 
             $this->options = [
+                'single_account' => $singleaccount,
+                'account' => $account,
+                'startaccount' => $startaccount,
                 'root' => $dir,
                 'subfolder' => $subfolder,
                 'class' => $class,
@@ -774,12 +852,14 @@ class Processor
                 'max_user_folder_size' => $maxuserfoldersize,
                 'mediaskin' => $mediaskin,
                 'mediabuttons' => $mediabuttons,
+                'media_ratio' => $media_ratio,
                 'autoplay' => $autoplay,
-                'hideplaylist' => $hideplaylist,
+                'showplaylist' => $showplaylist,
                 'showplaylistonstart' => $showplaylistonstart,
                 'playlistinline' => $playlistinline,
+                'playlistautoplay' => $playlistautoplay,
                 'playlistthumbnails' => $playlistthumbnails,
-                'linktomedia' => $linktomedia,
+                'playlist_search' => $playlist_search,
                 'linktoshop' => $linktoshop,
                 'ads' => $ads,
                 'ads_tag_url' => $ads_tag_url,
@@ -789,20 +869,29 @@ class Processor
                 'show_folders' => $showfolders,
                 'show_filesize' => $filesize,
                 'show_filedate' => $filedate,
+                'fileinfo_on_hover' => $fileinfo_on_hover,
                 'hover_thumbs' => $hoverthumbs,
                 'show_description' => $filedescription,
                 'max_files' => $maxfiles,
                 'filelayout' => $filelayout,
+                'allow_switch_view' => $allow_switch_view,
                 'show_ext' => $showext,
                 'sort_field' => $sortfield,
                 'sort_order' => $sortorder,
+                'show_header' => $show_header,
                 'show_breadcrumb' => $showbreadcrumb,
                 'can_download_zip' => $candownloadzip,
                 'lightbox_navigation' => $lightboxnavigation,
+                'lightbox_thumbnails' => $lightboxthumbs,
                 'show_sharelink' => $showsharelink,
+                'share_password' => $share_password,
+                'share_expire_after' => $share_expire_after,
+                'share_allow_download' => $share_allow_download,
                 'show_refreshbutton' => $showrefreshbutton,
+                'use_custom_roottext' => $use_custom_roottext,
                 'root_text' => $roottext,
                 'search' => $search,
+                'search_role' => $searchrole,
                 'searchfrom' => $searchfrom,
                 'searchterm' => $searchterm,
                 'searchcontents' => $searchcontents,
@@ -812,14 +901,31 @@ class Processor
                 'exclude_ext' => explode('|', strtolower($excludeext)),
                 'maxwidth' => $maxwidth,
                 'maxheight' => $maxheight,
+                'scrolltotop' => $scrolltotop,
                 'view_role' => $viewrole,
-                'allow_preview' => $allowpreview,
                 'preview_role' => $previewrole,
                 'download_role' => $downloadrole,
                 'share_role' => $sharerole,
                 'edit' => $edit,
                 'edit_role' => $editrole,
-                'previewinline' => ('0' === $allowpreview) ? '0' : $previewinline,
+                'previewinline' => ('none' === $previewrole) ? '0' : $previewinline,
+                'maximages' => $maximages,
+                'axis' => $axis,
+                'padding' => $padding,
+                'border_radius' => $border_radius,
+                'description_position' => $description_position,
+                'navigation_dots' => $navigation_dots,
+                'navigation_arrows' => $navigation_arrows,
+                'slide_items' => $slide_items,
+                'slide_height' => $slide_height,
+                'slide_by' => $slide_by,
+                'slide_speed' => $slide_speed,
+                'slide_center' => $slide_center,
+                'slide_auto_size' => $slide_auto_size,
+                'carousel_autoplay' => $carousel_autoplay,
+                'pausetime' => $pausetime,
+                'hoverpause' => $hoverpause,
+                'direction' => $direction,
                 'notificationupload' => $notificationupload,
                 'notificationdownload' => $notificationdownload,
                 'notificationdeletion' => $notificationdeletion,
@@ -827,9 +933,12 @@ class Processor
                 'notification_skip_email_currentuser' => $notification_skipemailcurrentuser,
                 'notification_from_name' => $notification_from_name,
                 'notification_from_email' => $notification_from_email,
+                'notification_replyto_email' => $notification_replyto_email,
                 'upload' => $upload,
                 'upload_folder' => $upload_folder,
                 'upload_auto_start' => $upload_auto_start,
+                'upload_filename' => $upload_filename,
+                'upload_create_shared_link' => $upload_create_shared_link,
                 'upload_button_text' => $upload_button_text,
                 'upload_button_text_plural' => $upload_button_text_plural,
                 'overwrite' => $overwrite,
@@ -839,11 +948,14 @@ class Processor
                 'maxfilesize' => Helpers::return_bytes($maxfilesize),
                 'maxnumberofuploads' => $maxnumberofuploads,
                 'delete' => $delete,
-                'delete_role' => $deleterole,
+                'delete_files_role' => $deletefilesrole,
+                'delete_folders_role' => $deletefoldersrole,
                 'rename' => $rename,
-                'rename_role' => $renamerole,
+                'rename_files_role' => $renamefilesrole,
+                'rename_folders_role' => $renamefoldersrole,
                 'move' => $move,
-                'move_role' => $moverole,
+                'move_files_role' => $movefilesrole,
+                'move_folders_role' => $movefoldersrole,
                 'copy' => $copy,
                 'copy_files_role' => $copyfilesrole,
                 'copy_folders_role' => $copyfoldersrole,
@@ -857,14 +969,16 @@ class Processor
                 'deeplink_role' => $deeplinkrole,
                 'quality' => $quality,
                 'show_filenames' => $showfilenames,
+                'show_descriptions' => $show_descriptions,
                 'show_descriptions_on_top' => $showdescriptionsontop,
                 'targetheight' => $targetheight,
                 'folderthumbs' => $folderthumbs,
+                'lightbox_open' => $lightbox_open,
                 'slideshow' => $slideshow,
                 'pausetime' => $pausetime,
-                'mcepopup' => $mcepopup,
+                'popup' => $popup,
                 'post_id' => $post_id,
-                'debug' => $debug,
+                'themestyle' => $themestyle,
                 'demo' => $demo,
                 'expire' => strtotime('+1 weeks'),
                 'listtoken' => $this->listtoken, ];
@@ -877,7 +991,7 @@ class Processor
 
             // Create userfolders if needed
 
-            if (('auto' === $this->options['user_upload_folders'])) {
+            if ('auto' === $this->options['user_upload_folders']) {
                 if ('Yes' === $this->settings['userfolder_onfirstvisit']) {
                     $allusers = [];
                     $roles = array_diff($this->options['view_role'], $this->options['view_user_folders_role']);
@@ -894,11 +1008,21 @@ class Processor
                         }
                     }
 
-                    $userfolder = $this->get_user_folders()->create_user_folders($allusers);
+                    $userfolder = UserFolders::instance()->create_user_folders($allusers);
                 }
             }
         } else {
             $this->options = apply_filters('letsbox_shortcode_set_options', $cached_shortcode, $this, $atts);
+        }
+
+        if (empty($this->options['startaccount'])) {
+            App::set_current_account_by_id($this->options['account']);
+        } else {
+            App::set_current_account_by_id($this->options['startaccount']);
+        }
+
+        if (null === App::get_current_account() || false === App::get_current_account()->get_authorization()->has_access_token()) {
+            return '&#9888; <strong>'.esc_html__('Module cannot be rendered as the requested content is not (longer) accessible. Contact the administrator to get access.', 'wpcloudplugins').'</strong>';
         }
 
         ob_start();
@@ -910,9 +1034,9 @@ class Processor
     public function render_template()
     {
         // Reload User Object for this new shortcode
-        $user = $this->get_user('reload');
+        $user = User::reset();
 
-        if (false === $this->get_user()->can_view()) {
+        if (false === User::can_view()) {
             do_action('letsbox_shortcode_no_view_permission', $this);
 
             return;
@@ -923,19 +1047,18 @@ class Processor
 
         // Render the  template
         $dataid = '';
-
-        $colors = $this->get_setting('colors');
+        $dataaccountid = (false !== $this->options['startaccount']) ? $this->options['startaccount'] : $this->options['account'];
 
         if ('manual' === $this->options['user_upload_folders']) {
             $userfolder = get_user_option('lets_box_linkedto');
             if (is_array($userfolder) && isset($userfolder['folderid'])) {
-                // $dataid = $userfolder['folderid'];
+                $dataaccountid = $userfolder['accountid'];
             } else {
                 $defaultuserfolder = get_site_option('lets_box_guestlinkedto');
                 if (is_array($defaultuserfolder) && isset($defaultuserfolder['folderid'])) {
-                    // $dataid = $defaultuserfolder['folderid'];
+                    $dataaccountid = $defaultuserfolder['accountid'];
                 } else {
-                    echo "<div id='LetsBox' class='{$colors['style']}'>";
+                    echo "<div id='LetsBox'>";
                     $this->load_scripts('general');
 
                     include sprintf('%s/templates/frontend/noaccess.php', LETSBOX_ROOTDIR);
@@ -944,16 +1067,26 @@ class Processor
                     return;
                 }
             }
+
+            $linked_account = Accounts::instance()->get_account_by_id($dataaccountid);
+            App::set_current_account($linked_account);
         }
 
         $dataorgid = $dataid;
         $dataid = (false !== $this->options['startid']) ? $this->options['startid'] : $dataid;
 
-        $shortcode_class = ('shortcode' === $this->options['mcepopup']) ? 'initiate' : '';
+        $shortcode_class = ('shortcode_buider' === $this->options['popup']) ? 'initiate' : '';
+        $shortcode_class .= ('1' === $this->options['scrolltotop']) ? ' wpcp-has-scroll-to-top' : '';
+
+        if ('0' !== $this->options['popup']) {
+            $shortcode_class .= ' wpcp-theme-light';
+        } else {
+            $shortcode_class .= ('default' !== $this->options['themestyle']) ? ' wpcp-theme-'.$this->options['themestyle'] : '';
+        }
 
         do_action('letsbox_before_shortcode', $this);
 
-        echo "<div id='LetsBox' class='{$colors['style']} {$this->options['class']} {$this->options['mode']} {$shortcode_class}' style='display:none'>";
+        echo "<div id='LetsBox' class='{$this->options['class']} {$this->options['mode']} {$shortcode_class}' style='display:none'>";
         echo "<noscript><div class='LetsBox-nojsmessage'>".esc_html__('To view this content, you need to have JavaScript enabled in your browser', 'wpcloudplugins').'.<br/>';
         echo "<a href='http://www.enable-javascript.com/' target='_blank'>".esc_html__('To do so, please follow these instructions', 'wpcloudplugins').'</a>.</div></noscript>';
 
@@ -961,21 +1094,7 @@ class Processor
             case 'files':
                 $this->load_scripts('files');
 
-                echo "<div id='LetsBox-{$this->listtoken}' class='LetsBox files jsdisabled' data-list='files' data-token='{$this->listtoken}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataorgid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['root'].$this->options['mode'])."' data-layout='".$this->options['filelayout']."' data-lightboxnav='".$this->options['lightbox_navigation']."' data-query='{$this->options['searchterm']}' data-action='{$this->options['mcepopup']}'>";
-
-                if ('shortcode' === $this->options['mcepopup']) {
-                    echo "<div class='selected-folder'><strong>".esc_html__('Selected folder', 'wpcloudplugins').": </strong><span class='current-folder-raw'></span></div>";
-                }
-
-                if ('linkto' === $this->get_shortcode_option('mcepopup') || 'linktobackendglobal' === $this->get_shortcode_option('mcepopup')) {
-                    $rootfolder = $this->get_client()->get_root_folder();
-                    $button_text = esc_html__('Use the Root Folder of your Account', 'wpcloudplugins');
-                    echo '<div data-id="'.$rootfolder->get_id().'" data-name="'.$rootfolder->get_name().'">';
-                    echo '<div class="entry_linkto entry_linkto_root">';
-                    echo '<span><input class="button-secondary" type="submit" title="'.$button_text.'" value="'.$button_text.'"></span>';
-                    echo '</div>';
-                    echo '</div>';
-                }
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox files jsdisabled ".('grid' === $this->options['filelayout'] ? 'wpcp-thumb-view' : 'wpcp-list-view')."' data-list='files' data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataorgid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."' data-layout='".$this->options['filelayout']."' data-lightboxnav='".$this->options['lightbox_navigation']."' data-lightboxthumbs='{$this->options['lightbox_thumbnails']}' data-query='{$this->options['searchterm']}' data-action='{$this->options['popup']}'>";
 
                 include sprintf('%s/templates/frontend/file_browser.php', LETSBOX_ROOTDIR);
                 $this->render_uploadform();
@@ -985,7 +1104,7 @@ class Processor
                 break;
 
             case 'upload':
-                echo "<div id='LetsBox-{$this->listtoken}' class='LetsBox upload jsdisabled'  data-token='{$this->listtoken}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' >";
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox upload jsdisabled'  data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' >";
                 $this->render_uploadform();
                 echo '</div>';
 
@@ -994,7 +1113,12 @@ class Processor
             case 'gallery':
                 $this->load_scripts('files');
 
-                echo "<div id='LetsBox-{$this->listtoken}' class='LetsBox wpcp-gallery jsdisabled' data-list='gallery' data-token='{$this->listtoken}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['root'].$this->options['mode'])."' data-targetheight='".$this->options['targetheight']."' data-slideshow='".$this->options['slideshow']."' data-pausetime='".$this->options['pausetime']."' data-lightboxnav='".$this->options['lightbox_navigation']."' data-query='{$this->options['searchterm']}'>";
+                $nextimages = '';
+                if ('0' !== $this->options['maximages']) {
+                    $nextimages = "data-loadimages='".$this->options['maximages']."'";
+                }
+
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox wpcp-gallery jsdisabled' data-list='gallery' data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."' data-targetheight='".$this->options['targetheight']."' data-slideshow='".$this->options['slideshow']."' data-pausetime='".$this->options['pausetime']."' {$nextimages} data-lightboxnav='".$this->options['lightbox_navigation']."' data-lightboxthumbs='{$this->options['lightbox_thumbnails']}' data-lightboxopen='{$this->options['lightbox_open']}' data-query='{$this->options['searchterm']}'>";
 
                 include sprintf('%s/templates/frontend/gallery.php', LETSBOX_ROOTDIR);
                 $this->render_uploadform();
@@ -1002,8 +1126,18 @@ class Processor
 
                 break;
 
+            case 'carousel':
+                $this->load_scripts('carousel');
+
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox carousel jsdisabled' data-list='carousel' data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."'>";
+
+                include sprintf('%s/templates/frontend/carousel.php', LETSBOX_ROOTDIR);
+                echo '</div>';
+
+                break;
+
             case 'search':
-                echo "<div id='LetsBox-{$this->listtoken}' class='LetsBox files searchlist jsdisabled' data-list='search' data-token='{$this->listtoken}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataorgid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['root'].$this->options['mode'])."' data-layout='".$this->options['filelayout']."' data-lightboxnav='".$this->options['lightbox_navigation']."' data-query='{$this->options['searchterm']}'>";
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox files searchlist jsdisabled' data-list='search' data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataorgid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."' data-layout='".$this->options['filelayout']."' data-lightboxnav='".$this->options['lightbox_navigation']."' data-lightboxthumbs='{$this->options['lightbox_thumbnails']}' data-query='{$this->options['searchterm']}'>";
                 $this->load_scripts('files');
 
                 include sprintf('%s/templates/frontend/search.php', LETSBOX_ROOTDIR);
@@ -1015,7 +1149,7 @@ class Processor
             case 'audio':
                 $mediaplayer = $this->load_mediaplayer($this->options['mediaskin']);
 
-                echo "<div id='LetsBox-{$this->listtoken}' class='LetsBox media ".$this->options['mode']." jsdisabled' data-list='media' data-token='{$this->listtoken}' data-id='".$dataid."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."'>";
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox media ".$this->options['mode']." jsdisabled' data-list='media' data-token='{$this->listtoken}'   data-account-id='{$dataaccountid}' data-id='".$dataid."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."' data-layout='".$this->options['filelayout']."'>";
                 $mediaplayer->load_player();
                 echo '</div>';
                 $this->load_scripts('mediaplayer');
@@ -1034,7 +1168,7 @@ class Processor
 
     public function render_uploadform()
     {
-        $user_can_upload = $this->get_user()->can_upload();
+        $user_can_upload = User::can_upload();
 
         if (false === $user_can_upload) {
             return;
@@ -1058,11 +1192,6 @@ class Processor
     public function get_last_folder()
     {
         return $this->_lastFolder;
-    }
-
-    public function get_last_path()
-    {
-        return $this->_lastPath;
     }
 
     public function get_root_folder()
@@ -1097,7 +1226,7 @@ class Processor
         try {
             $class = '\TheLion\LetsBox\MediaPlayers\\'.$mediaplayer;
 
-            return new $class($this);
+            return new $class();
         } catch (\Exception $ex) {
             error_log('[WP Cloud Plugin message]: '.sprintf('Media Player Skin %s is invalid', $mediaplayer));
 
@@ -1183,7 +1312,7 @@ class Processor
 
     public function send_notification_email($notification_type, $entries)
     {
-        $notification = new Notification($this, $notification_type, $entries);
+        $notification = new Notification($notification_type, $entries);
         $notification->send_notification();
     }
 
@@ -1205,24 +1334,24 @@ class Processor
         }
 
         // Skip entry if its a file, and we dont want to show files
-        if (($entry->is_file()) && ('0' === $this->get_shortcode_option('show_files'))) {
+        if ($entry->is_file() && ('0' === $this->get_shortcode_option('show_files'))) {
             return false;
         }
         // Skip entry if its a folder, and we dont want to show folders
-        if (($entry->is_dir()) && ('0' === $this->get_shortcode_option('show_folders')) && ($entry->get_id() !== $this->get_requested_entry())) {
+        if ($entry->is_dir() && ('0' === $this->get_shortcode_option('show_folders')) && ($entry->get_id() !== $this->get_requested_entry())) {
             return false;
         }
 
         // Only add allowed files to array
         $extension = $entry->get_extension();
         $allowed_extensions = $this->get_shortcode_option('include_ext');
-        if (($entry->is_file()) && (!in_array(strtolower($extension), $allowed_extensions)) && '*' != $allowed_extensions[0]) {
+        if ('*' != $allowed_extensions[0] && $entry->is_file() && (empty($extension) || (!in_array(strtolower($extension), $allowed_extensions)))) {
             return false;
         }
 
         // Hide files with extensions
         $hide_extensions = $this->get_shortcode_option('exclude_ext');
-        if (($entry->is_file()) && !empty($extension) && (in_array(strtolower($extension), $hide_extensions)) && '*' != $hide_extensions[0]) {
+        if ('*' != $hide_extensions[0] && $entry->is_file() && !empty($extension) && in_array(strtolower($extension), $hide_extensions)) {
             return false;
         }
 
@@ -1288,10 +1417,10 @@ class Processor
         // Make sure that files and folders from hidden folders are not allowed
         if ('*' != $hide_entries[0]) {
             foreach ($hide_entries as $hidden_entry) {
-                $cached_hidden_entry = $this->get_cache()->get_node_by_name($hidden_entry);
+                $cached_hidden_entry = Cache::instance()->get_node_by_name($hidden_entry);
 
                 if (false === $cached_hidden_entry) {
-                    $cached_hidden_entry = $this->get_cache()->get_node_by_id($hidden_entry);
+                    $cached_hidden_entry = Cache::instance()->get_node_by_id($hidden_entry);
                 }
 
                 if (false !== $cached_hidden_entry && $cached_hidden_entry->get_entry()->is_dir()) {
@@ -1353,14 +1482,14 @@ class Processor
 
     public function embed_image($entryid)
     {
-        $cachedentry = $this->get_client()->get_entry($entryid, false);
+        $cachedentry = Client::instance()->get_entry($entryid, false);
 
         if (false === $cachedentry) {
             return false;
         }
 
-        if (in_array($cachedentry->get_entry()->get_extension(), ['jpg', 'jpeg', 'gif', 'png', 'heic'])) {
-            $download = $this->get_client()->download_content($cachedentry);
+        if (in_array($cachedentry->get_entry()->get_extension(), ['jpg', 'jpeg', 'gif', 'png', 'webp', 'heic'])) {
+            $download = Client::instance()->download_content($cachedentry);
         }
 
         return true;
@@ -1399,6 +1528,25 @@ class Processor
         return $success;
     }
 
+  public function get_network_setting($key, $default = null)
+  {
+      $network_settings = get_site_option('letsbox_network_settings', []);
+
+      if (!isset($network_settings[$key])) {
+          return $default;
+      }
+
+      return $network_settings[$key];
+  }
+
+    public function set_network_setting($key, $value)
+    {
+        $network_settings = get_site_option('letsbox_network_settings', []);
+        $network_settings[$key] = $value;
+
+        return update_site_option('letsbox_network_settings', $network_settings);
+    }
+
     public function get_shortcode()
     {
         return $this->options;
@@ -1415,7 +1563,7 @@ class Processor
 
     public function set_shortcode($listtoken)
     {
-        $cached_shortcode = $this->get_shortcodes()->get_shortcode_by_id($listtoken);
+        $cached_shortcode = Shortcodes::instance()->get_shortcode_by_id($listtoken);
 
         if ($cached_shortcode) {
             $this->options = $cached_shortcode;
@@ -1451,99 +1599,19 @@ class Processor
         return isset($network_settings['network_wide']) && is_plugin_active_for_network(LETSBOX_SLUG) && ('Yes' === $network_settings['network_wide']);
     }
 
-    /**
-     * @return \TheLion\LetsBox\Main
-     */
-    public function get_main()
-    {
-        return $this->_main;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\App
-     */
-    public function get_app()
-    {
-        if (empty($this->_app)) {
-            $this->_app = new \TheLion\LetsBox\App($this);
-            $this->_app->start_client();
-        }
-
-        return $this->_app;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Client
-     */
-    public function get_client()
-    {
-        if (empty($this->_client)) {
-            $this->_client = new \TheLion\LetsBox\Client($this->get_app(), $this);
-        }
-
-        return $this->_client;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Cache
-     */
-    public function get_cache()
-    {
-        if (empty($this->_cache)) {
-            $this->_cache = new \TheLion\LetsBox\Cache($this);
-        }
-
-        return $this->_cache;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\Shortcodes
-     */
-    public function get_shortcodes()
-    {
-        if (empty($this->_shortcodes)) {
-            $this->_shortcodes = new \TheLion\LetsBox\Shortcodes($this);
-        }
-
-        return $this->_shortcodes;
-    }
-
-    /**
-     * @param mixed $force_reload
-     *
-     * @return \TheLion\LetsBox\User
-     */
-    public function get_user($force_reload = false)
-    {
-        if (empty($this->_user) || $force_reload) {
-            $this->_user = new \TheLion\LetsBox\User($this);
-        }
-
-        return $this->_user;
-    }
-
-    /**
-     * @return \TheLion\LetsBox\UserFolders
-     */
-    public function get_user_folders()
-    {
-        if (empty($this->_userfolders)) {
-            $this->_userfolders = new \TheLion\LetsBox\UserFolders($this);
-        }
-
-        return $this->_userfolders;
-    }
-
-    public function reset_complete_cache()
+    public static function reset_complete_cache($including_shortcodes = false, $including_thumbnails = false)
     {
         if (!file_exists(LETSBOX_CACHEDIR)) {
             return false;
         }
 
+        require_once ABSPATH.'wp-admin/includes/class-wp-filesystem-base.php';
+
+        require_once ABSPATH.'wp-admin/includes/class-wp-filesystem-direct.php';
+
+        $wp_file_system = new \WP_Filesystem_Direct(false);
+
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(LETSBOX_CACHEDIR, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $path) {
-            if ($path->isDir()) {
-                continue;
-            }
             if ('.htaccess' === $path->getFilename()) {
                 continue;
             }
@@ -1560,12 +1628,26 @@ class Processor
                 continue;
             }
 
-            if (false !== strpos($path->getPathname(), 'thumbnails')) {
+            if (false === $including_shortcodes && 'shortcodes' === $path->getExtension()) {
                 continue;
             }
 
+            if (false !== strpos($path->getPathname(), 'thumbnails') && false === $including_thumbnails) {
+                continue;
+            }
+
+            if ('index' === $path->getExtension()) {
+                // index files can be locked during purge request
+                $fp = fopen($path->getPathname(), 'w');
+
+                if (flock($fp, LOCK_EX)) {
+                    ftruncate($fp, 0);
+                    flock($fp, LOCK_UN);
+                }
+            }
+
             try {
-                @unlink($path->getPathname());
+                $wp_file_system->delete($path->getPathname(), true);
             } catch (\Exception $ex) {
                 continue;
             }
@@ -1574,7 +1656,7 @@ class Processor
         return true;
     }
 
-    public function do_shutdown()
+    public static function do_shutdown()
     {
         $error = error_get_last();
 
@@ -1587,22 +1669,120 @@ class Processor
         }
 
         if (isset($error['file']) && false !== strpos($error['file'], LETSBOX_ROOTDIR)) {
-            $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-unknown-';
+            $url = Helpers::get_page_url();
             error_log('[WP Cloud Plugin message]: Complete reset; URL: '.$url.';Reason: '.var_export($error, true));
 
             // fatal error has occured
-            $this->get_cache()->reset_cache();
+            Cache::instance()->reset_cache();
         }
     }
 
-    protected function set_last_path($path)
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Cache
+     */
+    public function get_cache()
     {
-        $this->_lastPath = $path;
-        if ('' === $this->_lastPath) {
-            $this->_lastPath = null;
-        }
+        Helpers::is_deprecated('function', 'get_cache()', '\TheLion\LetsBox\Cache::instance()');
 
-        return $this->_lastPath;
+        return Cache::instance();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\UserFolders
+     */
+    public function get_user_folders()
+    {
+        Helpers::is_deprecated('function', 'get_cache()', '\TheLion\LetsBox\UserFolders::instance()');
+
+        return UserFolders::instance();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Shortcodes
+     */
+    public function get_shortcodes()
+    {
+        Helpers::is_deprecated('function', 'get_shortcodes()', '\TheLion\LetsBox\Shortcodes::instance()');
+
+        return Shortcodes::instance();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Account
+     */
+    public function set_current_account(Account $account)
+    {
+        Helpers::is_deprecated('function', 'set_current_account()', '\TheLion\LetsBox\App::set_current_account($account) or \TheLion\LetsBox\App::set_current_account_by_id($account_id)');
+
+        return App::set_current_account($account);
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Account
+     */
+    public function get_current_account()
+    {
+        Helpers::is_deprecated('function', 'get_current_account()', '\TheLion\LetsBox\App::get_current_account()');
+
+        return App::get_current_account();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\App
+     */
+    public function get_app()
+    {
+        Helpers::is_deprecated('function', 'get_app()', '\TheLion\LetsBox\App::instance()');
+
+        return App::instance();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Client
+     */
+    public function get_client()
+    {
+        Helpers::is_deprecated('function', 'get_client()', '\TheLion\LetsBox\Client::instance()');
+
+        return Client::instance();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\User
+     */
+    public function get_user()
+    {
+        Helpers::is_deprecated('function', 'get_user()', '\TheLion\LetsBox\User::instance()');
+
+        return User::instance();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return \TheLion\LetsBox\Accounts
+     */
+    public function get_accounts()
+    {
+        Helpers::is_deprecated('function', 'get_accounts()', '\TheLion\LetsBox\Accounts::instance()');
+
+        return Accounts::instance();
     }
 
     protected function load_scripts($template)
@@ -1611,17 +1791,20 @@ class Processor
             return false;
         }
 
+        Core::instance()->load_scripts();
+        Core::instance()->load_styles();
+
         switch ($template) {
             case 'general':
                 wp_enqueue_style('Eva-Icons');
-                wp_enqueue_style('LetsBox.CustomStyle');
+                wp_enqueue_style('LetsBox');
                 wp_enqueue_script('LetsBox');
                 wp_enqueue_script('google-recaptcha');
 
                 break;
 
             case 'files':
-                if ($this->get_user()->can_move_files() || $this->get_user()->can_move_folders()) {
+                if (User::can_move_files() || User::can_move_folders()) {
                     wp_enqueue_script('jquery-ui-droppable');
                     wp_enqueue_script('jquery-ui-draggable');
                 }
@@ -1630,6 +1813,11 @@ class Processor
                 wp_enqueue_script('jquery-effects-fade');
                 wp_enqueue_style('ilightbox');
                 wp_enqueue_style('ilightbox-skin-letsbox');
+
+                break;
+
+            case 'carousel':
+                wp_enqueue_script('LetsBox.Carousel');
 
                 break;
 
@@ -1664,13 +1852,65 @@ class Processor
             unset($options['covers']);
         }
 
+        if (isset($options['userfolders']) && '0' === $options['userfolders']) {
+            $options['userfolders'] = 'off';
+        }
+
+        if (!empty($options['mode']) && in_array($options['mode'], ['video', 'audio'])) {
+            if (isset($options['linktomedia'])) {
+                if ('0' === $options['linktomedia']) {
+                    $options['downloadrole'] = empty($options['downloadrole']) ? 'none' : $options['downloadrole'];
+                } else {
+                    $options['downloadrole'] = empty($options['downloadrole']) ? 'all' : $options['downloadrole'];
+                }
+                unset($options['linktomedia']);
+            }
+        }
+
+        if (isset($options['allowpreview']) && '0' === $options['allowpreview']) {
+            unset($options['allowpreview']);
+            $options['previewrole'] = 'none';
+        }
+
+        if (isset($options['upload_filename_prefix'])) {
+            $options['upload_filename'] = $options['upload_filename_prefix'].(isset($options['upload_filename']) ? $options['upload_filename'] : '%file_name%%file_extension%');
+            unset($options['upload_filename_prefix']);
+        }
+
+        if (isset($options['delete_role'])) {
+            $options['deletefilesrole'] = $options['delete_role'];
+            $options['deletefoldersrole'] = $options['delete_role'];
+            unset($options['delete_role']);
+        }
+
+        if (isset($options['rename_role'])) {
+            $options['renamefilesrole'] = $options['rename_role'];
+            $options['renamefoldersrole'] = $options['rename_role'];
+            unset($options['rename_role']);
+        }
+
+        if (isset($options['move_role'])) {
+            $options['movefilesrole'] = $options['move_role'];
+            $options['movefoldersrole'] = $options['move_role'];
+            unset($options['move_role']);
+        }
+
+        if (isset($options['hideplaylist'])) {
+            $options['showplaylist'] = '0' !== $options['hideplaylist'];
+        }
+
+        if (isset($options['mcepopup'])) {
+            $options['popup'] = $options['mcepopup'];
+            unset($options['mcepopup']);
+        }
+
         return $options;
     }
 
     protected function save_shortcodes()
     {
-        $this->get_shortcodes()->set_shortcode($this->listtoken, $this->options);
-        $this->get_shortcodes()->update_cache();
+        Shortcodes::instance()->set_shortcode($this->listtoken, $this->options);
+        Shortcodes::instance()->update_cache();
     }
 
     private function _is_action_authorized($hook = false)
@@ -1687,7 +1927,7 @@ class Processor
                 case 'letsbox-get-gallery':
                 case 'letsbox-get-playlist':
                 case 'letsbox-rename-entry':
-                case 'letsbox-copy-entry':
+                case 'letsbox-copy-entries':
                 case 'letsbox-move-entries':
                 case 'letsbox-edit-description-entry':
                 case 'letsbox-create-entry':
@@ -1702,13 +1942,6 @@ class Processor
                 case 'letsbox-create-link':
                 case 'letsbox-embedded':
                     $is_authorized = check_ajax_referer('letsbox-create-link', false, false);
-
-                    break;
-
-                case 'letsbox-reset-cache':
-                case 'letsbox-factory-reset':
-                case 'letsbox-reset-statistics':
-                    $is_authorized = check_ajax_referer('letsbox-admin-action', false, false);
 
                     break;
 
@@ -1733,32 +1966,25 @@ class Processor
 
                     break;
 
-                case 'editpost': // Required for Yoast SEO Link Watcher trying to build the shortcode
+                case 'editpost': // Required for integrations
+                case 'wpseo_filter_shortcodes':
                 case 'elementor':
                 case 'elementor_ajax':
-                case 'wpseo_filter_shortcodes':
+                case 'frm_insert_field':
                     return false;
 
                 default:
                     error_log('[WP Cloud Plugin message]: '." Function _is_action_authorized() didn't receive a valid action: ".$_REQUEST['action']);
 
-                    exit();
+                    exit;
             }
 
             if (false === $is_authorized) {
                 error_log('[WP Cloud Plugin message]: '." Function _is_action_authorized() didn't receive a valid nonce");
 
-                exit();
+                exit;
             }
         }
-
-        if (!$this->get_app()->has_access_token()) {
-            error_log('[WP Cloud Plugin message]: '." Function _is_action_authorized() discovered that the plugin doesn't have an access token");
-
-            return new \WP_Error('broke', '<strong>'.sprintf(esc_html__('%s needs your help!', 'wpcloudplugins'), 'Lets-Box').'</strong> '.esc_html__('Authorize the plugin!', 'wpcloudplugins').'.');
-        }
-
-        $this->get_client();
 
         return true;
     }

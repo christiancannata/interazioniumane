@@ -9,35 +9,38 @@ if (!defined('ABSPATH')) {
 
 class Integrations
 {
-    /**
-     * @var \TheLion\LetsBox\Main
-     */
-    private $_main;
-
-    public function __construct(\TheLion\LetsBox\Main $main)
+    public static function init()
     {
-        $this->_main = $main;
-
         // Add Global Form Helpers
         require_once 'FormHelpers.php';
         new FormHelpers();
 
         // Load integrations
-        $this->load_contactform7();
-        $this->load_elementor();
-        $this->load_divipagebuilder();
-        $this->load_gravityforms();
-        $this->load_formidableforms();
-        $this->load_fluentforms();
-        $this->load_gravitypdf();
-        $this->load_gutenberg();
-        $this->load_woocommcerce();
-        $this->load_wpforms();
-        $this->load_advancedcustomfields();
-        $this->load_beaverbuilder();
+        self::load_automator();
+        self::load_contactform7();
+        self::load_elementor();
+        self::load_divipagebuilder();
+        self::load_gravityforms();
+        self::load_formidableforms();
+        self::load_fluentforms();
+        self::load_gravitypdf();
+        self::load_gutenberg();
+        self::load_woocommcerce();
+        self::load_wpforms();
+        self::load_advancedcustomfields();
+        self::load_beaverbuilder();
     }
 
-    public function load_contactform7()
+    public static function load_automator()
+    {
+        if (!defined('AUTOMATOR_PLUGIN_VERSION')) {
+            return false;
+        }
+
+        require_once 'automator/init.php';
+    }
+
+    public static function load_contactform7()
     {
         if (!defined('WPCF7_PLUGIN')) {
             return false;
@@ -45,10 +48,10 @@ class Integrations
 
         require_once 'contactform7/init.php';
 
-        new ContactForm($this->_main);
+        new ContactForm();
     }
 
-    public function load_elementor()
+    public static function load_elementor()
     {
         if (!did_action('elementor/loaded')) {
             return false;
@@ -57,12 +60,12 @@ class Integrations
         require_once 'elementor/init.php';
     }
 
-    public function load_divipagebuilder()
+    public static function load_divipagebuilder()
     {
         require_once 'divipagebuilder/init.php';
     }
 
-    public function load_gravityforms()
+    public static function load_gravityforms()
     {
         if (!class_exists('GFForms')) {
             return false;
@@ -81,7 +84,7 @@ class Integrations
         }
     }
 
-    public function load_formidableforms()
+    public static function load_formidableforms()
     {
         if (!class_exists('FrmHooksController')) {
             return false;
@@ -90,7 +93,7 @@ class Integrations
         require_once 'formidableforms/init.php';
     }
 
-    public function load_fluentforms()
+    public static function load_fluentforms()
     {
         if (!defined('FLUENTFORM')) {
             return false;
@@ -99,7 +102,7 @@ class Integrations
         require_once 'fluentforms/init.php';
     }
 
-    public function load_gravitypdf()
+    public static function load_gravitypdf()
     {
         if (!class_exists('GFForms')) {
             return false;
@@ -108,12 +111,12 @@ class Integrations
         require_once 'gravitypdf/init.php';
     }
 
-    public function load_gutenberg()
+    public static function load_gutenberg()
     {
         require_once 'gutenberg/init.php';
     }
 
-    public function load_woocommcerce()
+    public static function load_woocommcerce()
     {
         if (!class_exists('woocommerce')) {
             return false;
@@ -122,7 +125,7 @@ class Integrations
         require_once 'woocommerce/init.php';
     }
 
-    public function load_wpforms()
+    public static function load_wpforms()
     {
         if (!defined('WPFORMS_VERSION')) {
             return false;
@@ -131,7 +134,7 @@ class Integrations
         require_once 'wpforms/init.php';
     }
 
-    public function load_advancedcustomfields()
+    public static function load_advancedcustomfields()
     {
         if (!class_exists('ACF')) {
             return false;
@@ -140,7 +143,7 @@ class Integrations
         require_once 'advancedcustomfields/init.php';
     }
 
-    public function load_beaverbuilder()
+    public static function load_beaverbuilder()
     {
         if (!class_exists('FLBuilder')) {
             return;
@@ -149,3 +152,5 @@ class Integrations
         require_once 'beaverbuilder/init.php';
     }
 }
+
+Integrations::init();

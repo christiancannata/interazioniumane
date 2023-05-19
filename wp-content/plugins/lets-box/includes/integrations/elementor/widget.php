@@ -23,14 +23,11 @@ class Widget extends \Elementor\Widget_Base
 
     public function get_script_depends()
     {
-        $a = $this->is_editor();
         if (false === $this->is_editor()) {
             return [];
         }
 
-        global $LetsBox;
-
-        $mediaplayer = $LetsBox->get_processor()->load_mediaplayer($LetsBox->settings['mediaplayer_skin']);
+        $mediaplayer = \TheLion\LetsBox\Processor::instance()->load_mediaplayer(\TheLion\LetsBox\Core::get_setting('mediaplayer_skin'));
 
         if (!empty($mediaplayer)) {
             $mediaplayer->load_scripts();
@@ -46,9 +43,7 @@ class Widget extends \Elementor\Widget_Base
             return [];
         }
 
-        global $LetsBox;
-
-        return ['Eva-Icons', 'LetsBox.ShortcodeBuilder', 'LetsBox'];
+        return ['Eva-Icons', 'LetsBox', 'LetsBox'];
     }
 
     public function is_reload_preview_required()
@@ -81,7 +76,7 @@ class Widget extends \Elementor\Widget_Base
         return ['cloud', 'box', 'drive', 'documents', 'files', 'upload', 'video', 'audio', 'media', 'embed'];
     }
 
-    protected function _register_controls()
+    protected function register_controls()
     {
         $this->start_controls_section(
             'content_section',
@@ -98,6 +93,9 @@ class Widget extends \Elementor\Widget_Base
                 'type' => \Elementor\Controls_Manager::TEXTAREA,
                 'description' => esc_html__('Edit this shortcode via the Shortcode Builder or manually via the raw code', 'wpcloudplugins'),
                 'default' => '[letsbox mode="files"]',
+                'dynamic' => [
+                    'active' => true,
+                ],
                 'rows' => 7,
             ]
         );

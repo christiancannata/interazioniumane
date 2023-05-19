@@ -3,11 +3,11 @@
 namespace ACP\Table;
 
 use AC\ListScreen;
-use AC\Registrable;
+use AC\Registerable;
 use ACP\Search;
 use ACP\Settings\ListScreen\HideOnScreen;
 
-final class HideElements implements Registrable {
+final class HideElements implements Registerable {
 
 	public function register() {
 		add_action( 'ac/table_scripts', [ $this, 'hide_elements' ] );
@@ -42,6 +42,10 @@ final class HideElements implements Registrable {
 
 		if ( ( new HideOnScreen\BulkActions() )->is_hidden( $list_screen ) ) {
 			$hidden_elements[] = new HideElement\BulkActions();
+		}
+
+		if ( ( new HideOnScreen\RowActions() )->is_hidden( $list_screen ) ) {
+			$hidden_elements[] = new HideElement\RowActions( $list_screen );
 		}
 
 		if ( ( new HideOnScreen\SubMenu( '' ) )->is_hidden( $list_screen ) ) {

@@ -190,7 +190,6 @@ abstract class WOE_Formatter {
 	protected function format_number_field( $field_value ) {
 		$new_value = $field_value; //as is!
 		$new_value = apply_filters( 'woe_format_numbers', $new_value, $field_value );
-
 		return $new_value;
 	}
 

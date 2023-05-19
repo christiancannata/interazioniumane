@@ -2,6 +2,8 @@
 
 namespace TheLion\LetsBox\Integrations;
 
+use TheLion\LetsBox\Processor;
+
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
@@ -10,7 +12,7 @@ if (!defined('ABSPATH')) {
 class FormidableForms
 {
     public $field_type = 'wpcp-letsbox';
-    public $default_value = '[letsbox class="formidableforms_upload_box" mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
+    public $default_value = '[letsbox mode="upload" upload="1" uploadrole="all" upload_auto_start="0" userfolders="auto" viewuserfoldersrole="none"]';
 
     public function __construct()
     {
@@ -44,6 +46,7 @@ class FormidableForms
 
         // Store Submission value
         add_filter('frm_pre_create_entry', [$this, 'save_value']);
+        add_filter('frm_pre_update_entry', [$this, 'save_value']);
 
         // Field Submission value render
         add_filter('frm_display_'.$this->field_type.'_value_custom', [$this, 'render_value_custom'], 15, 2);
@@ -95,15 +98,17 @@ class FormidableForms
             $field['shortcode'] = $this->default_value;
         } ?>
 
-        <tr>
-            <td><h2>Shortcode</h2></td>
-            <td>
-            <label for="shortcode_" class="howto"><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></label>
-            <textarea id="shortcode_<?php echo esc_attr($field['id']); ?>" name="field_options[shortcode_<?php echo esc_attr($field['id']); ?>]" class="frm_long_input"><?php echo esc_attr($field['shortcode']); ?></textarea>
-            <a href="#" class='button-primary letsbox open-shortcode-builder'><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></a>
-            </td>
-        </tr>
-        <?php
+<tr>
+    <td>
+        <h2>Shortcode</h2>
+    </td>
+    <td>
+        <label for="shortcode_" class="howto"><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></label>
+        <textarea id="shortcode_<?php echo esc_attr($field['id']); ?>" name="field_options[shortcode_<?php echo esc_attr($field['id']); ?>]" class="frm_long_input"><?php echo esc_attr($field['shortcode']); ?></textarea>
+        <a href="#" class='button-primary letsbox open-shortcode-builder'><?php esc_html_e('Build your shortcode', 'wpcloudplugins'); ?></a>
+    </td>
+</tr>
+<?php
     }
 
     public function admin_field($field)
@@ -113,12 +118,12 @@ class FormidableForms
         }
 
         $this->enqueue(); ?>
-	
-        <div class="frm_html_field_placeholder">
-            <?php echo do_shortcode($field['shortcode']); ?>
-            <div class="howto button-secondary frm_html_field">Please update page to see changes to its options rendered.</div>
-        </div> 
-    <?php
+
+<div class="frm_html_field_placeholder">
+    <?php echo do_shortcode($field['shortcode']); ?>
+    <div class="howto button-secondary frm_html_field">Please update page to see changes to its options rendered.</div>
+</div>
+<?php
     }
 
     public function frontend_field($field, $field_name, $atts)
@@ -130,15 +135,23 @@ class FormidableForms
         $field_id = $field['id'];
 
         $prefill = '';
-        if (!empty($_REQUEST['frm_action']) && 'create' === $_REQUEST['frm_action']) {
+        if (!empty($_REQUEST['frm_action']) && 'create' === $_REQUEST['frm_action'] && !isset($_REQUEST['item_meta'][$field_id])) {
             // Clear all uploaded values
             foreach ($_REQUEST as $key => $value) {
                 if (false !== strpos($key, 'fileupload-filelist_')) {
                     $_REQUEST[$key] = '';
                 }
             }
+        } elseif (isset($field['value'])) {
+            $value = $field['value'];
+            // Value can be different depending on FF addons installed
+            if (false === is_array($value)) {
+                $prefill = trim(str_ireplace($this->field_type.'-', '', $value));
+            } else {
+                $prefill = json_encode($value);
+            }
         } else {
-            $prefill = (isset($_REQUEST['item_meta'][$field_id]) ? stripslashes($_REQUEST['item_meta'][$field_id]) : '');
+            $prefill = stripslashes($_REQUEST['item_meta'][$field_id] ?? '');
         }
 
         echo do_shortcode($field['shortcode']);
@@ -157,7 +170,7 @@ class FormidableForms
         ];
 
         foreach ($defaults as $opt => $default) {
-            $field_options[$opt] = isset($values['field_options'][$opt.'_'.$field->id]) ? $values['field_options'][$opt.'_'.$field->id] : $default;
+            $field_options[$opt] = $values['field_options'][$opt.'_'.$field->id] ?? $default;
         }
 
         return $field_options;
@@ -208,7 +221,13 @@ class FormidableForms
         if (isset($atts['entry_id']) && (empty($value) || (isset($atts['truncate']) && true === $atts['truncate']))) {
             $data = \FrmEntry::getOne($atts['entry_id'], true);
             $value = $data->metas[$field->id];
-            $value = trim(str_ireplace($this->field_type.'-', '', $value));
+
+            // Value can be different depending on FF addons installed
+            if (false === is_array($value)) {
+                $value = trim(str_ireplace($this->field_type.'-', '', $value));
+            } else {
+                $value = json_encode($value);
+            }
         }
 
         return $this->render_value_as_text($value, $as_html);
@@ -265,9 +284,13 @@ class FormidableForms
             return $value;
         }
 
-        $value = trim(str_ireplace($this->field_type.'-', '', $value));
-
-        $data = json_decode($value);
+        // Value can be different depending on FF addons installed
+        if (false === is_array($value)) {
+            $value = trim(str_ireplace($this->field_type.'-', '', $value));
+            $data = json_decode($value, true);
+        } else {
+            $data = $value;
+        }
 
         if ((null === $data) || (0 === count((array) $data))) {
             return $value;
@@ -275,7 +298,7 @@ class FormidableForms
 
         $return = '';
         foreach ($data as $fileid => $file) {
-            $return .= urldecode($file->link)."\n";
+            $return .= urldecode($file['link'])."\n";
         }
 
         return $return;
@@ -284,25 +307,23 @@ class FormidableForms
     public function enqueue()
     {
         $action = \FrmAppHelper::simple_get('frm_action', 'sanitize_title');
-        $is_builder_page = \FrmAppHelper::is_admin_page('formidable') && ('edit' === $action || 'duplicate' === $action);
+        $is_builder_page = (\FrmAppHelper::is_admin_page('formidable') || \FrmAppHelper::is_admin_page('formidable-entries')) && ('edit' === $action || 'duplicate' === $action);
 
         if (!$is_builder_page) {
             return;
         }
 
-        global $LetsBox;
+        \TheLion\LetsBox\Core::instance()->load_scripts();
+        \TheLion\LetsBox\Core::instance()->load_styles();
 
-        $LetsBox->load_scripts();
-        $LetsBox->load_styles();
-
-        wp_enqueue_style('LetsBox.CustomStyle');
+        wp_enqueue_style('LetsBox');
 
         wp_enqueue_script('WPCP-'.$this->field_type.'-FormidableForms', plugins_url('FormidableForms.js', __FILE__), ['LetsBox.UploadBox', 'LetsBox'], LETSBOX_VERSION, true);
     }
 
     public function enqueue_for_ajax($fields, $form)
     {
-        $form_is_using_ajax = (null !== $form && '1' === $form->options['ajax_submit']);
+        $form_is_using_ajax = (null !== $form && '1' === $form->options['ajax_load']);
         $form_has_fields = \FrmField::get_all_types_in_form($form->id, $this->field_type);
 
         if (false === $form_is_using_ajax || 0 === count($form_has_fields)) {
@@ -329,7 +350,7 @@ class FormidableForms
             return $private_folder_name;
         }
 
-        if ('formidableforms_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('formidableforms_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name;
         }
 
@@ -350,12 +371,14 @@ class FormidableForms
      */
     public function rename_private_folder_names_for_guests($private_folder_name_guest, $processor)
     {
-        if ('formidableforms_upload_box' !== $processor->get_shortcode_option('class')) {
+        if ('formidableforms_upload_box' !== Processor::instance()->get_shortcode_option('class')) {
             return $private_folder_name_guest;
         }
 
-        return str_replace(esc_html__('Guests', 'wpcloudplugins').' - ', '', $private_folder_name_guest);
+        $prefix = Processor::instance()->get_setting('userfolder_name_guest_prefix');
+
+        return str_replace($prefix, '', $private_folder_name_guest);
     }
 }
 
- new FormidableForms();
+new FormidableForms();
