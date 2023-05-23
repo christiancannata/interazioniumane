@@ -17,4 +17,4 @@ jobs:
           compress: true                             # Compression
           localDir: '.'                              # Required, Absolute or relative to cwd.
           remoteDir: '/clickandbuilds/StagingInterazioniUmane/'                             # Required, Absolute path only.
-          exclude: '.git*,.DS_Store,wp-config.php,wp-content/uploads,wp-content/wp-includes,wp-content/wp-admin'                 # Optional. exclude patterns (glob) like .gitignore, use ',' to split, Default to ''.
+          exclude: '.git*,.DS_Store,wp-config.php,wp-content/uploads,wp-content/wp-includes,wp-content/wp-admin,wp-content/plugins'                 # Optional. exclude patterns (glob) like .gitignore, use ',' to split, Default to ''.
