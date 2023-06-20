@@ -68,6 +68,7 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 	</table>
 
 	<div id="payment">
+        <h3 class='my-account--minititle'>Pagamento</h3>
 		<?php if ( $order->needs_payment() ) : ?>
 			<ul class="wc_payment_methods payment_methods methods">
 				<?php

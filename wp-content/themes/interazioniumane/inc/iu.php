@@ -365,3 +365,21 @@ function getModuloIscrizioneFromCart()
 }
 
 
+function getModuloIscrizioneFromOrder($order)
+{
+
+//get modulo iscrizione
+    $items = $order->get_items();
+    $moduloIscrizione = null;
+    foreach ($items as $item => $product) {
+        $moduloIscrizione = get_field('modulo_iscrizione', $product['product_id']);
+        if (is_array($moduloIscrizione) && !empty($moduloIscrizione)) {
+            $moduloIscrizione = reset($moduloIscrizione);
+            $moduloIscrizione = $moduloIscrizione->ID;
+        }
+    }
+
+    return $moduloIscrizione;
+}
+
+

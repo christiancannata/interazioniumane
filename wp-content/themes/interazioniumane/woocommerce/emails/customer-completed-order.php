@@ -15,18 +15,19 @@
  * @version 3.7.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
 /*
  * @hooked WC_Emails::email_header() Output the email header
  */
-do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
+do_action('woocommerce_email_header', $email_heading, $email); ?>
 
 <?php /* translators: %s: Customer first name */ ?>
-<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
-<p>accedi alla tua bacheca virtuale e troverai tutte le informazioni e i materiali didattici sul corso a cui sei iscritt*. </p>
+    <p><?php printf(esc_html__('Hi %s,', 'woocommerce'), esc_html($order->get_billing_first_name())); ?></p>
+    <p>accedi alla tua bacheca virtuale e troverai tutte le informazioni e i materiali didattici sul corso a cui sei
+        iscritt*. </p>
 <?php
 
 /*
@@ -51,11 +52,21 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 /**
  * Show user-defined additional content - this is set in each email's settings.
  */
-if ( $additional_content ) {
-	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+if ($additional_content) {
+    echo wp_kses_post(wpautop(wptexturize($additional_content)));
 }
+
+// ADD CUSTOM TEXT FROM MODULO ISCRIZIONE
+$moduloIscrizione = getModuloIscrizioneFromOrder($order);
+if ($moduloIscrizione) {
+    $testoPagamento = get_field('testo_pagamento', $moduloIscrizione);
+    if (!empty($testoPagamento)) { ?>
+        <p><?php echo $testoPagamento; ?></p>
+    <?php }
+}
+
 
 /*
  * @hooked WC_Emails::email_footer() Output the email footer
  */
-do_action( 'woocommerce_email_footer', $email );
+do_action('woocommerce_email_footer', $email);
