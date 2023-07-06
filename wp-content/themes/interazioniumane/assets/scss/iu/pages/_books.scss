@@ -1,0 +1,151 @@
+.books {
+  &--section {
+    padding: 32px 0;
+  }
+
+  &--category {
+    @include clearfix();
+    @include font-size(22);
+    font-weight: 900;
+    position: relative;
+    display: inline-block;
+    margin: 40px 0 24px 16px;
+    color: $black;
+    @include breakpoint(desktop) {
+      @include font-size(28);
+    }
+
+    &:after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 1px;
+      background: $black;
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+    }
+  }
+
+  &--science {
+    margin: 0 16px;
+  }
+}
+
+.book {
+  &--item {
+    padding: 16px;
+  }
+
+  &--image {
+    display: block;
+  }
+
+  &--link {
+    display: block;
+    overflow: hidden;
+
+    img {
+      @include transition(all 0.3s ease);
+    }
+
+    &:hover {
+      img {
+        @include transform(scale(1.1));
+      }
+    }
+  }
+
+  &--header {
+    margin-top: 8px;
+  }
+
+  &--title {
+    a {
+      @include font-size(20);
+      color: $black;
+
+      &:hover {
+        color: $primary;
+      }
+    }
+  }
+
+  &--info {
+    @include font-size(16);
+    color: $grey;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  &--price {
+    @include font-size(20);
+    font-weight: 900;
+
+    .symbol {
+      @include font-size(16);
+      font-weight: 400;
+    }
+  }
+}
+
+.book-hero {
+  margin-top: 24px;
+  @include breakpoint(desktop) {
+    margin-top: 40px;
+  }
+
+  &__flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__image {
+    width: 100%;
+    display: block;
+    margin: 0 0 24px;
+    @include breakpoint(desktop) {
+      width: 40%;
+      margin:0;
+    }
+  }
+
+  &__info {
+    @include breakpoint(desktop) {
+      width: 60%;
+      padding-left: 40px;
+    }
+  }
+
+  &__title {
+    @include font-size(30);
+    line-height: 1.1;
+    @include breakpoint(desktop) {
+      @include font-size(45);
+    }
+  }
+
+  &__author {
+    @include font-size(18);
+    line-height: 1.1;
+    font-weight: 400;
+    margin-bottom: 16px;
+    @include breakpoint(desktop) {
+      @include font-size(22);
+    }
+  }
+
+  &__description {
+    @include font-size(18);
+    line-height: 1.4;
+    font-weight: 300;
+    margin-top: 24px;
+    color: $gray;
+    @include breakpoint(desktop) {
+      @include font-size(22);
+    }
+  }
+}

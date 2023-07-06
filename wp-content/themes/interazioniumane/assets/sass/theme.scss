@@ -1,0 +1,50 @@
+@import "theme/theme_variables";  // <-------- Add your variables into this file. Also add variables to overwrite Bootstrap or UnderStrap variables here
+@import "assets/bootstrap4";      // <-------- Loads Bootstrap4
+@import "understrap/understrap";  // <-------- Loads the UnderStrap defaults. Just a few classes to incorporate BS in WP
+//@import "understrap/woocommerce"; // <-------- Loads WooCommerce style fixes. Comment out if you aren't using WooCommerce
+
+
+
+// Any additional imported files //
+// @import "theme/theme";            // <-------- That's where you can add your own design. Thats your part!
+// @import "theme/contact-form7";    // <-------- Contact Form 7 - Bootstrap 4 support
+
+//iu style
+@import "iu/mixing/mixing";
+@import "iu/mixing/animations";
+@import "iu/mixing/breakpoints";
+@import "iu/mixing/variables";
+
+@import "iu/base/buttons";
+@import "iu/base/basics";
+@import "iu/base/typography";
+@import "iu/base/icomoon";
+
+@import "iu/elements/header";
+@import "iu/elements/footer";
+@import "iu/elements/form";
+@import "iu/elements/popup";
+@import "iu/elements/_slick";
+@import "iu/elements/slider";
+@import "iu/elements/banner";
+@import "iu/elements/empty";
+//@import "iu/elements/notify";
+
+@import "iu/elements/courses"; //IU
+
+@import "iu/pages/pages";
+@import "iu/pages/home";
+@import "iu/pages/explore";
+@import "iu/pages/login";
+@import "iu/pages/profile";
+@import "iu/pages/archive";
+@import "iu/pages/single-work";
+@import "iu/pages/landing";
+@import "iu/pages/about";
+@import "iu/pages/companies";
+@import "iu/pages/magazine";
+@import "iu/pages/faq";
+@import "iu/pages/career";
+@import "iu/pages/checkout";
+@import "iu/pages/books";
+@import "iu/pages/exams";

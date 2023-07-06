@@ -1,0 +1,71 @@
+.typography-content {
+  max-width: 990px;
+  margin: 0 auto;
+
+  .entry-content {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      font-weight: 900;
+    }
+
+    h1 {
+      @include font-size(36);
+      margin: 36px 0;
+    }
+
+    h2 {
+      @include font-size(32);
+      margin: 24px 0;
+    }
+
+    h3 {
+      @include font-size(28);
+      margin: 24px 0;
+    }
+
+    h4 {
+      @include font-size(24);
+      margin: 24px 0 16px;
+    }
+
+    h5 {
+      @include font-size(20);
+      margin: 24px 0 16px;
+    }
+
+    h6 {
+      @include font-size(16);
+      font-weight: normal;
+      text-decoration: underline;
+      margin: 25px 0 15px;
+    }
+
+    ol li,
+    ul li {
+      @include font-size(18);
+      @include line-height(24);
+      margin: 8px 0;
+    }
+
+    p {
+      @include font-size(18);
+      line-height: 1.4;
+      margin: 16px 0;
+      font-weight: normal;
+      font-weight: 400;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+
+      &:not([class^="align"]) {
+        margin-top: 36px;
+        margin-bottom: 36px;
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+.empty-states {
+  &--text {
+    text-align: center;
+  }
+  &--image {
+    max-width: 250px;
+    margin: 0 auto 16px;
+    &.big {
+      max-width: 400px;
+    }
+  }
+
+  &--title{
+    @include font-size(24);
+    font-weight: 900;
+  }
+  &--subtitle{
+    @include font-size(16);
+    color: $gray;
+  }
+  &--button {
+    margin-top: 24px;
+  }
+}

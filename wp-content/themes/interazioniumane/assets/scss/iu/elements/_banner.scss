@@ -1,0 +1,180 @@
+.banner {
+  margin: 50px 0 0;
+
+  &__content {
+    padding: 80px 60px 40px;
+    color: #fff;
+    text-align: center;
+    background: $primary;
+    @include breakpoint(mobile) {
+      padding: 50px 20px;
+    }
+  }
+
+  &__text {
+    @include font-size(30);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-top: 0;
+    @include breakpoint(desktop) {
+      @include font-size(50);
+    }
+  }
+
+  &__subtitle {
+    @include font-size(20);
+    margin: 8px 0 32px;
+  }
+
+  label {
+    color: #fff;
+    a {
+      color: #fff;
+      text-decoration: underline;
+    }
+  }
+
+  &__btn {
+    margin: 0 8px;
+    min-width: 220px;
+    @include breakpoint(mobile) {
+      margin: 8px 0;
+    }
+
+    span {
+      @include font-size(28);
+      position: relative;
+      top: 5px;
+      margin-left: -4px;
+    }
+  }
+}
+
+.contacts-form {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+
+  .form-row {
+    br {
+      display: none;
+    }
+  }
+
+  .banner__form & {
+    input[type=submit] {
+      @include button();
+      @include button-mixed();
+    }
+  }
+}
+
+.contacts {
+  &__mode {
+    &--flex {
+      @include breakpoint(desktop) {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+      }
+    }
+
+    &--item {
+      padding: 16px 0;
+      @include breakpoint(desktop) {
+        width: 33.333%;
+        padding: 24px 32px;
+      }
+
+      &:first-of-type {
+        padding-left: 0;
+      }
+
+      &:last-of-type {
+        padding-right: 0;
+      }
+    }
+
+    &--title {
+      @include font-size(26);
+    }
+
+    &--text {
+      line-height: 1.4;
+
+      a {
+        color: $primary;
+      }
+
+      .icon-heart {
+        @include font-size(12);
+      }
+    }
+  }
+
+  &__form {
+    label {
+      color: $black;
+    }
+
+    .checkbox-form label:before {
+      border: 1px solid $black;
+    }
+
+    input[type=submit] {
+      @include button();
+      @include buttonprimary();
+      @include button-mixed();
+    }
+
+    input[type=email],
+    input[type=text],
+    textarea {
+      color: $black;
+      border: 1px solid $black;
+      background: #fff;
+
+      &:focus {
+        border: 1px solid $primary;
+      }
+    }
+
+    :-ms-input-placeholder {
+      font-weight: 500;
+      color: #999 !important;
+      opacity: 0.7;
+    }
+
+    ::-ms-input-placeholder {
+      font-weight: 500;
+      color: #999 !important;
+      opacity: 0.7;
+    }
+
+    ::placeholder {
+      font-weight: 500;
+      opacity: 0.7;
+      color: #999 !important;
+    }
+  }
+
+  &__faqs {
+    text-align: center;
+    padding: 40px 0;
+
+    &--title {
+      @include font-size(18);
+      font-weight: 300;
+      @include breakpoint(desktop) {
+        @include font-size(24);
+      }
+
+      a {
+        @include font-size(18);
+        @include breakpoint(desktop) {
+          @include font-size(24);
+        }
+      }
+    }
+  }
+}

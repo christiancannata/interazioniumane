@@ -1,0 +1,574 @@
+body.page-template-pubblica-annuncio-php {
+  .landing-wrapper {
+    background-image: url("https://www.the-district.com/wp-content/uploads/2019/05/Pattern-1.png");
+    background-repeat: repeat-y;
+    background-position: center center;
+    background-attachment: scroll;
+    background-size: contain;
+  }
+  .landing-about p{
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 10px 30px;
+  }
+}
+
+body.page-template-free-district-php,
+body.page-template-pubblica-annuncio-php {
+  padding-top: 0 !important;
+
+  input[type="checkbox"].styled:checked + label:after,
+  #header-search {
+    display: none;
+  }
+
+  .wrapper {
+    padding: 0;
+  }
+
+  .dstr-button,
+  .dstr-count,
+  h1,
+  h2,
+  h3,
+  h4,
+  label {
+    font-family: 'district-h';
+  }
+
+  p {
+    font-family: "raleway";
+  }
+
+  .dstr-button {
+    @include border-radius(25px);
+  }
+
+  .landing-wrapper {
+    .landing-hero {
+      padding: 80px 0;
+      background: url("../assets/img/works/background.jpg") center center no-repeat;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      position: relative;
+      @media screen and (max-width: 820px) {
+        padding: 40px 0;
+      }
+
+      &__hover {
+        @include opacity(0.8);
+        content: '';
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #123E7F;
+      }
+
+      &__content {
+        @include clearfix();
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+        @media screen and (min-width: 821px) {
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      &__text {
+        width: 60%;
+        padding: 0 80px;
+        @media screen and (max-width: 1200px) {
+          padding: 0 40px 0 20px;
+        }
+        @media screen and (max-width: 820px) {
+          width: 100%;
+          padding: 0 20px;
+        }
+
+        .iorestoacasa {
+          @include font-size(13);
+          @include border-radius(25px);
+          background: $yellow;
+          padding: 6px 15px;
+          display: inline-block;
+          margin-bottom: 20px;
+          letter-spacing: 0.03em;
+        }
+
+        h1 {
+          @include font-size(40);
+          margin: 0 0 30px;
+          font-weight: 900;
+          color: #fff;
+        }
+
+        p {
+          @include font-size(18);
+          font-weight: normal;
+          line-height: 24px;
+          color: #fff;
+        }
+
+        .red {
+          color: $primary;
+        }
+      }
+
+      &__form {
+        width: 40%;
+        padding: 40px 30px;
+        background: #fff;
+        border-radius: 3px;
+        box-shadow: 0 6px 10px 6px rgba(0,0,0,0.2);
+        margin: 0 20px;
+        @media screen and (max-width: 820px) {
+          width: auto;
+          margin: 20px 20px 0;
+        }
+      }
+    }
+
+    .price-box {
+      font-family: 'district-h';
+      margin-top: 40px;
+
+      .free {
+        @include font-size(18);
+        color: $yellow;
+        margin-left: 10px;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        font-family: 'district-h';
+      }
+
+      .title {
+        @include font-size(14);
+        display: block;
+        color: #fff;
+      }
+
+      .the-price {
+        @include font-size(30);
+        position: relative;
+        color: #fff;
+        font-family: 'district-h';
+
+        &:before {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 4px;
+          position: absolute;
+          z-index: 2;
+          background: $yellow;
+          transform: rotate(175deg);
+          left: 0;
+          top: 13px;
+        }
+      }
+
+      .symbol {
+        @include font-size(18);
+      }
+    }
+  }
+
+  .form-button {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .checkbox-form {
+    @include clearfix();
+    text-align: left;
+    margin-top: 20px;
+
+    input[type=checkbox] {
+      display: none;
+    }
+
+    label {
+      @include font-size(13);
+      @include line-height(20);
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      padding-left: 25px;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: normal;
+      font-family: "raleway";
+
+      &.white {
+        color: $white;
+      }
+    }
+
+    label:before {
+      @include border-radius(3px);
+      background: $input;
+      content: "";
+      width: 18px;
+      height: 18px;
+      position: absolute;
+      left: 0;
+      border: 1px solid transparent;
+    }
+
+    input[type=checkbox]:checked + label:before {
+      background: $input url("../assets/img/elements/check.svg") center center no-repeat;
+      background-size: 80% auto;
+    }
+  }
+
+  .wpcf7-form-control-wrap {
+    width: 100%;
+  }
+
+  .dtr-input,
+  .input-text,
+  form.wpcf7-form input[type=email],
+  form.wpcf7-form input[type=password],
+  form.wpcf7-form input[type=tel],
+  form.wpcf7-form input[type=text],
+  form.wpcf7-form input[type=url] {
+    @include transition(all 0.3s ease);
+    @include border-radius(5px);
+    @include font-size(16);
+    @include line-height(40);
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 40px;
+    font-weight: normal;
+    padding: 0 10px !important;
+    margin: 15px 0 8px;
+    text-align: left;
+    border: 1px solid transparent;
+    outline: none;
+    background: $input;
+    color: $black;
+
+    &:-ms-input-placeholder,
+    &::-ms-input-placeholder,
+    &::placeholder {
+      color: #999;
+    }
+
+    &:focus {
+      border-color: inherit;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+      outline: none !important;
+      border: 1px solid $primary;
+    }
+
+    &.wpcf7-not-valid {
+      border: 1px solid $red;
+    }
+  }
+
+  textarea {
+    height: 100px !important;
+    resize: vertical;
+  }
+
+  .pubblica-annuncio {
+    margin: 40px auto;
+    max-width: 480px;
+    padding: 0 30px 30px;
+    background: #fff;
+    border: 2px solid $primary;
+  }
+
+  .form-row {
+    max-width: 450px;
+    margin: 10px auto;
+
+    &.button {
+      margin-top: 20px;
+      text-align: center;
+
+      input {
+        margin: 0 auto;
+      }
+    }
+
+    h3 {
+      @include font-size(18);
+      font-weight: 900;
+      margin: 30px 0 20px;
+    }
+  }
+
+  .dstr-label,
+  .form-row label:not(.checkbox-label) {
+    @include font-size(12);
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    color: $gray;
+    letter-spacing: 0.08em;
+  }
+
+  .landing-about {
+    padding: 80px 0 40px;
+    @media screen and (max-width: 820px) {
+      padding: 40px 20px;
+    }
+
+    &__content {
+      @include clearfix();
+      text-align: center;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      @include font-size(40);
+      margin-bottom: 30px;
+      @media screen and (max-width: 820px) {
+        @include font-size(32);
+      }
+    }
+
+    p {
+      @include font-size(18);
+      font-weight: normal;
+      line-height: 24px;
+      color: $gray;
+      @media screen and (max-width: 820px) {
+        @include font-size(16);
+      }
+    }
+
+    .red {
+      color: $primary;
+    }
+  }
+
+  .landing-numbers {
+    padding: 40px 0 80px;
+    @media screen and (max-width: 820px) {
+      padding: 0 20px 40px;
+    }
+
+    &__content {
+      @include clearfix();
+      max-width: 1200px;
+      margin: 0 auto;
+      @media screen and (min-width: 821px) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    &__text {
+      text-align: center;
+      padding: 0 30px;
+      font-family: 'district-h';
+      @media screen and (max-width: 820px) {
+        padding: 0 10px;
+        margin: 20px 0;
+      }
+
+      .dstr-count,
+      .dstr-label {
+        display: block;
+        text-align: center;
+        font-weight: 900;
+      }
+
+      .dstr-count {
+        @include font-size(30);
+        color: $primary;
+        display: inline-block;
+        vertical-align: middle;
+        font-family: 'district-h';
+
+        &__number {
+          @include font-size(40);
+          display: inline-block;
+          vertical-align: middle;
+          margin-left: 6px;
+          font-family: 'district-h';
+        }
+      }
+    }
+  }
+
+  .landing-clients {
+    padding: 80px 0;
+    border-bottom: 1px solid #ddd;
+    @media screen and (max-width: 820px) {
+      padding: 40px 0;
+    }
+
+    &__content {
+      @include clearfix();
+      text-align: center;
+
+      h3 {
+        @include font-size(18);
+        margin-bottom: 25px;
+        color: $primary;
+        @media screen and (max-width: 820px) {
+          @include font-size(16);
+        }
+      }
+    }
+
+    .clients-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      text-align: center;
+
+      li {
+        display: inline-block;
+        width: 13%;
+        padding: 0 15px;
+        @media screen and (max-width: 820px) {
+          width: 30%;
+          margin: 5px 0;
+        }
+
+        img {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .landing-works {
+    h4 {
+      @include font-size(20);
+      margin-bottom: 25px;
+
+      span {
+        @include font-size(30);
+      }
+    }
+
+    &__content {
+      @include clearfix();
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    &__section {
+      @include clearfix();
+      @media screen and (min-width: 821px) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+      }
+      @media screen and (max-width: 820px) {
+        padding: 30px 20px;
+      }
+
+      &--image {
+        &.mobile {
+          display: none;
+        }
+        @media screen and (min-width: 821px) {
+          width: 50%;
+          padding: 0 80px;
+        }
+        @media screen and (max-width: 820px) {
+          &.mobile {
+            display: block;
+          }
+
+          &.desktop {
+            display: none;
+          }
+        }
+
+        img {
+          @include border-radius(3px);
+          @media screen and (max-width: 820px) {
+            margin: 15px auto;
+          }
+        }
+      }
+
+      &--text {
+        text-align: left;
+        @media screen and (min-width: 821px) {
+          width: 40%;
+          padding: 0 50px;
+        }
+
+        h3 {
+          @include font-size(24);
+          margin-bottom: 25px;
+          font-weight: 900;
+        }
+
+        p {
+          @include font-size(18);
+          color: $gray;
+        }
+      }
+    }
+  }
+
+  .landing-promo {
+    margin-top: 40px;
+    padding: 50px 0;
+    background: $primary;
+    @media screen and (max-width: 820px) {
+      padding: 30px 20px;
+      margin-bottom: 30px;
+    }
+
+    &__content {
+      @include clearfix();
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      @media screen and (min-width: 821px) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    &__text {
+      @media screen and (min-width: 821px) {
+        text-align: left;
+        padding-right: 50px;
+      }
+      @media screen and (max-width: 820px) {
+        margin-bottom: 30px;
+      }
+
+      h3 {
+        @include font-size(26);
+        font-weight: 900;
+      }
+
+      p {
+        @include font-size(18);
+        color: $white;
+      }
+    }
+  }
+}

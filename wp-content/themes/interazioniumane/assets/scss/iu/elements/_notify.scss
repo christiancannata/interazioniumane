@@ -1,0 +1,110 @@
+.bp-feedback.custom-homepage-info.info {
+  display: none;
+}
+
+.bp-feedback.bp-messages {
+  @include transition(all 0.2s ease);
+  @include animate(popup, 0.2s,linear,normal);
+  @include font-size(16);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  margin: 0;
+  height: 70px;
+  align-items: center !important;
+  box-shadow: 0 -5px 10px 0 rgba(0,0,0,0.1);
+  color: $black;
+  padding-left: 90px;
+  border: none;
+
+  &:after {
+    font-family: 'icomoon' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: "\e908";
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 20px;
+    width: 70px;
+    @include font-size(30);
+    text-align: center;
+    color: $gray;
+    cursor: pointer;
+  }
+
+  &.hide-message {
+    bottom: -70px;
+    pointer-events: none;
+  }
+
+  &.success {
+    background: #E5FEF8;
+
+    .bp-icon {
+      background: $green;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 70px;
+
+      &:before {
+        @include font-size(30);
+        margin: 0 auto;
+      }
+    }
+  }
+  &.error {
+    background: #FFEEEB;
+
+    .bp-icon {
+      background: $red;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 70px;
+
+      &:before {
+        @include font-size(30);
+        margin: 0 auto;
+      }
+    }
+  }
+  &.info {
+    background: #FFEFBF;
+
+    .bp-icon {
+      background: $yellow;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 70px;
+
+      &:before {
+        @include font-size(30);
+        margin: 0 auto;
+      }
+    }
+  }
+}
+@include keyframes (popup) {
+  0% {
+    bottom: -70px;
+  }
+
+  100% {
+    bottom: 0;
+  }
+}

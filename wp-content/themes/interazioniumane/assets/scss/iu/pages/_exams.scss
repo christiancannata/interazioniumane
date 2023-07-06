@@ -1,0 +1,14 @@
+.exam__list {
+  margin-top: 32px;
+}
+
+.exams {
+  .my-account--minititle {
+    color: #fff;
+    margin: 16px 0 !important;
+
+    &:after {
+      background: #fff;
+    }
+  }
+}

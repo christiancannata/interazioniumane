@@ -1,0 +1,107 @@
+body.single-work {}
+
+.work-wrapper {
+  max-width: 1600px;
+  margin: 0 auto;
+  @include breakpoint(desktop) {
+    display: flex;
+    padding: 0 40px;
+  }
+
+  .works-sidebar {
+    @include clearfix();
+    position: relative;
+    @include breakpoint(mobile) {
+      width: 100%;
+    }
+    @include breakpoint(desktop) {
+      @include transition(all 0.3s ease);
+      width: 30%;
+      position: sticky;
+      top: 80px;
+      display: inline-block;
+    }
+
+    .category-list {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+    }
+  }
+
+  .works-container {
+    @include breakpoint(mobile) {
+      width: 100%;
+      padding: 0 20px;
+    }
+    @include breakpoint(desktop) {
+      width: 70%;
+      float: right;
+      padding: 40px;
+      display: inline-block;
+    }
+    @include breakpoint(tablet) {
+      padding: 0 20px;
+    }
+  }
+}
+
+.works-header {
+  @include breakpoint(desktop) {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  &__dx {
+    padding-top: 5px;
+    min-width: 130px;
+    text-align: right;
+    @include breakpoint(desktop) {
+      text-align: center;
+    }
+
+    .expired-date {
+      @include font-size(12);
+      color: $gray;
+      display: block;
+      margin-top: 15px;
+    }
+  }
+}
+
+.company_quote {
+  padding: 10px 40px;
+  @include breakpoint(desktop) {
+
+    margin: 0 40px 40px;
+  }
+
+  &__text {
+    @include font-size(40);
+    color: $primary;
+    font-style: italic;
+    font-weight: 100;
+  }
+}
+
+.entry-header {
+  .entry-title {
+    @include font-size(60);
+    color: $black;
+    font-weight: 100;
+    @include breakpoint(mobile) {
+      @include font-size(32);
+    }
+  }
+}
+
+.entry-meta {
+  &__company {
+    @include font-size(18);
+    font-weight: bold;
+    color: $black;
+    margin-bottom: 16px;
+  }
+}

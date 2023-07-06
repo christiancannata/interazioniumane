@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;700;900&display=swap');
+
+@font-face {
+    font-family: 'Silka';
+    src: url('../fonts/silka/silka-regular-webfont.eot');
+    src: url('../fonts/silka/silka-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/silka/silka-regular-webfont.woff2') format('woff2'),
+         url('../fonts/silka/silka-regular-webfont.woff') format('woff'),
+         url('../fonts/silka/silka-regular-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+@font-face {
+    font-family: 'Silka';
+    src: url('../fonts/silka/silka-regularitalic-webfont.eot');
+    src: url('../fonts/silka/silka-regularitalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/silka/silka-regularitalic-webfont.woff2') format('woff2'),
+         url('../fonts/silka/silka-regularitalic-webfont.woff') format('woff'),
+         url('../fonts/silka/silka-regularitalic-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+
+}
+
+@font-face {
+    font-family: 'Silka';
+    src: url('../fonts/silka/silka-black.woff');
+    src: url('../fonts/silka/silka-black.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+
+}
+
+$font-primary: 'Silka', sans-serif;
+
+$primary: #29346e; //blue
+$secondary: #f0ca4f; //yellow
+$black: #26262E;
+$darkblue: #123E7F;
+$white: #FFFFFF;
+$red: #FF583D;
+$gray: #828289;
+$grey: #828289;
+$inputgray: #A5A5AC;
+$lightgray: #DDDDDD;
+$bggray: #f9f9f9;
+$input: #F8F7FD;
+$textlight: #AAAAAA;
+$green: #29E574;
+$yellow: #F9AE00;
+$blue: #185af5;
+$linkhover: #1b0d83;
+$linklight: #6a58eb;

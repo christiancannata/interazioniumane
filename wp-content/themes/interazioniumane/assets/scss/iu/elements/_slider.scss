@@ -1,0 +1,87 @@
+.owl-nav {
+  @include vertical-align();
+  position: absolute;
+  height: 36px !important;
+  z-index: 3;
+  width: 100%;
+
+  button {
+    background: transparent !important;
+    border: none !important;
+    height: 0 !important;
+  }
+}
+
+.owl-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+
+  .owl-dot {
+    background: transparent;
+    border: none;
+    padding: 0;
+    @include border-radius(50%);
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: #ddd !important;
+    margin: 5px 4px;
+  }
+
+  .owl-dot.active {
+    width: 6px;
+    height: 6px;
+    background: $primary !important;
+  }
+}
+
+.owl-stage-outer {
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.owl-item {
+  float: left;
+}
+
+.slider-arrow {
+  @include transition(all 0.2s linear);
+  @include vertical-align();
+  @include font-size(36);
+  position: absolute;
+  z-index: 2;
+  color: $black;
+  cursor: pointer;
+  @include breakpoint(mobile) {
+    display: none;
+  }
+
+  .disabled & {
+    @include opacity(0);
+  }
+
+  &.slider-prev {
+    left: 10px;
+    padding-left: 10px;
+    @include breakpoint(mobile) {
+      padding: 0;
+      left: 0;
+    }
+  }
+
+  &.slider-next {
+    right: 10px;
+    padding-right: 10px;
+    @include breakpoint(mobile) {
+      padding: 0;
+      right: 0;
+    }
+  }
+
+  &:hover {
+    color: $red;
+    padding: 0;
+  }
+}

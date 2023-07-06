@@ -6,9 +6,9 @@
 
 //Aggiungi javascript
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_script('iu-main', get_template_directory_uri() . '/js/main.js', ['jquery'], null, true);
-    wp_enqueue_script('slick', get_template_directory_uri() . '/js/slick.min.js', ['jquery'], null, true);
-    wp_enqueue_script('aos', get_template_directory_uri() . '/js/aos.js', ['jquery'], null, true);
+    wp_enqueue_script('iu-main', get_template_directory_uri() . '/assets/js/main.js', ['jquery'], null, true);
+    wp_enqueue_script('slick', get_template_directory_uri() . '/assets/js/slick.min.js', ['jquery'], null, true);
+    wp_enqueue_script('aos', get_template_directory_uri() . '/assets/js/aos.js', ['jquery'], null, true);
     wp_localize_script('ajax_term', 'wpAjax', array('ajaxUrl' => admin_url('admin-ajax.php')));
 
 }, 100);
@@ -381,5 +381,3 @@ function getModuloIscrizioneFromOrder($order)
 
     return $moduloIscrizione;
 }
-
-
