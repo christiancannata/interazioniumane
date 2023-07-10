@@ -54,9 +54,9 @@ gulp.task('watch', function () {
 	gulp.watch(
 		[
 			`${paths.dev}/js/**/*.js`,
-			'js/**/*.js',
-			'!js/theme.js',
-			'!js/theme.min.js'
+			'assets/js/**/*.js',
+			'!assets/js/theme.js',
+			'!assets/js/theme.min.js'
 		],
 		gulp.series('scripts')
 	);

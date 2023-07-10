@@ -22,7 +22,7 @@ function misha_my_load_more_scripts() {
 
 	global $wp_query;
 
-  wp_register_script( 'my_loadmore', get_stylesheet_directory_uri() . '/js/myloadmore.js', array('jquery') );
+  wp_register_script( 'my_loadmore', get_stylesheet_directory_uri() . '/assets/js/myloadmore.js', array('jquery') );
 
 	// you can define variables directly in your HTML but I decided that the most proper way is wp_localize_script()
 	wp_localize_script( 'my_loadmore', 'misha_loadmore_params', array(
