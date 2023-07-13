@@ -31,6 +31,7 @@ body.woocommerce-checkout {
 
 .woocommerce table.shop_table {
   background: #f8f7fd;
+
   td.product-name {
     position: relative;
     padding-left: 32px;
@@ -164,4 +165,99 @@ body.woocommerce-order-received {
     width: 350px;
     display: block;
   }
+}
+
+.woocommerce-checkout #payment {
+  background: $white !important;
+  border-radius: 16px !important;
+
+  ul.payment_methods {
+    border-bottom: none !important;
+    padding: 0 !important;
+    margin-bottom: 40px;
+
+    li {
+      input {
+        display: none;
+      }
+
+      .payment_method_wallet {
+        label {
+          strong {
+            font-weight: 400;
+          }
+        }
+      }
+
+      label {
+        @include transition(all 0.2s linear);
+        @include border-radius(4px);
+        @include font-size(16);
+        background: $input;
+        cursor: pointer;
+        margin: 4px 0;
+        padding: 10px;
+        width: 100%;
+        color: $black;
+        display: block;
+        border: 1px solid #f1f1f1;
+      }
+
+      .payment_box {
+        @include font-size(14);
+        //display: none !important;
+        background: $input;
+
+        &:before {
+          border: 1em solid $input;
+          border-right-color: transparent;
+          border-left-color: transparent;
+          border-top-color: transparent;
+        }
+
+        .wc-credit-card-form {
+          padding: 0;
+
+          #wcpay-card-element,
+          #wcpay-sepa-element {
+            padding: 16px 10px;
+            border-radius: 8px;
+          }
+        }
+      }
+
+      input:checked ~ label {
+        background: $primary;
+        border-color: $primary;
+        color: $white;
+      }
+
+      &:not(.payment_method_woocommerce_payments) {
+        .payment_box {
+          display: none !important;
+        }
+      }
+
+      &.payment_method_satispay,
+      &.payment_method_woocommerce_payments {
+        & > label {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          img {
+            display: block;
+            height: 32px;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+#payment .payment_methods li .payment_box.payment_method_woocommerce_payments fieldset {
+  border: none;
+    background: rgba(255,255,255,0.7);
+    padding: 24px 16px !important;
 }

@@ -10437,6 +10437,85 @@ body.woocommerce-order-received .entry-header {
   display: block;
 }
 
+.woocommerce-checkout #payment {
+  background: #FFFFFF !important;
+  border-radius: 16px !important;
+}
+.woocommerce-checkout #payment ul.payment_methods {
+  border-bottom: none !important;
+  padding: 0 !important;
+  margin-bottom: 40px;
+}
+.woocommerce-checkout #payment ul.payment_methods li input {
+  display: none;
+}
+.woocommerce-checkout #payment ul.payment_methods li .payment_method_wallet label strong {
+  font-weight: 400;
+}
+.woocommerce-checkout #payment ul.payment_methods li label {
+  -webkit-transition: all 0.2s linear;
+  -moz-transition: all 0.2s linear;
+  -ms-transition: all 0.2s linear;
+  -o-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background-clip: padding-box;
+  font-size: 16px;
+  font-size: 2rem;
+  background: #F8F7FD;
+  cursor: pointer;
+  margin: 4px 0;
+  padding: 10px;
+  width: 100%;
+  color: #26262E;
+  display: block;
+  border: 1px solid #f1f1f1;
+}
+.woocommerce-checkout #payment ul.payment_methods li .payment_box {
+  font-size: 14px;
+  font-size: 1.75rem;
+  background: #F8F7FD;
+}
+.woocommerce-checkout #payment ul.payment_methods li .payment_box:before {
+  border: 1em solid #F8F7FD;
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+.woocommerce-checkout #payment ul.payment_methods li .payment_box .wc-credit-card-form {
+  padding: 0;
+}
+.woocommerce-checkout #payment ul.payment_methods li .payment_box .wc-credit-card-form #wcpay-card-element,
+.woocommerce-checkout #payment ul.payment_methods li .payment_box .wc-credit-card-form #wcpay-sepa-element {
+  padding: 16px 10px;
+  border-radius: 8px;
+}
+.woocommerce-checkout #payment ul.payment_methods li input:checked ~ label {
+  background: #29346e;
+  border-color: #29346e;
+  color: #FFFFFF;
+}
+.woocommerce-checkout #payment ul.payment_methods li:not(.payment_method_woocommerce_payments) .payment_box {
+  display: none !important;
+}
+.woocommerce-checkout #payment ul.payment_methods li.payment_method_satispay > label, .woocommerce-checkout #payment ul.payment_methods li.payment_method_woocommerce_payments > label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.woocommerce-checkout #payment ul.payment_methods li.payment_method_satispay > label img, .woocommerce-checkout #payment ul.payment_methods li.payment_method_woocommerce_payments > label img {
+  display: block;
+  height: 32px;
+}
+
+#payment .payment_methods li .payment_box.payment_method_woocommerce_payments fieldset {
+  border: none;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 24px 16px !important;
+}
+
 .books--section {
   padding: 32px 0;
 }
