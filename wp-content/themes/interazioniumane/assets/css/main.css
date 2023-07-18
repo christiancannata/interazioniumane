@@ -3014,6 +3014,7 @@ textarea {
   height: 150px;
   resize: vertical;
   padding: 15px 10px;
+  font-family: "Silka", sans-serif;
 }
 textarea:-ms-input-placeholder, textarea::-ms-input-placeholder, textarea::placeholder {
   color: #A5A5AC;
