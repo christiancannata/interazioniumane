@@ -3088,11 +3088,11 @@ textarea.wpcf7-not-valid {
 }
 .checkbox-form.perfect label:before,
 .checkbox-form input[type=checkbox]:checked + label:before {
-  background: #fff url("../assets/img/elements/check.svg") center center no-repeat;
+  background: #fff url("../img/elements/check.svg") center center no-repeat;
   background-size: 85% auto;
 }
 .checkbox-form input[type=checkbox]:checked + label.grey:before {
-  background: #f8f7fd url("../assets/img/elements/check.svg") center center no-repeat;
+  background: #f8f7fd url("../img/elements/check.svg") center center no-repeat;
   background-size: 85% auto;
 }
 
@@ -3506,7 +3506,7 @@ span.wpcf7-list-item {
 }
 
 div.wpcf7 .ajax-loader {
-  background-image: url("../assets/img/elements/pulse.gif");
+  background-image: url("../img/elements/pulse.gif");
   background-size: 16px 16px;
 }
 
@@ -3578,7 +3578,7 @@ div.wpcf7 .ajax-loader {
 }
 .contact-page.contacts-form .checkbox-form.perfect label:before,
 .contact-page.contacts-form input[type=checkbox]:checked + label:before {
-  background: #f8f7fd url("../assets/img/elements/check.svg") center center no-repeat;
+  background: #f8f7fd url("../img/elements/check.svg") center center no-repeat;
   background-size: 85% auto;
 }
 
@@ -8338,7 +8338,7 @@ body.page-template-pubblica-annuncio-php .dstr-button {
 body.page-template-free-district-php .landing-wrapper .landing-hero,
 body.page-template-pubblica-annuncio-php .landing-wrapper .landing-hero {
   padding: 80px 0;
-  background: url("../assets/img/works/background.jpg") center center no-repeat;
+  background: url("../img/works/background.jpg") center center no-repeat;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -8563,7 +8563,7 @@ body.page-template-pubblica-annuncio-php .checkbox-form label:before {
 }
 body.page-template-free-district-php .checkbox-form input[type=checkbox]:checked + label:before,
 body.page-template-pubblica-annuncio-php .checkbox-form input[type=checkbox]:checked + label:before {
-  background: #F8F7FD url("../assets/img/elements/check.svg") center center no-repeat;
+  background: #F8F7FD url("../img/elements/check.svg") center center no-repeat;
   background-size: 80% auto;
 }
 body.page-template-free-district-php .wpcf7-form-control-wrap,

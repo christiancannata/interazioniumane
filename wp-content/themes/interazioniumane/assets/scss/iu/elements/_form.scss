@@ -239,12 +239,12 @@ textarea {
 
   &.perfect label:before,
   input[type=checkbox]:checked + label:before {
-    background: #fff url("../assets/img/elements/check.svg") center center no-repeat;
+    background: #fff url("../img/elements/check.svg") center center no-repeat;
     background-size: 85% auto;
   }
 
   input[type=checkbox]:checked + label.grey:before {
-    background: #f8f7fd url("../assets/img/elements/check.svg") center center no-repeat;
+    background: #f8f7fd url("../img/elements/check.svg") center center no-repeat;
     background-size: 85% auto;
   }
 }
@@ -558,7 +558,7 @@ span.wpcf7-list-item {
 }
 
 div.wpcf7 .ajax-loader {
-  background-image: url("../assets/img/elements/pulse.gif");
+  background-image: url("../img/elements/pulse.gif");
   background-size: 16px 16px;
 }
 
@@ -587,7 +587,7 @@ div.wpcf7 .ajax-loader {
 
   .checkbox-form.perfect label:before,
   input[type=checkbox]:checked + label:before {
-    background: #f8f7fd url("../assets/img/elements/check.svg") center center no-repeat;
+    background: #f8f7fd url("../img/elements/check.svg") center center no-repeat;
     background-size: 85% auto;
   }
 }

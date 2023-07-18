@@ -48,7 +48,7 @@ body.page-template-pubblica-annuncio-php {
   .landing-wrapper {
     .landing-hero {
       padding: 80px 0;
-      background: url("../assets/img/works/background.jpg") center center no-repeat;
+      background: url("../img/works/background.jpg") center center no-repeat;
       -webkit-background-size: cover;
       -moz-background-size: cover;
       -o-background-size: cover;
@@ -224,7 +224,7 @@ body.page-template-pubblica-annuncio-php {
     }
 
     input[type=checkbox]:checked + label:before {
-      background: $input url("../assets/img/elements/check.svg") center center no-repeat;
+      background: $input url("../img/elements/check.svg") center center no-repeat;
       background-size: 80% auto;
     }
   }
