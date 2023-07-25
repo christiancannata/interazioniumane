@@ -43,7 +43,7 @@ jQuery(function($) {
 
 	$(".dismiss-review-notification").on('click', function(){
               	var nonce = $('#_wpnonce').val();
-		
+	
 		jQuery.ajax({
                 	method: "POST",
                         url: ajaxurl,

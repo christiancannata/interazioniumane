@@ -1,4 +1,5 @@
 <?php
+$cron_projects = get_option( 'cron_projects' );
 $domain = sanitize_text_field($_SERVER['HTTP_HOST']);
 $plugin_settings = get_option( 'plugin_settings' );
 $license_information = get_option( 'license_information' );
@@ -121,9 +122,27 @@ if(isset($_GET["tab"])) {
                                                 </p>
                                         </div>
                                 <?php
+			}
+
+                        /**
+                        * Request our plugin users to write a review
+                        **/
+			if(!empty( $cron_projects )){
+                                $nr_projects = count($cron_projects);
+                                $first_activation = get_option ( 'woosea_first_activation' );
+                                $notification_interaction = get_option( 'woosea_review_interaction' );
+                                $current_time = time();
+                                $show_after = 604800; // Show only after one week
+                                $is_active = $current_time-$first_activation;
+                                $page = sanitize_text_field(basename($_SERVER['REQUEST_URI']));
+
+                                if(($nr_projects > 0) AND ($is_active > $show_after) AND ($notification_interaction != "yes")){
+                                        echo '<div class="notice notice-info review-notification">';
+                                        echo '<table><tr><td></td><td><font color="green" style="font-weight:normal";><p>Hey, I noticed you have been using our plugin, <u>Product Feed PRO for WooCommerce by AdTribes.io</u>, for over a week now and have created product feed projects with it - that\'s awesome! Could you please do our support volunteers and me a BIG favor and give it a <strong>5-star rating</strong> on WordPress? Just to help us spread the word and boost our motivation. We would greatly appreciate if you would do so :)<br/>~ Adtribes.io support team<br><ul><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="https://wordpress.org/support/plugin/woo-product-feed-pro/reviews?rate=5#new-post" target="_blank" class="dismiss-review-notification">Ok, you deserve it</a></li><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="#" class="dismiss-review-notification">Nope, maybe later</a></li><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="#" class="dismiss-review-notification">I already did</a></li></ul></p></font></td></tr></table>';
+                                        echo '</div>';
+                                }
                         }
                         ?>
-
     
         	    	<!-- wordpress provides the styling for tabs. -->
 			<h2 class="nav-tab-wrapper">

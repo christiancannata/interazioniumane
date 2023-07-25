@@ -2,7 +2,7 @@
 /**
  * Hello Elementor theme compatibility
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH WooCommerce Ajax Product FIlter
  * @version 1.3.2
  */

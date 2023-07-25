@@ -40,30 +40,48 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 						<label for="wpowp_skip_cart">
 							<input type="hidden" name="wpowp_skip_cart" value="no" />
 							<input name="wpowp_skip_cart" type="checkbox" id="wpowp_skip_cart" value="yes"
-								<?php echo ( true === wc_string_to_bool( $option['skip_cart'] ) ) ? 'checked' : ''; ?> />
+								<?php echo ( true === filter_var( $option['skip_cart'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
 							
 						</label>
 					</fieldset>
 					<p><?php esc_html_e( '( Skip Cart & Go to Checkout on Add to Cart )', WPOWP_TEXT_DOMAIN ); ?></p>
 				</td>
-			</tr>	
+			</tr>				
 			<?php
 			if ( $wpowp_fs->is_paying() ) {
 				?>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Standard Add Cart Button', WPOWP_TEXT_DOMAIN ); ?></th>
+				<td>
+					<fieldset>
+						<legend class="screen-reader-text">
+							<span>checkbox</span>
+						</legend>
+						<label for="wpowp_standard_add_cart">
+							<input type="hidden" name="wpowp_standard_add_cart" value="no" />
+							<input name="wpowp_standard_add_cart" type="checkbox" id="wpowp_standard_add_cart" value="yes"
+								<?php echo ( true === filter_var( $option['standard_add_cart'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
+							
+						</label>
+					</fieldset>
+					<p><?php esc_html_e( '( Standard Add to cart button on shop pages )', WPOWP_TEXT_DOMAIN ); ?></p>
+				</td>
+			</tr>	
 			<tr class="wpowp-admin-separator">
 				<th scope="row"><?php esc_html_e( 'Add to cart text', WPOWP_TEXT_DOMAIN ); ?></th>
 				<td>
 					<input name="wpowp_add_cart_text" type="text" value="<?php echo esc_attr( $option['add_cart_text'] ); ?>" />
+					<p><?php esc_html_e( '( Add to cart text works if Standard Add to cart is unchecked )', WPOWP_TEXT_DOMAIN ); ?></p>
 				</td>
 			</tr>
 			<tr>
 				<th scope="row"><label
-						for="wpowp_remove_shipping_adress"><?php esc_html_e( 'Remove shipping rates', WPOWP_TEXT_DOMAIN ); ?></label>
+						for="wpowp_remove_shipping_adress"><?php esc_html_e( 'Remove shipping fields & rates', WPOWP_TEXT_DOMAIN ); ?></label>
 				</th>
 				<td>					
 					<select name="wpowp_remove_shipping" >
-						<option value="no" <?php echo ( false === wc_string_to_bool( $option['remove_shipping'] ) ) ? 'selected' : ''; ?>><?php echo esc_html_e( 'No' ); ?></option>
-						<option value="yes" <?php echo ( true === wc_string_to_bool( $option['remove_shipping'] ) ) ? 'selected' : ''; ?>><?php echo esc_html_e( 'Yes' ); ?></option>
+						<option value="no" <?php echo ( false === filter_var( $option['remove_shipping'], FILTER_VALIDATE_BOOLEAN ) ) ? 'selected' : ''; ?>><?php esc_html_e( 'No', WPOWP_TEXT_DOMAIN ); ?></option>
+						<option value="yes" <?php echo ( true === filter_var( $option['remove_shipping'], FILTER_VALIDATE_BOOLEAN ) ) ? 'selected' : ''; ?>><?php esc_html_e( 'Yes', WPOWP_TEXT_DOMAIN ); ?></option>
 					</select>
 				</td>
 			</tr>
@@ -73,8 +91,8 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 				</th>
 				<td>					
 					<select name="wpowp_remove_privacy_policy_text">
-						<option value="no" <?php echo ( false === wc_string_to_bool( $option['remove_privacy_policy_text'] ) ) ? 'selected' : ''; ?>><?php echo esc_html_e( 'No' ); ?></option>
-						<option value="yes" <?php echo ( true === wc_string_to_bool( $option['remove_privacy_policy_text'] ) ) ? 'selected' : ''; ?>><?php echo esc_html_e( 'Yes' ); ?></option>
+						<option value="no" <?php echo ( false === filter_var( $option['remove_privacy_policy_text'], FILTER_VALIDATE_BOOLEAN ) ) ? 'selected' : ''; ?>><?php esc_html_e( 'No', WPOWP_TEXT_DOMAIN ); ?></option>
+						<option value="yes" <?php echo ( true === filter_var( $option['remove_privacy_policy_text'], FILTER_VALIDATE_BOOLEAN ) ) ? 'selected' : ''; ?>><?php esc_html_e( 'Yes', WPOWP_TEXT_DOMAIN ); ?></option>
 					</select>
 				</td>
 			</tr>
@@ -84,8 +102,8 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 				</th>
 				<td>					
 					<select name="wpowp_remove_checkout_terms_conditions">
-						<option value="no" <?php echo ( false === wc_string_to_bool( $option['remove_checkout_terms_conditions'] ) ) ? 'selected' : ''; ?>><?php echo esc_html_e( 'No' ); ?></option>
-						<option value="yes" <?php echo ( true === wc_string_to_bool( $option['remove_checkout_terms_conditions'] ) ) ? 'selected' : ''; ?>><?php echo esc_html_e( 'Yes' ); ?></option>
+						<option value="no" <?php echo ( false === filter_var( $option['remove_checkout_terms_conditions'], FILTER_VALIDATE_BOOLEAN ) ) ? 'selected' : ''; ?>><?php esc_html_e( 'No', WPOWP_TEXT_DOMAIN ); ?></option>
+						<option value="yes" <?php echo ( true === filter_var( $option['remove_checkout_terms_conditions'], FILTER_VALIDATE_BOOLEAN ) ) ? 'selected' : ''; ?>><?php esc_html_e( 'Yes', WPOWP_TEXT_DOMAIN ); ?></option>
 					</select>
 				</td>
 			</tr>
@@ -98,9 +116,39 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 						</legend>
 						<label for="wpowp_free_product">
 							<input type="hidden" name="wpowp_free_product" value="no" />
-							<input name="wpowp_free_product" type="checkbox" id="wpowp_free_product" value="yes" <?php echo ( true === wc_string_to_bool( $option['free_product'] ) ) ? 'checked' : ''; ?> />
+							<input name="wpowp_free_product" type="checkbox" id="wpowp_free_product" value="yes" <?php echo ( true === filter_var( $option['free_product'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
 						</label>
 						<p><?php esc_html_e( '( For WooCommerce price label of $0.00, show custom text, such as the word “FREE”)', WPOWP_TEXT_DOMAIN ); ?></p>
+					</fieldset>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'On Checkout', WPOWP_TEXT_DOMAIN ); ?></th>
+				<td>
+					<fieldset>
+						<legend class="screen-reader-text">
+							<span>checkbox</span>
+						</legend>
+						<label for="wpowp_free_product">
+							<input type="hidden" name="wpowp_free_product_on_checkout" value="no" />
+							<input name="wpowp_free_product_on_checkout" type="checkbox" id="wpowp_free_product_on_checkout" value="yes" <?php echo ( true === filter_var( $option['free_product_on_checkout'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
+						</label>
+						<p><?php esc_html_e( '( On Checkout page for WooCommerce price label of $0.00, show custom text, such as the word “FREE”)', WPOWP_TEXT_DOMAIN ); ?></p>
+					</fieldset>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'On Cart', WPOWP_TEXT_DOMAIN ); ?></th>
+				<td>
+					<fieldset>
+						<legend class="screen-reader-text">
+							<span>checkbox</span>
+						</legend>
+						<label for="wpowp_free_product">
+							<input type="hidden" name="wpowp_free_product_on_cart" value="no" />
+							<input name="wpowp_free_product_on_cart" type="checkbox" id="wpowp_free_product_on_cart" value="yes" <?php echo ( true === filter_var( $option['free_product_on_cart'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
+						</label>
+						<p><?php esc_html_e( '( On Cart page for WooCommerce price label of $0.00, show custom text, such as the word “FREE”)', WPOWP_TEXT_DOMAIN ); ?></p>
 					</fieldset>
 				</td>
 			</tr>
@@ -138,12 +186,12 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 						</tr>
 						<tr>
 							<th scope="row"><label
-									for="wpowp_remove_shipping_adress"><?php esc_html_e( 'Remove shipping rates', WPOWP_TEXT_DOMAIN ); ?></label>
+									for="wpowp_remove_shipping_adress"><?php esc_html_e( 'Remove shipping fields & rates', WPOWP_TEXT_DOMAIN ); ?></label>
 							</th>
 							<td>					
 								<select disabled>
-									<option><?php echo esc_html_e( 'No' ); ?></option>
-									<option><?php echo esc_html_e( 'Yes' ); ?></option>
+									<option><?php esc_html_e( 'No', WPOWP_TEXT_DOMAIN ); ?></option>
+									<option><?php esc_html_e( 'Yes', WPOWP_TEXT_DOMAIN ); ?></option>
 								</select>
 							</td>
 						</tr>
@@ -153,8 +201,8 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 							</th>
 							<td>					
 								<select disabled>
-									<option><?php echo esc_html_e( 'No' ); ?></option>
-									<option><?php echo esc_html_e( 'Yes' ); ?></option>
+									<option><?php esc_html_e( 'No', WPOWP_TEXT_DOMAIN ); ?></option>
+									<option><?php esc_html_e( 'Yes', WPOWP_TEXT_DOMAIN ); ?></option>
 								</select>
 							</td>
 						</tr>
@@ -164,8 +212,8 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 							</th>
 							<td>					
 								<select disabled>
-									<option><?php echo esc_html_e( 'No' ); ?></option>
-									<option><?php echo esc_html_e( 'Yes' ); ?></option>
+									<option><?php esc_html_e( 'No', WPOWP_TEXT_DOMAIN ); ?></option>
+									<option><?php esc_html_e( 'Yes', WPOWP_TEXT_DOMAIN ); ?></option>
 								</select>
 							</td>
 						</tr>
@@ -177,9 +225,37 @@ $option = $this->get_settings(); // phpcs:ignore VariableAnalysis.CodeAnalysis.V
 										<span>checkbox</span>
 									</legend>
 									<label for="wpowp_status">
-										<input disabled name="" type="checkbox" id="" value="yes"  <?php echo ( true === wc_string_to_bool( $option['free_product'] ) ) ? 'checked' : ''; ?> />
+										<input disabled name="" type="checkbox" id="" value="yes"  <?php echo ( true === filter_var( $option['free_product'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
 									</label>
 									<p><?php esc_html_e( '( For WooCommerce price label of $0.00, show custom text, such as the word “FREE”)', WPOWP_TEXT_DOMAIN ); ?></p>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'On Checkout', WPOWP_TEXT_DOMAIN ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text">
+										<span>checkbox</span>
+									</legend>
+									<label for="wpowp_status">
+										<input disabled name="" type="checkbox" id="" value="yes"  <?php echo ( true === filter_var( $option['free_product'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
+									</label>
+									<p><?php esc_html_e( '( On Checkout page for WooCommerce price label of $0.00, show custom text, such as the word “FREE”)', WPOWP_TEXT_DOMAIN ); ?></p>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'On Cart', WPOWP_TEXT_DOMAIN ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text">
+										<span>checkbox</span>
+									</legend>
+									<label for="wpowp_status">
+										<input disabled name="" type="checkbox" id="" value="yes"  <?php echo ( true === filter_var( $option['free_product'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
+									</label>
+									<p><?php esc_html_e( '( On cart page for WooCommerce price label of $0.00, show custom text, such as the word “FREE”)', WPOWP_TEXT_DOMAIN ); ?></p>
 								</fieldset>
 							</td>
 						</tr>

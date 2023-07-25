@@ -2,7 +2,7 @@
 /**
  * Filters Tax End
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Templates\Filters
  * @version 4.0.0
  */

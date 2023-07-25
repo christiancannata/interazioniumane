@@ -2,7 +2,7 @@
 /**
  * Functions
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Functions
  * @version 4.0.0.
  */
@@ -573,7 +573,6 @@ if ( ! function_exists( 'yit_get_woocommerce_layered_nav_link' ) ) {
 	 * @return string|bool The new link
 	 *
 	 * @since    1.4
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_get_woocommerce_layered_nav_link() {
 		$return = get_post_type_archive_link( 'product' );
@@ -593,7 +592,6 @@ if ( ! function_exists( 'yit_wcan_localize_terms' ) ) {
 	 * @return string The new term_id
 	 *
 	 * @since    1.4
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_wcan_localize_terms( $term_id, $taxonomy ) {
 		/* === WPML Support === */
@@ -613,7 +611,6 @@ if ( ! function_exists( 'yit_wcan_get_product_taxonomy' ) ) {
 	 * @return array Product taxonomy array
 	 *
 	 * @since    2.2
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_wcan_get_product_taxonomy() {
 		global $_attributes_array;
@@ -665,7 +662,6 @@ if ( ! function_exists( 'yit_get_brands_taxonomy' ) ) {
 	 * @return string the product brands taxonomy name if YITH WooCommerce Brands addons is currently activated
 	 *
 	 * @since    2.7.6
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_get_brands_taxonomy() {
 		$taxonomy = '';
@@ -692,7 +688,6 @@ if ( ! function_exists( 'yit_reorder_hierachical_categories' ) ) {
 	 * @return array the full terms array
 	 *
 	 * @since    2.8.1
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_reorder_hierachical_categories( $parent_term_id, $taxonomy = 'product_cat' ) {
 		$exclude = apply_filters( 'yith_wcan_exclude_terms', array(), array() );
@@ -730,7 +725,6 @@ if ( ! function_exists( 'yith_remove_premium_query_arg' ) ) {
 	 * @return bool|string Updated url.
 	 *
 	 * @since    2.8.1
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yith_remove_premium_query_arg( $link ) {
 		$reset           = array( 'orderby', 'onsale_filter', 'instock_filter', 'product_tag', 'product_cat' );
@@ -750,7 +744,6 @@ if ( ! function_exists( 'yit_is_filtered_uri' ) ) {
 	 * @return bool true if the url are filtered, false otherwise
 	 *
 	 * @since    2.8.6
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_is_filtered_uri() {
 		$_chosen_attributes = YITH_WCAN()->get_layered_nav_chosen_attributes();
@@ -772,7 +765,6 @@ if ( ! function_exists( 'yit_plus_character_hack' ) ) {
 	 * @return string the filtered link
 	 *
 	 * @since    2.8.6
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_plus_character_hack( $link ) {
 		return str_replace( '+', '%2B', $link );
@@ -789,7 +781,6 @@ if ( ! function_exists( 'yit_in_array_ignore_case' ) ) {
 	 * @return bool
 	 *
 	 * @since    2.8.6
-	 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yit_in_array_ignore_case( $needle, $haystack ) {
 		return in_array( strtolower( $needle ), array_map( 'strtolower', $haystack ), true );

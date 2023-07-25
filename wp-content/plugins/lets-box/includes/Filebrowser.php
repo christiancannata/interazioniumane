@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -350,7 +350,7 @@ class Filebrowser
 
         if ($item->is_dir()) {
             if (
-                in_array(Processor::instance()->get_shortcode_option('popup'), ['links', 'embedded', 'woocommerce'])
+                in_array(Processor::instance()->get_shortcode_option('popup'), ['links', 'woocommerce'])
                 || User::can_download_zip()
                  || User::can_delete_folders()
                   || User::can_move_folders()
@@ -553,17 +553,27 @@ class Filebrowser
 
         $has_description = (false === empty($item->description));
 
-        $metadata = [
-            'modified' => "<i class='eva eva-clock-outline'></i> ".$item->get_last_edited_str(false),
-            'size' => ($item->get_size() > 0) ? Helpers::bytes_to_size_1024($item->get_size()) : '',
-        ];
+        $metadata = [];
+        if ('1' === Processor::instance()->get_shortcode_option('show_filedate')) {
+            $metadata['modified'] = "<i class='eva eva-clock-outline'></i> ".$item->get_last_edited_str(false);
+        }
+        if ('1' === Processor::instance()->get_shortcode_option('show_filesize') && $item->get_size() > 0) {
+            $metadata['size'] = Helpers::bytes_to_size_1024($item->get_size());
+        }
+
+        if (false === $has_description && empty($metadata)) {
+            return $html; // Don't display description button if there is no description and no metadata to display
+        }
 
         $html .= "<div class='entry-info-button entry-description-button ".(($has_description) ? '-visible' : '')."' tabindex='0'><i class='eva eva-info-outline eva-lg'></i>\n";
         $html .= "<div class='tippy-content-holder'>";
         $html .= "<div class='description-textbox'>";
         $html .= "<div class='description-file-name'>".htmlspecialchars($item->get_name(), ENT_COMPAT | ENT_HTML401 | ENT_QUOTES, 'UTF-8').'</div>';
         $html .= ($has_description) ? "<div class='description-text'>".nl2br($item->get_description()).'</div>' : '';
-        $html .= "<div class='description-file-info'>".implode(' &bull; ', array_filter($metadata)).'</div>';
+
+        if (!empty($metadata)) {
+            $html .= "<div class='description-file-info'>".implode(' &bull; ', array_filter($metadata)).'</div>';
+        }
 
         $html .= '</div>';
         $html .= '</div>';

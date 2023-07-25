@@ -107,6 +107,7 @@
 .ilightbox-toolbar a {
 	float: left;
 	cursor: pointer;
+	transition: none!important;
 }
 
 .ilightbox-toolbar .ilightbox-prev-button,

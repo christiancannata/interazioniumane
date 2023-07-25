@@ -83,6 +83,7 @@ class WooSEA_fruugonl {
 					"name" => "VATRate",
 					"feed_name" => "VATRate",
 					"format" => "required",
+					"woo_suggest" => "vat",
 				),
 				"Image URL 2" => array(
 					"name" => "Imageurl2",

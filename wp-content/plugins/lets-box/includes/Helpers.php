@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -238,17 +238,22 @@ class Helpers
         }
     }
 
-    public static function get_page_url()
+    public static function get_page_url($clean_url = false)
     {
+        $url = '';
+
         if (isset($_REQUEST['page_url'])) {
-            return esc_url($_REQUEST['page_url'], null, 'db');
+            $url = esc_url($_REQUEST['page_url'], null, 'db');
+        } elseif (isset($_SERVER['HTTP_REFERER'])) {
+            $url = $_SERVER['HTTP_REFERER'];
         }
 
-        if (isset($_SERVER['HTTP_REFERER'])) {
-            return $_SERVER['HTTP_REFERER'];
+        // Remove anchor
+        if ($clean_url) {
+            $url = strtok($url, '#');
         }
 
-        return '';
+        return $url;
     }
 
     public static function get_all_users_and_roles()
@@ -266,7 +271,7 @@ class Helpers
 
         // Add custom roles
         $wp_roles_names['guest'] = esc_html__('Anonymous user', 'wpcloudplugins');
-        $wp_roles_names['users'] = esc_html__('Logged in user', 'wpcloudplugins');        
+        $wp_roles_names['users'] = esc_html__('Logged in user', 'wpcloudplugins');
         $wp_roles_names['all'] = esc_html__('Everyone', 'wpcloudplugins');
         $wp_roles_names['none'] = esc_html__('None', 'wpcloudplugins');
 
@@ -294,7 +299,7 @@ class Helpers
             $list[] = [
                 'value' => (string) $wp_user->id,
                 'id' => (string) $wp_user->id,
-                'text' => esc_html(str_replace('"', "", empty($wp_user->display_name) ? $wp_user->user_login : $wp_user->display_name)),
+                'text' => esc_html(str_replace('"', '', empty($wp_user->display_name) ? $wp_user->user_login : $wp_user->display_name)),
                 'type' => 'user',
                 'searchBy' => esc_html($wp_user->user_login),
                 'img' => ($user_count < 1000) ? get_avatar_url($wp_user->id, ['size' => '32']) : LETSBOX_ROOTPATH.'/css/images/usericon.png',
@@ -366,7 +371,7 @@ class Helpers
      */
     public static function extract_email_from_string($string)
     {
-        $result = preg_match('/\b[^\s]+@[\w|.]+/', $string, $matches);
+        $result = preg_match('/[a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/', $string, $matches);
 
         if (empty($result)) {
             return false;
@@ -498,7 +503,7 @@ class Helpers
         // Extra Placeholders
         $value = strtr($value, [
             '%yyyy-mm-dd%' => current_time('Y-m-d'),
-            '%jjjj-mm-dd%' => current_time('Y-m-d'), // Backward compatibility           
+            '%jjjj-mm-dd%' => current_time('Y-m-d'), // Backward compatibility
             '%hh:mm%' => current_time('Hi'),
             '%ip%' => self::get_user_ip(),
             '%directory_separator%' => '/',
@@ -524,7 +529,22 @@ class Helpers
 
         // WooCommerce Products Placeholders
         if (empty($extra['wc_product']) && $context instanceof Processor && !is_null($context->get_shortcode_option('wc_product_id'))) {
-            $product = new \WC_Product($context->get_shortcode_option('wc_product_id'));
+            $product_id = $context->get_shortcode_option('wc_product_id');
+
+            try {
+                $product = new \WC_Product($product_id);
+            } catch (\Exception $ex) {
+                $product = null;
+            }
+
+            if (empty($product)) {
+                try {
+                    $product = new \WC_Product_Variation($product_id);
+                } catch (\Exception $ex) {
+                    $product = null;
+                }
+            }
+
             if (!empty($product) && $product instanceof \WC_Product) {
                 $extra['wc_product'] = $product;
             }
@@ -553,7 +573,12 @@ class Helpers
 
         // WooCommerce Order Placeholders
         if (empty($extra['wc_order']) && $context instanceof Processor && !is_null($context->get_shortcode_option('wc_order_id'))) {
-            $order = new \WC_Order($context->get_shortcode_option('wc_order_id'));
+            try {
+                $order = new \WC_Order($context->get_shortcode_option('wc_order_id'));
+            } catch (\Exception $ex) {
+                $order = null;
+            }
+
             if (!empty($order) && $order instanceof \WC_Order) {
                 $extra['wc_order'] = $order;
             }
@@ -569,7 +594,12 @@ class Helpers
 
         // WooCommerce Item Placeholders
         if (empty($extra['wc_item']) && $context instanceof Processor && !is_null($context->get_shortcode_option('wc_item_id'))) {
-            $item = new \WC_Order_Item_Product($context->get_shortcode_option('wc_item_id'));
+            try {
+                $item = new \WC_Order_Item_Product($context->get_shortcode_option('wc_item_id'));
+            } catch (\Exception $ex) {
+                $item = null;
+            }
+
             if (!empty($item) && $item instanceof \WC_Order_Item_Product) {
                 $extra['wc_item'] = $item;
             }

@@ -2,7 +2,7 @@
 /**
  * Main class
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 1.3.2
  */
@@ -85,6 +85,9 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 
 			// register assets needed both on backend and frontend.
 			add_action( 'init', array( $this, 'register_assets' ) );
+
+			// declare HPOS compatibility
+			add_action( 'before_woocommerce_init', array( $this, 'declare_wc_features_support' ) );
 		}
 
 		/**
@@ -92,7 +95,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  1.0
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public function plugin_fw_loader() {
 			if ( ! defined( 'YIT_CORE_PLUGIN' ) ) {
@@ -109,7 +111,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  4.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function install() {
 			do_action( 'yith_wcan_before_init' );
@@ -128,7 +129,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  1.4
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public function require_files() {
 			$required = apply_filters(
@@ -167,7 +167,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  1.4
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public function init() {
 			// do startup operations.
@@ -215,7 +214,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  4.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function load_compatibilities() {
 			// include theme compatibility, if any.
@@ -230,7 +228,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  4.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function load_theme_compatibility() {
 			$theme = strtolower( wp_get_theme()->Name );
@@ -248,7 +245,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  4.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function load_plugin_compatibilities() {
 			$supported_plugins = $this->get_compatible_plugins();
@@ -287,7 +283,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 *
 		 * @return void
 		 * @since  4.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function register_assets() {
 			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
@@ -301,11 +296,19 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		}
 
 		/**
+		 * Declare support for WooCommerce features.
+		 */
+		public function declare_wc_features_support() {
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', YITH_WCAN_INIT, true );
+			}
+		}
+
+		/**
 		 * Get choosen attribute args
 		 *
 		 * @return array
 		 * @since  2.9.3
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public function get_layered_nav_chosen_attributes() {
 			return WC_Query::get_layered_nav_chosen_attributes();
@@ -317,7 +320,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 * @return array Array of compatible plugins
 		 *
 		 * @since 4.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		protected function get_compatible_plugins() {
 			if ( empty( $this->supported_plugins ) ) {
@@ -347,7 +349,6 @@ if ( ! class_exists( 'YITH_WCAN' ) ) {
 		 * Main plugin Instance
 		 *
 		 * @return YITH_WCAN|YITH_WCAN_Premium Main instance
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public static function instance() {
 			if ( class_exists( 'YITH_WCAN_Premium' ) ) {
@@ -371,7 +372,6 @@ if ( ! function_exists( 'YITH_WCAN' ) ) {
 	 *
 	 * @return YITH_WCAN
 	 * @since 4.0.0
-	 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 	 */
 	function YITH_WCAN() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 		return YITH_WCAN::instance();

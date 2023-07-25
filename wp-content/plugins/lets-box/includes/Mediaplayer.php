@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -146,13 +146,13 @@ class Mediaplayer
                         'poster' => $poster,
                         'thumb' => $poster,
                         'size' => $child->get_size(),
-                        'id'=> $child->get_id(),
+                        'id' => $child->get_id(),
                         'last_edited' => $last_edited,
                         'last_edited_date_str' => !empty($last_edited) ? date_i18n(get_option('date_format'), strtotime($localtime)) : '',
                         'last_edited_time_str' => !empty($last_edited) ? date_i18n(get_option('time_format'), strtotime($localtime)) : '',
                         'download' => (User::can_download()) ? str_replace('letsbox-stream', 'letsbox-download', $source_url) : false,
                         'share' => User::can_share(),
-                        'deeplink' => User::can_deeplink(),                        
+                        'deeplink' => User::can_deeplink(),
                         'source' => $source_url,
                         'captions' => isset($captions[$basename]) ? $captions[$basename] : [],
                         'type' => Helpers::get_mimetype($extension),

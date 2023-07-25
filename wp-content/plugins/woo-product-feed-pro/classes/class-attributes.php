@@ -3,7 +3,6 @@
 * This class is called to: retrieve product attributes 
 * for populating the rules dropdowns and draggable boxes
 */
-
 class WooSEA_Attributes {
 
 public $attributes;
@@ -49,8 +48,8 @@ private function get_dynamic_attributes(){
 	$list = array();
 
         $no_taxonomies = array("portfolio_category","portfolio_skills","portfolio_tags","nav_menu","post_format","slide-page","element_category","template_category","portfolio_category","portfolio_skills","portfolio_tags","faq_category","slide-page","category","post_tag","nav_menu","link_category","post_format","product_type","product_visibility","product_cat","product_shipping_class","product_tag");
-     	$taxonomies = get_taxonomies();
-     	$diff_taxonomies = array_diff($taxonomies, $no_taxonomies);
+	$taxonomies = get_taxonomies();
+	$diff_taxonomies = array_diff($taxonomies, $no_taxonomies);
 
     	# get custom taxonomy values for a product
     	foreach($diff_taxonomies as $tax_diff){
@@ -286,6 +285,7 @@ public function get_mapping_attributes_dropdown() {
 			"days_back_created" => "Product days back created",
             		"currency" => "Currency",
 			"categories" => "Category",
+			"raw_categories" => "Category (not used for mapping)",
 			"category_link" => "Category link",
 			"category_path" => "Category path",
 			"category_path_short" => "Category path short",
@@ -324,7 +324,8 @@ public function get_mapping_attributes_dropdown() {
 			"total_product_orders" => "Total product orders",
 			"tax_status" => "Tax status",
 			"tax_class" => "Tax class",
-                        "featured" => "Featured",
+			"vat" => "VAT",
+			"featured" => "Featured",
 			"item_group_id" => "Item group ID",
 			"weight" => "Weight",
             		"width" => "Width",
@@ -497,6 +498,7 @@ public function get_mapping_attributes_dropdown() {
 			"featured" => "Featured",
                         "tax_status" => "Tax status",
                         "tax_class" => "Tax class",
+			"vat" => "VAT",
 			"currency" => "Currency",
     			"categories" => "Category",
 			"raw_categories" => "Category (not used for mapping)",
@@ -610,8 +612,20 @@ public function get_mapping_attributes_dropdown() {
 			"calculated" => "Plugin calculation",
 			"product_tag" => "Product tags",
 			"product_tag_space" => "Product tags space",
-			"product_detail" => "Product detail",
+			"product_detail 1" => "Product detail 1",
+			"product_detail 2" => "Product detail 2",
+			"product_detail 3" => "Product detail 3",
+			"product_detail 4" => "Product detail 4",
+			"product_detail 5" => "Product detail 5",
+			"product_detail 6" => "Product detail 6",
+			"product_detail 7" => "Product detail 7",
+			"product_detail 8" => "Product detail 8",
+			"product_detail 9" => "Product detail 9",
+			"product_detail 10" => "Product detail 10",
 			"product_highlight" => "Product highlight",
+			"consumer_notice_1" => "Consumer notice 1",
+			"consumer_notice_2" => "Consumer notice 2",
+			"consumer_notice_3" => "Consumer notice 3",
 			"menu_order" => "Menu order",
 			"reviews" => "Reviews",
 			"author" => "Author",

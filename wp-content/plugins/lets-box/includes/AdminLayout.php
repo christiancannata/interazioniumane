@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -58,7 +58,6 @@ class AdminLayout
         }
 
         do_action('letsbox_render_setting', $field_type, $field);
-        do_action('letsbox_render_setting_'.$field_type, $field);
     }
 
     public static function render_nav_tab($settings)
@@ -687,103 +686,103 @@ class AdminLayout
 <?php
     }
 
-public static function render_folder_selectbox($settings)
-{
-    if (isset($_GET['dir'])) {
-        $settings['shortcode_attr']['startid'] = self::get_setting_value('dir');
-    }
-
-    if ('usertemplatedir' === $settings['key']) {
-        $settings['shortcode_attr']['startid'] = self::get_setting_value('usertemplatedir');
-    }
-
-    if (isset($_GET['account'])) {
-        $settings['shortcode_attr']['startaccount'] = self::get_setting_value('account');
-        App::set_current_account_by_id($settings['shortcode_attr']['startaccount']);
-    }
-
-    // Module configuration
-    $module_default_options = [
-        'mode' => 'files',
-        'singleaccount' => '0',
-        'dir' => '0',
-        'filelayout' => 'list',
-        'maxheight' => '250px',
-        'showfiles' => '0',
-        'filesize' => '0',
-        'filedate' => '0',
-        'upload' => '0',
-        'delete' => '0',
-        'rename' => '0',
-        'addfolder' => '0',
-        'showfiles' => '0',
-        'downloadrole' => 'none',
-        'candownloadzip' => '0',
-        'showsharelink' => '0',
-        'popup' => 'private_folders_backend',
-        'search' => '0',
-    ];
-
-    $module_options = array_merge($module_default_options, $settings['shortcode_attr']);
-
-    // Back-End Private Folders
-    $user_folder_backend = apply_filters('letsbox_use_user_folder_backend', Core::get_setting('userfolder_backend'));
-    if ('No' !== $user_folder_backend && (!isset($settings['apply_backend_private_folder']) || true === $settings['apply_backend_private_folder'])) {
-        $module_options['userfolders'] = $user_folder_backend;
-
-        $private_root_folder = Core::get_setting('userfolder_backend_auto_root');
-
-        if ('0' === $module_options['startid']) {
-            $module_options['startid'] = null;
+    public static function render_folder_selectbox($settings)
+    {
+        if (isset($_GET['dir'])) {
+            $settings['shortcode_attr']['startid'] = self::get_setting_value('dir');
         }
 
-        if ('auto' === $user_folder_backend && !empty($private_root_folder) && isset($private_root_folder['id'])) {
-            if (!isset($private_root_folder['account']) || empty($private_root_folder['account'])) {
-                $main_account = Accounts::instance()->get_primary_account();
-                $module_options['account'] = $main_account->get_id();
-            } else {
-                $module_options['account'] = $private_root_folder['account'];
-            }
-
-            $module_options['dir'] = $private_root_folder['id'];
-
-            if (!isset($private_root_folder['view_roles']) || empty($private_root_folder['view_roles'])) {
-                $private_root_folder['view_roles'] = ['none'];
-            }
-            $module_options['viewuserfoldersrole'] = implode('|', $private_root_folder['view_roles']);
+        if ('usertemplatedir' === $settings['key']) {
+            $settings['shortcode_attr']['startid'] = self::get_setting_value('usertemplatedir');
         }
-    }
 
-    // Load the module
-    $html_module = Processor::instance()->create_from_shortcode($module_options);
+        if (isset($_GET['account'])) {
+            $settings['shortcode_attr']['startaccount'] = self::get_setting_value('account');
+            App::set_current_account_by_id($settings['shortcode_attr']['startaccount']);
+        }
 
-    if (empty(Processor::instance()->options)) {
-        return self::render_notice(
-            esc_html__('The selected account is no longer available, or there are currently no accounts linked to the plugin. Please make sure that the plugin has active accounts and re-create the shortcode.', 'wpcloudplugins'),
-            'warning'
-        );
-    }
+        // Module configuration
+        $module_default_options = [
+            'mode' => 'files',
+            'singleaccount' => '0',
+            'dir' => '0',
+            'filelayout' => 'list',
+            'maxheight' => '250px',
+            'showfiles' => '0',
+            'filesize' => '0',
+            'filedate' => '0',
+            'upload' => '0',
+            'delete' => '0',
+            'rename' => '0',
+            'addfolder' => '0',
+            'showfiles' => '0',
+            'downloadrole' => 'none',
+            'candownloadzip' => '0',
+            'showsharelink' => '0',
+            'popup' => 'private_folders_backend',
+            'search' => '0',
+        ];
 
-    // Input values
-    $folder_id = (!empty($module_options['startid'])) ? $module_options['startid'] : '';
-    $folder_account = App::get_current_account()->get_id();
-    $folder_data = (!empty($module_options['startid'])) ? Client::instance()->get_folder($folder_id, false) : '';
+        $module_options = array_merge($module_default_options, $settings['shortcode_attr']);
 
-    if (empty($folder_data)) {
-        if (!empty($module_options['startid'])) {
-            self::render_notice(
-                esc_html__('The selected folder is no longer available. Please reselect a top folder.', 'wpcloudplugins'),
+        // Back-End Private Folders
+        $user_folder_backend = apply_filters('letsbox_use_user_folder_backend', Core::get_setting('userfolder_backend'));
+        if ('No' !== $user_folder_backend && (!isset($settings['apply_backend_private_folder']) || true === $settings['apply_backend_private_folder'])) {
+            $module_options['userfolders'] = $user_folder_backend;
+
+            $private_root_folder = Core::get_setting('userfolder_backend_auto_root');
+
+            if ('0' === $module_options['startid']) {
+                $module_options['startid'] = null;
+            }
+
+            if ('auto' === $user_folder_backend && !empty($private_root_folder) && isset($private_root_folder['id'])) {
+                if (!isset($private_root_folder['account']) || empty($private_root_folder['account'])) {
+                    $main_account = Accounts::instance()->get_primary_account();
+                    $module_options['account'] = $main_account->get_id();
+                } else {
+                    $module_options['account'] = $private_root_folder['account'];
+                }
+
+                $module_options['dir'] = $private_root_folder['id'];
+
+                if (!isset($private_root_folder['view_roles']) || empty($private_root_folder['view_roles'])) {
+                    $private_root_folder['view_roles'] = ['none'];
+                }
+                $module_options['viewuserfoldersrole'] = implode('|', $private_root_folder['view_roles']);
+            }
+        }
+
+        // Load the module
+        $html_module = Processor::instance()->create_from_shortcode($module_options);
+
+        if (empty(Processor::instance()->options)) {
+            return self::render_notice(
+                esc_html__('The selected account is no longer available, or there are currently no accounts linked to the plugin. Please make sure that the plugin has active accounts and re-create the shortcode.', 'wpcloudplugins'),
                 'warning'
             );
-
-            $folder_path = esc_html__('Folder location not longer available', 'wpcloudplugins');
-        } else {
-            $folder_path = esc_html__('Select folder location', 'wpcloudplugins');
         }
-    } else {
-        $root = API::get_root_folder();
-        $folder_path = $folder_data['folder']->get_path($root->get_id());
-    } ?>
+
+        // Input values
+        $folder_id = (!empty($module_options['startid'])) ? $module_options['startid'] : '';
+        $folder_account = App::get_current_account()->get_id();
+        $folder_data = (!empty($module_options['startid'])) ? Client::instance()->get_folder($folder_id, false) : '';
+
+        if (empty($folder_data)) {
+            if (!empty($module_options['startid'])) {
+                self::render_notice(
+                    esc_html__('The selected folder is no longer available. Please reselect a top folder.', 'wpcloudplugins'),
+                    'warning'
+                );
+
+                $folder_path = esc_html__('Folder location not longer available', 'wpcloudplugins');
+            } else {
+                $folder_path = esc_html__('Select folder location', 'wpcloudplugins');
+            }
+        } else {
+            $root = API::get_root_folder();
+            $folder_path = $folder_data['folder']->get_path($root->get_id());
+        } ?>
 <div class="mt-2 mb-4 sm:flex sm:items-center sm:justify-between <?php echo self::get_modules_classes($settings); ?>">
     <div class="flex-grow flex flex-col">
         <div class="text-base text-gray-900 flex items-center">
@@ -793,8 +792,8 @@ public static function render_folder_selectbox($settings)
         <div class="wpcp-folder-selector mt-2">
             <div class="flex grow justify-items-stretch space-x-1">
                 <?php
-                    $is_hidden_class = (false === $settings['inline']) ? '' : 'hidden';
-    ?>
+                        $is_hidden_class = (false === $settings['inline']) ? '' : 'hidden';
+        ?>
                 <input class="wpcp-folder-selector-current <?php echo $is_hidden_class; ?> wpcp-input-textbox max-w-xl flex-1shadow-sm focus:ring-brand-color-700 focus:border-brand-color-700 sm:text-sm border border-gray-300 rounded-md mr-2 p-2 select-all" type="text" value="<?php echo $folder_path; ?>" readonly="readonly">
 
                 <input class="wpcp-folder-selector-input-account wpcp-input-hidden" type='hidden' value='<?php echo $folder_account; ?>' name='<?php echo $settings['key']; ?>[account]' id='<?php echo $settings['key']; ?>[account]' />
@@ -808,58 +807,58 @@ public static function render_folder_selectbox($settings)
             <div class="mt-4">
                 <div id='<?php echo $settings['key']; ?>-selector' class='wpcp-folder-selector-embed basis-0' style='<?php echo ($settings['inline']) ? '' : 'clear:both;display:none;'; ?>'>
                     <?php
-                    try {
-                        echo $html_module;
-                    } catch (\Exception $ex) {
-                    }
+                        try {
+                            echo $html_module;
+                        } catch (\Exception $ex) {
+                        }
 
-                    if ('private_folders_backend' === $module_options['popup']) {
-                        ?>
+                        if ('private_folders_backend' === $module_options['popup']) {
+                            ?>
                     <div class="mt-5">
                         <button type="button" class="wpcp-button-primary wpcp-dialog-entry-select inline-flex justify-center w-full"><?php esc_html_e('Select'); ?></button>                            
                     </div>
                     <?php
-                    }
-    ?>  
+                        }
+        ?>  
                 </div>
             </div>
         </div>
     </div>
 </div>
 <?php
-}
+    }
 
-     public static function render_user_selectbox($settings)
-     {
-         $db_value = $settings['value'] ?? self::get_setting_value($settings['key']);
+    public static function render_user_selectbox($settings)
+    {
+        $db_value = $settings['value'] ?? self::get_setting_value($settings['key']);
 
-         if (!is_array($db_value)) {
-             $db_value = explode('|', $db_value ?? '');
-         }
+        if (!is_array($db_value)) {
+            $db_value = explode('|', $db_value ?? '');
+        }
 
-         if (!is_array($db_value)) {
-             $db_value = $settings['default'];
-         }
+        if (!is_array($db_value)) {
+            $db_value = $settings['default'];
+        }
 
-         // Workaround: Add temporarily selected value to prevent an empty selection in Tagify when only user ID 0 is selected
-         if (0 === count($db_value)) {
-             $db_value[] = '_______PREVENT_EMPTY_______';
-         }
+        // Workaround: Add temporarily selected value to prevent an empty selection in Tagify when only user ID 0 is selected
+        if (0 === count($db_value)) {
+            $db_value[] = '_______PREVENT_EMPTY_______';
+        }
 
-         if (empty($db_value) && false === empty($settings['deprecated'])) {
-             return;
-         }
+        if (empty($db_value) && false === empty($settings['deprecated'])) {
+            return;
+        }
 
-         // Create value for imput field
-         $value = implode(', ', $db_value); ?>
+        // Create value for imput field
+        $value = implode(', ', $db_value); ?>
 <div class="mt-2 mb-4 sm:flex sm:items-start sm:justify-between <?php echo self::get_modules_classes($settings); ?>">
     <div class="flex-grow flex flex-col space-y-2 max-w-full">
         <div class="text-base text-gray-900 flex items-center">
             <?php echo $settings['title'];
 
-         if (isset($settings['help_text'])) {
-             self::render_help_tip($settings['help_text']);
-         } ?>
+        if (isset($settings['help_text'])) {
+            self::render_help_tip($settings['help_text']);
+        } ?>
         </div>
         <div class="text-sm text-gray-400"><?php echo $settings['description']; ?></div>
         <input type="text" name="<?php echo $settings['key']; ?>" id="<?php echo $settings['key']; ?>" class="wpcp-tagify wpcp-input-hidden w-full focus:ring-brand-color-700 focus:border-brand-color-700 sm:text-sm border-0 border-gray-300 rounded-md" value="<?php echo $value; ?>" data-default-value="<?php echo implode('|', $settings['default']); ?>">
@@ -869,11 +868,11 @@ public static function render_folder_selectbox($settings)
     </div>
 </div>
 <?php
-     }
+    }
 
-      public static function render_share_buttons()
-      {
-          $buttons = self::get_setting_value('share_buttons'); ?>
+    public static function render_share_buttons()
+    {
+        $buttons = self::get_setting_value('share_buttons'); ?>
 <div class="shareon shareon-settings">
     <?php foreach ($buttons as $button => $value) {
         $title = ucfirst($button);
@@ -882,7 +881,7 @@ public static function render_folder_selectbox($settings)
     } ?>
 </div>
 <?php
-      }
+    }
 
     public static function render_image_selector($settings)
     {

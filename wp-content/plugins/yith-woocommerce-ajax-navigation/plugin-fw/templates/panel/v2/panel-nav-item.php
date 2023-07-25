@@ -56,6 +56,7 @@ if ( $sub_tabs ) {
 	$classes[] = $active_class;
 }
 
+$classes = $panel->apply_filters( 'nav_item_classes', $classes, $tab_key, $tab_data, $nav_args );
 $classes = implode( ' ', array_filter( $classes ) );
 
 $allowed_icon_tags = array_merge( wp_kses_allowed_html( 'post' ), yith_plugin_fw_kses_allowed_svg_tags() );
@@ -86,10 +87,14 @@ $allowed_icon_tags = array_merge( wp_kses_allowed_html( 'post' ), yith_plugin_fw
 				</div>
 				<?php foreach ( $sub_tabs as $sub_tab_key => $sub_tab_data ) : ?>
 					<?php
-					$active_class = $current_tab === $tab_key && $current_sub_tab === $sub_tab_key ? 'yith-plugin-fw--active' : '';
-					$url          = $panel->get_nav_url( $the_page, $tab_key, $sub_tab_key );
+					$item_active_class = $current_tab === $tab_key && $current_sub_tab === $sub_tab_key ? 'yith-plugin-fw--active' : '';
+					$item_classes      = array( 'yith-plugin-fw__panel__submenu-item', $item_active_class );
+					$item_classes      = $panel->apply_filters( 'nav_submenu_item_classes', $item_classes, $tab_key, $sub_tab_key, $sub_tab_data, $nav_args );
+					$item_classes      = implode( ' ', array_filter( $item_classes ) );
+
+					$url = $panel->get_nav_url( $the_page, $tab_key, $sub_tab_key );
 					?>
-					<div class="yith-plugin-fw__panel__submenu-item <?php echo esc_attr( $active_class ); ?>">
+					<div class="<?php echo esc_attr( $item_classes ); ?>">
 						<a class="yith-plugin-fw__panel__submenu-item__content" href="<?php echo esc_url( $url ); ?>">
 						<span class="yith-plugin-fw__panel__submenu-item__name">
 							<?php echo wp_kses_post( $sub_tab_data['title'] ); ?>

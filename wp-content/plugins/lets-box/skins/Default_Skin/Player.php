@@ -16,6 +16,10 @@ class Default_Skin extends \TheLion\LetsBox\MediaplayerSkin
 
     public function load_scripts()
     {
+        if (defined('LETSBOX_SCRIPTS'.get_class().'_LOADED')) {
+            return;
+        }
+
         $dependence = false;
         if ('Yes' === Processor::instance()->get_setting('mediaplayer_load_native_mediaelement')) {
             $dependence = ['wp-mediaelement'];
@@ -39,7 +43,7 @@ class Default_Skin extends \TheLion\LetsBox\MediaplayerSkin
                 'mejs.share' => esc_html__('Share', 'wpcloudplugins'),
                 'mejs.deeplink' => esc_html__('Direct link', 'wpcloudplugins'),
                 'mejs.purchase' => esc_html__('Purchase', 'wpcloudplugins'),
-                'mejs.search' => esc_html__('Search', 'wpcloudplugins') .'...',
+                'mejs.search' => esc_html__('Search', 'wpcloudplugins').'...',
                 'mejs.fullscreen' => esc_html__('Fullscreen'),
                 'mejs.time-jump-forward' => [esc_html__('Jump forward 30 second'), esc_html__('Jump forward %1 seconds')],
                 'mejs.loop' => esc_html__('Toggle Loop'),
@@ -134,6 +138,8 @@ class Default_Skin extends \TheLion\LetsBox\MediaplayerSkin
 
         wp_localize_script('Default_Skin.Library', 'mejsL10n', $localize_library);
         wp_localize_script('LetsBox.Default_Skin.Player', 'Default_Skin_vars', $localize_mediaplayer);
+
+        define('LETSBOX_SCRIPTS'.get_class().'_LOADED', true);
     }
 
     public function load_styles()

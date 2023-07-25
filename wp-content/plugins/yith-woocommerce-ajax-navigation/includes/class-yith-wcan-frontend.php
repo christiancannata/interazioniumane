@@ -2,7 +2,7 @@
 /**
  * Frontend class
  *
- * @author  Your Inspiration Themes
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 1.3.2
  */
@@ -480,7 +480,6 @@ if ( ! class_exists( 'YITH_WCAN_Frontend' ) ) {
 		 *
 		 * @return array
 		 * @since  1.0
-		 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 		 */
 		public function body_class( $classes ) {
 			$classes[] = apply_filters( 'yith_wcan_body_class', 'yith-wcan-free' );

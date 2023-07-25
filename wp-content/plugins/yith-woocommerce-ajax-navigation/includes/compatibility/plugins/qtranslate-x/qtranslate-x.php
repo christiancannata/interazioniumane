@@ -2,7 +2,7 @@
 /**
  * QTranslateX plugin support
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Compatibility
  * @version 1.3.2
  */

@@ -5,7 +5,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: Google Shopping Feed, Meta feed, Facebook feed, Facebook catalog feed, WooCommerce Product Feed, Product Feed, Bing Shopping Feed, Bing Product Feed, Google Merchant Feed, Skroutz, Google Product Feed, Twitter, Pinterest, Idealo, Pixels, Conversion API
 Requires at least: 4.5
 Tested up to: 6.2
-Stable tag: 12.6.1
+Stable tag: 12.7.8
 
 == Description ==
 
@@ -225,7 +225,7 @@ Please report your security reports or plugin vulnerabilities to security@adtrib
 * AdForm
 * Smartly.io
 * <a href="https://www.shareasale.com" target="_blank">Shareasale.com</a>
-* Pricerunner
+* <a href="https://www.pricerunner.com/info/getting-started" target="_blank">Pricerunner</a>
 * <a href="https://www.miinto.dk" target="_blank">Miinto Denmark</a>
 * <a href="https://www.miinto.nl" target="_blank">Miinto Netherlands</a>
 * <a href="https://www.miinto.pl" target="_blank">Miinto Poland</a>
@@ -356,6 +356,66 @@ Questions left or unanswered? Please do not hesitate to contact us at support@ad
 8. Set the basic configurations for your product feed
 
 === Changelog ===
+
+= 12.7.8 (2023-06-29) =
+* Completed pre-mapping for all Pricerunner templates
+* Removed some obsolete error logging
+
+= 12.7.7 (2023-06-28) =
+* Added support for multiple Pricerunner country templates
+
+= 12.7.6 (2023-06-26) =
+* Added a new field to the Google Shopping template: g:auto_pricing_min_price
+
+= 12.7.5 (2023-06-22) =
+* Removed stand-alone attribute from Fruugo feeds
+
+= 12.7.4 (2023-06-20) =
+* WooCommerce changed sale date outputs from ints to strings, adapt code to it
+
+= 12.7.3 (2023-06-20) =
+* Fixed a Fruugo XML header issue
+* Fixed a Flycart issue for prices that had a point as decimal and a point as thousand seperator
+
+= 12.7.2 (2023-06-16) =
+* Fixed an issue with the sale price effective date which was empty. WooCommerce is returning them as strings in the new WC instead of integers
+
+= 12.7.1 (2023-06-15) =
+* A small group of users reported unexpected drops in products in feeds introduced in version 12.6.8. This should be fixed now.
+
+= 12.7.0 (2023-06-14) =
+* Checked for compatibility with WooCommerce 7.8
+* Solved a price rounding issue for the Flycart discount plugin
+
+= 12.6.9 (2023-06-13) =
+* Added extensive support for up to 10 product details for Google Shopping feeds
+
+= 12.6.8 (2023-06-12) =
+* Performance tweaks
+* Add consumer notice option for Google Shopping feeds
+* Fixed Fruugo XML templates so it meets Fruugo's changed feed requirements
+* Removed Fruugo CSV option
+* Fixed an issue for Google Shopping feeds, no empty product details are allowed in feeds
+
+= 12.6.7 (2023-05-26) =
+* Sales date's that were not a timestamp caused the plugin to get stuck on processing. This has been fixex now.
+
+= 12.6.6 (2023-05-25) =
+* Product feeds are no longer being cached when user uses popular caching plugin
+
+= 12.6.5 (2023-05-25) =
+* Availability dates are only added to products that are on backorder
+* Fixed the default field mapping for Google's g:product_type field
+
+= 12.6.4 (2023-05-17) =
+* Solved missing class issue
+
+= 12.6.3 (2023-05-17) =
+* Solved an issue where parent variable products showed in Google Shopping / Meta feeds again
+* Fixed an issue for Fruugo CSV feeds
+
+= 12.6.2 (2023-05-11) =
+* Removing BOM characters for Fruugo CSV feeds
 
 = 12.6.1 (2023-05-10) =
 * Fixed issues with Fruugo VAT fields and availability values
@@ -4044,6 +4104,66 @@ Questions left or unanswered? Please do not hesitate to contact us at support@ad
 * Strip HTML from the (short) description attributes
 
 == Upgrade Notice ==
+
+= 12.7.8 =
+Completed pre-mapping for all Pricerunner templates
+Removed some obsolete error logging
+
+= 12.7.7 =
+Added support for multiple Pricerunner country templates
+
+= 12.7.6 =
+Added a new field to the Google Shopping template: g:auto_pricing_min_price
+
+= 12.7.5 =
+Removed stand-alone attribute from Fruugo feeds
+
+= 12.7.4 =
+WooCommerce changed sale date outputs from ints to strings, adapt code to it
+
+= 12.7.3 =
+Fixed a Fruugo XML header issue
+Fixed a Flycart issue for prices that had a point as decimal and a point as thousand seperator
+
+= 12.7.2 =
+Fixed an issue with the sale price effective date which was empty. WooCommerce is returning them as strings in the new WC instead of integers
+
+= 12.7.1 =
+A small group of users reported unexpected drops in products in feeds introduced in version 12.6.8. This should be fixed now.
+
+= 12.7.0 =
+Checked for compatibility with WooCommerce 7.8
+Solved a price rounding issue for the Flycart discount plugin
+
+= 12.6.9 =
+Added extensive support for up to 10 product details for Google Shopping feeds
+
+= 12.6.8 =
+Performance tweaks
+Add consumer notice option for Google Shopping feeds
+Fixed Fruugo XML templates so it meets Fruugo's changed feed requirements
+Removed Fruugo CSV option
+Fixed an issue for Google Shopping feeds, no empty product details are allowed in feeds
+
+= 12.6.7 =
+Sales date's that were not a timestamp caused the plugin to get stuck on processing. This has been fixex now.
+
+= 12.6.6 =
+Product feeds are no longer being cached when user uses popular caching plugin
+
+= 12.6.5 =
+Availability dates are only added to products that are on backorder
+Fixed the default field mapping for Google's g:product_type field
+
+= 12.6.4 =
+Solved missing class issue
+
+= 12.6.3 =
+Solved an issue where parent variable products showed in Google Shopping / Meta feeds again
+Fixed an issue for Fruugo CSV feeds
+
+= 12.6.2 =
+Removing BOM characters for Fruugo CSV feeds
 
 = 12.6.1 =
 Fixed issues with Fruugo VAT fields and availability values

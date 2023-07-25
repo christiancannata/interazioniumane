@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -121,6 +121,31 @@ if (
                                 </div>
                             </section>
 
+                            <!-- Users Information -->
+                            <section>
+                                <div class="rounded-lg bg-white overflow-hidden shadow divide-y divide-gray-200 sm:divide-y-0 sm:grid sm:grid-cols-1 sm:gap-px">
+                                    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6 flex items-center justify-start">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 ml-2"><?php esc_html_e('Events per user', 'wpcloudplugins'); ?></h3>
+                                    </div>
+                                    <div class="w-full px-4 py-5">
+                                        <table id="users-log" class="stripe hover order-column">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th><?php esc_html_e('User', 'wpcloudplugins'); ?></th>
+                                                    <th><?php esc_html_e('Previews', 'wpcloudplugins'); ?></th>
+                                                    <th><?php esc_html_e('Downloads', 'wpcloudplugins'); ?></th>
+                                                    <th><?php esc_html_e('Uploads', 'wpcloudplugins'); ?></th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                            
                             <!-- All Events -->
                             <section>
                                 <div class="rounded-lg bg-white overflow-hidden shadow divide-y divide-gray-200 sm:divide-y-0 sm:grid sm:grid-cols-1 sm:gap-px">

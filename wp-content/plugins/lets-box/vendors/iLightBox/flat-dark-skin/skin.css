@@ -9,9 +9,7 @@
 	padding: 0;
 	opacity: 0;
 	pointer-events: none;
-	-webkit-transition: opacity 0.3s ease;
 	transition: opacity 0.3s ease;
-	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
@@ -31,8 +29,6 @@
 .wpcp-lightbox.ilightbox-holder.flat-dark {
 	padding: 0;
 	background: transparent;
-
-	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
@@ -59,7 +55,6 @@
 .ilightbox-toolbar.flat-dark {
 	top: 15px;
 	left: 15px;
-	right: 15px;
 	background: transparent;
 	overflow: hidden;
 }
@@ -169,8 +164,6 @@
 
 .wpcp-lightbox.ilightbox-holder.flat-dark .ilightbox-inner-toolbar .ilightbox-toolbar a {
 	float: left;
-
-	-webkit-border-radius: 0;
 	border-radius: 0;
 }
 
@@ -210,8 +203,6 @@
 	background: transparent;
 	opacity: 0.7;
 	z-index: 100020;
-
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	-webkit-border-top-left-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
@@ -237,8 +228,6 @@
 .ilightbox-button.ilightbox-prev-button.flat-dark {
 	top: 0;
 	bottom: auto;
-
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	-webkit-border-bottom-left-radius: 5px;
 	-webkit-border-bottom-right-radius: 5px;
@@ -264,8 +253,6 @@
 	bottom: 0;
 	width: 55px;
 	height: 95px;
-
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	-webkit-border-bottom-left-radius: 5px;
 	-webkit-border-top-left-radius: 5px;
@@ -276,8 +263,6 @@
 .ilightbox-button.ilightbox-prev-button.flat-dark.horizontal {
 	right: auto;
 	left: 0;
-
-	-webkit-border-radius: 0;
 	border-radius: 0;
 	-webkit-border-bottom-right-radius: 5px;
 	-webkit-border-top-right-radius: 5px;

@@ -2,7 +2,7 @@
 /**
  * WPML plugin support
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Compatibility
  * @version 4.0.1
  */

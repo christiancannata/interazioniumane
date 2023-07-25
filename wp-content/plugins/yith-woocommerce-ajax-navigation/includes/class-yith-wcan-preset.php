@@ -3,7 +3,7 @@
  * Preset object
  * Offers method to read and set properties of the preset and filters
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Presets
  * @version 4.0.0
  */
@@ -70,7 +70,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param int|string|\YITH_WCAN_Preset $preset Preset identifier.
 		 *
 		 * @throws Exception When not able to load Data Store class.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function __construct( $preset = 0 ) {
 			// set default values.
@@ -128,7 +127,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context of the operation.
 		 *
 		 * @return string Preset title
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_title( $context = 'view' ) {
 			return $this->get_prop( 'title', $context );
@@ -140,7 +138,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context of the operation.
 		 *
 		 * @return string Preset slug
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_slug( $context = 'view' ) {
 			return $this->slug;
@@ -152,7 +149,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context of the operation.
 		 *
 		 * @return string Preset slug
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_layout( $context = 'view' ) {
 			return $this->get_prop( 'layout', $context );
@@ -164,7 +160,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context of the operation.
 		 *
 		 * @return string Preset slug
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_selector( $context = 'view' ) {
 			return $this->get_prop( 'selector', $context );
@@ -176,7 +171,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context of the operation.
 		 *
 		 * @return bool Preset status
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function is_enabled( $context = 'view' ) {
 			return yith_plugin_fw_is_true( $this->get_prop( 'enabled', $context ) );
@@ -237,7 +231,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset slug
 		 *
 		 * @param string $title Filter preset unique token.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_title( $title ) {
 			$this->set_prop( 'title', $title );
@@ -247,7 +240,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset slug
 		 *
 		 * @param string $slug Filter preset unique token.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_slug( $slug ) {
 			$this->slug = $slug;
@@ -257,7 +249,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset layout
 		 *
 		 * @param string $layout Filter preset layout.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_layout( $layout ) {
 			$layout = in_array( $layout, array_keys( YITH_WCAN_Preset_Factory::get_supported_layouts() ), true ) ? $layout : 'default';
@@ -269,7 +260,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset selector
 		 *
 		 * @param string $selector Filter preset selector.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_selector( $selector ) {
 			$this->set_prop( 'selector', $selector );
@@ -279,7 +269,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset status
 		 *
 		 * @param string $enabled Filter preset status (yes/no for enabled/not enabled).
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_enabled( $enabled ) {
 			$this->set_prop( 'enabled', $enabled );
@@ -289,7 +278,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset as enabled
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function enable() {
 			$this->set_prop( 'enabled', 'yes' );
@@ -299,7 +287,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Set preset as disabled
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function disable() {
 			$this->set_prop( 'enabled', 'no' );
@@ -311,7 +298,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Save data to the database.
 		 *
 		 * @return int Preset ID
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function save() {
 			if ( $this->data_store ) {
@@ -345,7 +331,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context for the operation.
 		 *
 		 * @return bool Whether filter with specified ID exists or not.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function has_filter( $filter_id, $context = 'view' ) {
 			$filters = $this->get_raw_filters( $context );
@@ -359,7 +344,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $context Context for the operation.
 		 *
 		 * @return bool Whether preset has filters.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function has_filters( $context = 'view' ) {
 			return ! ! $this->get_raw_filters( $context );
@@ -369,7 +353,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Checks if preset has any relevant filter for current product selection
 		 *
 		 * @return bool Whether preset has relevant filters.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function has_relevant_filters() {
 			$filters = $this->get_filters();
@@ -403,7 +386,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param int    $page    Page to retrieve; false if you want all filters (default: false).
 		 *
 		 * @return array Array of filters.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_raw_filters( $context = 'view', $page = false ) {
 			$filters = $this->get_prop( 'filters', $context );
@@ -422,7 +404,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Returns filters for current preset
 		 *
 		 * @return YITH_WCAN_Filter[]
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_filters() {
 			$filters = $this->get_prop( 'filters', 'edit' );
@@ -459,7 +440,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param int   $page    Page to overwrite; false if the entire set should be overridden (default: false).
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_filters( $filters, $page = false ) {
 			if ( $page ) {
@@ -484,7 +464,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param array $filter Formatted filter.
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function set_filter( $filter_id, $filter ) {
 			$filters               = $this->get_raw_filters();
@@ -497,7 +476,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Remove all filters for current preset
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function delete_filters() {
 			$this->set_filters( array() );
@@ -509,7 +487,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param int $filter_id Filter id.
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function delete_filter( $filter_id ) {
 			if ( ! $this->has_filter( $filter_id ) ) {
@@ -528,7 +505,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Return admin edit url for current item
 		 *
 		 * @return string Edit url
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_admin_edit_url() {
 			return YITH_WCAN()->admin->get_panel_url(
@@ -544,7 +520,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Get admin url to visit to clone this preset
 		 *
 		 * @return string Url to clone preset
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_admin_clone_url() {
 			if ( ! $this->current_user_can( 'clone' ) ) {
@@ -564,7 +539,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * Get admin url to visit to delete this preset
 		 *
 		 * @return string Url to delete preset
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_admin_delete_url() {
 			if ( ! $this->current_user_can( 'clone' ) ) {
@@ -587,7 +561,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $cap Capability to check.
 		 *
 		 * @return bool Whether user has capability or not
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function user_can( $user_id, $cap ) {
 			$default = user_can( $user_id, 'manage_woocommerce' );
@@ -608,7 +581,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset' ) ) {
 		 * @param string $cap Capability to check.
 		 *
 		 * @return bool Whether current user has capability or not
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function current_user_can( $cap ) {
 			if ( ! is_user_logged_in() ) {

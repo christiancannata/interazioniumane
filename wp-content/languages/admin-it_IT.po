@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the WordPress - 6.2.x - Development - Administration package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2023-05-06 13:26:56+0000\n"
+"PO-Revision-Date: 2023-05-12 13:09:27+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -274,7 +274,7 @@ msgstr "Un rinnovato design ti dà maggiore visibilità e un accesso più sempli
 
 #: wp-admin/about.php:100
 msgid "Discover a smoother experience for the Block Inserter"
-msgstr "Sperimenta un'esperienza d'uso più fluida dello strumento di inserimento dei blocchi"
+msgstr "Scopri un'esperienza d'uso più fluida del pannello di inserimento dei blocchi"
 
 #: wp-admin/about.php:84
 msgid "A new sidebar experience makes it easier to edit your site&#8217;s navigation. Add, remove, and reorder menu items faster—no matter how complex your menus are."
@@ -716,13 +716,13 @@ msgstr "Dopo aver impostato la pagina sulla Privacy policy, devi modificarla."
 #. translators: 1: .htaccess, 2: Documentation URL, 3: Ctrl + A, 4: ⌘ + A
 #: wp-admin/options-permalink.php:534
 msgid "<strong>Error:</strong> Your %1$s file is not <a href=\"%2$s\">writable</a>, so updating it automatically was not possible. These are the mod_rewrite rules you should have in your %1$s file. Click in the field and press %3$s (or %4$s on Mac) to select all."
-msgstr "<strong>Errore:</strong> il tuo file %1$s non è <a href=\"%2$s\">modificabile</a>, quindi aggiornarlo in automatico non è possibile. Queste sono le regole mod_rewrite che dovresti avere nel tuo file %1$s. Fai clic nel campo e premi %3$s (o %4$s nel Mac) per selezionarle tutte."
+msgstr "<strong>Errore:</strong> il tuo file %1$s non è <a href=\"%2$s\">modificabile</a>, non è quindi possibile aggiornarlo in automatico. Queste sono le regole mod_rewrite che dovresti avere nel tuo file %1$s. Fai clic nel campo e premi %3$s (o %4$s su Mac) per selezionarle tutte."
 
 #. translators: 1: web.config, 2: Documentation URL, 3: Ctrl + A, 4: ⌘ + A,
 #. 5: Element code.
 #: wp-admin/options-permalink.php:466
 msgid "<strong>Error:</strong> Your %1$s file is not <a href=\"%2$s\">writable</a>, so updating it automatically was not possible. This is the URL rewrite rule you should have in your %1$s file. Click in the field and press %3$s (or %4$s on Mac) to select all. Then insert this rule inside of the %5$s element in %1$s file."
-msgstr "<strong>Errore:</strong> il tuo file %1$s non è <a href=\"%2$s\">modificabile</a>, quindi aggiornarlo in automatico non è possibile. Questa è la regola di riscrittura degli URL che dovresti avere nel tuo file %1$s. Fai clic nel campo e premi %3$s (o %4$s nel Mac) per selezionarla. Quindi inserisci questa regola all’interno dell'elemento %5$s del file %1$s."
+msgstr "<strong>Errore:</strong> il tuo file %1$s non è <a href=\"%2$s\">modificabile</a>, non è quindi possibile aggiornarlo in automatico. Questa è la regola di riscrittura degli URL che dovresti avere nel tuo file %1$s. Fai clic nel campo e premi %3$s (o %4$s su Mac) per selezionarla. Quindi inserisci questa regola all’interno dell'elemento %5$s del file %1$s."
 
 #: wp-admin/options-discussion.php:252
 msgid "An avatar is an image that can be associated with a user across multiple websites. In this area, you can choose to display avatars of users who interact with the site."
@@ -3057,7 +3057,7 @@ msgstr "Il tempo universale è %s."
 #. translators: %s: UTC abbreviation
 #: wp-admin/options-general.php:260
 msgid "Choose either a city in the same timezone as you or a %s (Coordinated Universal Time) time offset."
-msgstr "Scegli o una città nella tua stessa timezone o un  %s (Coordinated Universal Time) time offset."
+msgstr "Scegli o una città nella tua stessa timezone o un %s (Coordinated Universal Time) time offset."
 
 #: wp-admin/options-general.php:131
 msgid "Administration Email Address"
@@ -4398,7 +4398,7 @@ msgstr "Variabile PHP max input"
 #: wp-admin/includes/class-wp-debug-data.php:539
 #: wp-admin/includes/class-wp-debug-data.php:731
 msgid "Unable to determine some settings, as the %s function has been disabled."
-msgstr "Impossibile determinare alcune impostazioni, perché la funzione  %s è stata disabilitata."
+msgstr "Impossibile determinare alcune impostazioni, perché la funzione %s è stata disabilitata."
 
 #: wp-admin/includes/class-wp-debug-data.php:728
 msgid "Server settings"
@@ -5884,7 +5884,7 @@ msgstr "WordPress non sta notificando alcun <a href=\"%1$s\">Servizio di Aggiorn
 #. translators: 1: Documentation URL, 2: web.config, 3: Ctrl + A, 4: ⌘ + A
 #: wp-admin/options-permalink.php:499
 msgid "<strong>Error:</strong> The root directory of your site is not <a href=\"%1$s\">writable</a>, so creating a file automatically was not possible. This is the URL rewrite rule you should have in your %2$s file. Create a new file called %2$s in the root directory of your site. Click in the field and press %3$s (or %4$s on Mac) to select all. Then insert this code into the %2$s file."
-msgstr "<strong>Errore:</strong> La directory principale del tuo sito non è <a href=\"%1$s\">scrivibile</a>, per cui non è possible creare il file in modo automatico. Questa è la regola di riscrittura degli URL da inserire nel file %2$s. Crea un nuovo file chiamato %2$s nella directory principale del sito. Fai clic sul campo e premi %3$s (o %4$s su Mac) per selezionare tutto.Poi inserisci questo codice nel file %2$s. "
+msgstr "<strong>Errore:</strong> la directory principale del tuo sito non è <a href=\"%1$s\">scrivibile</a>, per cui non è possible creare il file in modo automatico. Questa è la regola di riscrittura degli URL da inserire nel file %2$s. Crea un nuovo file chiamato %2$s nella directory principale del sito. Fai clic sul campo e premi %3$s (o %4$s su Mac) per selezionare tutto. Poi inserisci questo codice nel file %2$s."
 
 #. translators: %s: Documentation URL.
 #: wp-admin/options-general.php:119
@@ -7807,11 +7807,11 @@ msgstr "Filtra elenco commenti"
 
 #: wp-admin/edit-comments.php:203
 msgid "In the <strong>Submitted on</strong> column, the date and time the comment was left on your site appears. Clicking on the date/time link will take you to that comment on your live site."
-msgstr "Nella colonna <strong>Inviato il</strong>, appare la data e l'ora in cui il commento è stato scritto. Facendo clic sul link data/ora ti sarai portato a quel commento sul tuo sito."
+msgstr "Nella colonna <strong>Inviato il</strong>, appare la data e l'ora in cui il commento è stato scritto. Facendo clic sul link data/ora sarai portato a quel commento sul tuo sito."
 
 #: wp-admin/edit-comments.php:201
 msgid "In the <strong>Comment</strong> column, hovering over any comment gives you options to approve, reply (and approve), quick edit, edit, spam mark, or trash that comment."
-msgstr "Nella colonna <strong>Commento</strong>, spostare il mouse sopra ogni commento  ti da le opzioni per approvare, rispondere (e approvare), modificare velocemente, modificare, segnalare come spam, o spostare nel cestino quel commento."
+msgstr "Nella colonna <strong>Commento</strong>, al passaggio del mouse sopra ogni commento ti da le opzioni per approvare, rispondere (e approvare), modificare velocemente, modificare, segnalare come spam, o spostare nel cestino quel commento."
 
 #. translators: %s: Comments count.
 #: wp-admin/edit-comments.php:175 wp-admin/js/edit-comments.js:196
@@ -8434,11 +8434,11 @@ msgstr "Facendo clic su un elemento verrà visualizzata la finestra di dialogo c
 
 #: wp-admin/upload.php:142
 msgid "To delete media items, click the Bulk Select button at the top of the screen. Select any items you wish to delete, then click the Delete Selected button. Clicking the Cancel Selection button takes you back to viewing your media."
-msgstr "Per eliminare elementi media, fare clic sul pulsante «Selezione di massa» in cima all'elenco. Seleziona gli elementi che desideri eliminare e quindi fai clic sul pulsante «Elimina definitivamente». Facendo clic sul pulsante «Annulla» si tornerà alla visualizzazione degli elementi media."
+msgstr "Per eliminare elementi media, fai clic sul pulsante «Selezione multipla» in cima all'elenco. Seleziona gli elementi che desideri eliminare e quindi fai clic sul pulsante «Elimina definitivamente». Facendo clic sul pulsante «Annulla» si tornerà alla visualizzazione degli elementi media."
 
 #: wp-admin/upload.php:141 wp-admin/upload.php:323
 msgid "You can view your media in a simple visual grid or a list with columns. Switch between these views using the icons to the left above the media."
-msgstr "Puoi visualizzare gli elementi media in una semplice vista a griglia o in una lista a colonne. Per passare da una vista all'altra utilizzare le icone poste a sinistra sopra gli elementi media."
+msgstr "Puoi visualizzare gli elementi media in una semplice vista a griglia o in una lista a colonne. Per passare da una vista all'altra utilizza le icone poste a sinistra sopra gli elementi media."
 
 #: wp-admin/upload.php:140
 msgid "All the files you&#8217;ve uploaded are listed in the Media Library, with the most recent uploads listed first."
@@ -8591,7 +8591,7 @@ msgstr "Puoi scalare proporzionalmente l&#8217;immagine originale. Per un miglio
 #. translators: %s: Alt + F10
 #: wp-admin/edit-form-advanced.php:300
 msgid "Keyboard users: When you are working in the visual editor, you can use %s to access the toolbar."
-msgstr "Per gli utenti che utilizzano la tastiera: mentre lavori nell&#8217;editor visuale, puoi utilizzare  %s per accedere alla barra degli strumenti."
+msgstr "Per gli utenti che utilizzano la tastiera: mentre lavori nell&#8217;editor visuale, puoi utilizzare %s per accedere alla barra degli strumenti."
 
 #: wp-admin/edit-comments.php:199
 msgid "A red bar on the left means the comment is waiting for you to moderate it."
@@ -9765,7 +9765,7 @@ msgstr "Se stai cercando di utilizzare il gestore dei link installa il plugin <a
 
 #: wp-admin/widgets-form.php:65
 msgid "When changing themes, there is often some variation in the number and setup of widget areas/sidebars and sometimes these conflicts make the transition a bit less smooth. If you changed themes and seem to be missing widgets, scroll down on this screen to the Inactive Widgets area, where all of your widgets and their settings will have been saved."
-msgstr "Quando si cambiano i temi vi sono spesso della variazioni sul numero e sulle impostazioni della barre laterali e delle aree widget ed a volte questi conflitti rendono il cambio meno semplice e lineare. Se cambi tema e ti sembra che manchino dei widget, scorri in basso a questa schermata nella sezione Widget inattivi dove sono stati salvati tutti  i widget e le relative impostazioni."
+msgstr "Quando si cambiano i temi vi sono spesso della variazioni sul numero e sulle impostazioni della barre laterali e delle aree widget ed a volte questi conflitti rendono il cambio meno semplice e lineare. Se cambi tema e ti sembra che manchino dei widget, scorri in basso a questa schermata nella sezione Widget inattivi dove sono stati salvati tutti i widget e le relative impostazioni."
 
 #: wp-admin/edit-tags.php:286
 msgid "<strong>Parent</strong> &mdash; Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have child categories for Bebop and Big Band. Totally optional. To create a subcategory, just choose another category from the Parent dropdown."
@@ -9794,7 +9794,7 @@ msgstr "Per utilizzare una immagine di sfondo basta semplicemente caricarla o se
 #. translators: 1: URL to browser uploader, 2: Additional link attributes.
 #: wp-admin/includes/media.php:3032
 msgid "You are using the multi-file uploader. Problems? Try the <a href=\"%1$s\" %2$s>browser uploader</a> instead."
-msgstr "Stai utilizzando l'uploader multiplo. Problemi? Prova al suo posto <a href=\"%1$s\" %2$s>l'uploader del browser</a>."
+msgstr "Stai utilizzando l'uploader multifile. Problemi? Prova al suo posto l'<a href=\"%1$s\" %2$s>uploader del browser</a>."
 
 #: wp-admin/async-upload.php:77
 msgctxt "media item"
@@ -9828,7 +9828,7 @@ msgstr "Scegliere l'immagine di sfondo"
 
 #: wp-admin/includes/class-custom-image-header.php:130
 msgid "In the Header Text section of this page, you can choose whether to display this text or hide it. You can also choose a color for the text by clicking the Select Color button and either typing in a legitimate HTML hex value, e.g. &#8220;#ff0000&#8221; for red, or by choosing a color using the color picker."
-msgstr "Nella sezione Testo testata di questa pagina puoi scegliere se visualizzare o meno questo testo. Puoi anche scegliere il colore del testo facendo clic sul pulsante Seleziona un colore e quindi inserire un valore HTML esadecimale legittimo, es. &#8220;#ff0000&#8221; per il rosso oppure impostare il colore tramite il selezionatore dei colori."
+msgstr "Nella sezione Testo dell'header di questa pagina puoi scegliere se visualizzare o meno questo testo. Puoi anche scegliere il colore del testo facendo clic sul pulsante Seleziona un colore e quindi inserire un valore HTML esadecimale legittimo, es. &#8220;#ff0000&#8221; per il rosso oppure impostare il colore tramite il selettore colore."
 
 #: wp-admin/includes/class-custom-background.php:93
 msgid "You can also choose a background color by clicking the Select Color button and either typing in a legitimate HTML hex value, e.g. &#8220;#ff0000&#8221; for red, or by choosing a color using the color picker."
@@ -9932,7 +9932,7 @@ msgstr "Preferiti"
 
 #: wp-admin/theme-install.php:131
 msgid "To install the theme so you can preview it with your site&#8217;s content and customize its theme options, click the \"Install\" button at the top of the left-hand pane. The theme files will be downloaded to your website automatically. When this is complete, the theme is now available for activation, which you can do by clicking the \"Activate\" link, or by navigating to your Manage Themes screen and clicking the \"Live Preview\" link under any installed theme&#8217;s thumbnail image."
-msgstr "Per installare il tema così da poterne vedere una anteprima con il contenuto del proprio sito e con la possibilità di personalizzarne le impostazioni fai clic sul pulsante \"Installa\" in alto a destra del pannello di sinistra. I file del tema verranno scaricati automaticamente sul tuo sito. Una volta terminato il tema sarà ora disponibile per l'attivazione che potrai effettuare facendo clic sul link \"Attiva\" oppure navigando alla schermata di Gestione temi e facendo clic sul link  \"Anteprima in tempo reale\" posto sotto la miniatura di qualsiasi tema installato."
+msgstr "Per installare il tema, così da poterne vedere una anteprima con il contenuto del proprio sito e con la possibilità di personalizzarne le impostazioni, fai clic sul pulsante \"Installa\" in alto a destra del pannello di sinistra. I file del tema verranno scaricati automaticamente sul tuo sito. Una volta terminato il tema sarà ora disponibile per l'attivazione che potrai effettuare facendo clic sul link \"Attiva\" oppure navigando alla schermata di Gestione temi e facendo clic sul link \"Anteprima in tempo reale\" posto sotto la miniatura di qualsiasi tema installato."
 
 #: wp-admin/includes/widgets.php:262
 msgctxt "widget"
@@ -10059,7 +10059,7 @@ msgstr "Una volta generato un elenco di temi puoi vedere in anteprima ed install
 
 #: wp-admin/includes/media.php:3049
 msgid "You are using the browser&#8217;s built-in file uploader. The WordPress uploader includes multiple file selection and drag and drop capability. <a href=\"#\">Switch to the multi-file uploader</a>."
-msgstr "Stai utilizzando l'uploader incorporato del browser. L'uploader di WordPress include la selezione di file multipli e le funzionalità di drag&drop. <a href=\"#\">Passa all'uploader multifile</a>."
+msgstr "Stai utilizzando l'uploader incorporato del browser. L'uploader di WordPress include la selezione di file multipli e le funzionalità di trascina e rilascia. <a href=\"#\">Passa all'uploader multifile</a>."
 
 #. translators: %s: Theme name.
 #: wp-admin/includes/class-wp-theme-install-list-table.php:345
@@ -10101,7 +10101,7 @@ msgstr "Errore di configurazione"
 
 #: wp-admin/media-new.php:55
 msgid "Revert to the <strong>Browser Uploader</strong> by clicking the link below the drag and drop box."
-msgstr "Tornare al <strong>Caricamento browser</strong> facendo clic sul link sottostante il riquadro di trascina e rilascia."
+msgstr "Torna all' <strong>Uploader del browser</strong> facendo clic sul link sottostante il riquadro di trascina e rilascia."
 
 #: wp-admin/users.php:539 wp-admin/network/users.php:262
 msgid "User deleted."
@@ -10829,7 +10829,7 @@ msgstr "Barra laterale inattiva (non utilizzata)"
 
 #: wp-admin/media-new.php:54
 msgid "Clicking <strong>Select Files</strong> opens a navigation window showing you files in your operating system. Selecting <strong>Open</strong> after clicking on the file you want activates a progress bar on the uploader screen."
-msgstr "Facendo clic su <strong>Seleziona file</strong> si apre una finestra di navigazione che elenca i file nel tuo sistema operativo. Selezionando <strong>Apri</strong> dopo aver fatto clic sul file che desideri si attiverà una barra di avanzamento sulla schermata di caricamento."
+msgstr "Facendo clic su <strong>Seleziona i file</strong> si apre una finestra di navigazione che elenca i file nel tuo sistema operativo. Selezionando <strong>Apri</strong> dopo aver fatto clic sul file che desideri si attiverà una barra di avanzamento sulla schermata dell'uploader."
 
 #: wp-admin/media-new.php:53
 msgid "<strong>Drag and drop</strong> your files into the area below. Multiple files are allowed."
@@ -10865,11 +10865,11 @@ msgstr "Puoi anche eseguire lo stesso tipo di azioni, compresa la riduzione dell
 
 #: wp-admin/edit.php:315
 msgid "Managing pages is very similar to managing posts, and the screens can be customized in the same way."
-msgstr "La gestione delle pagine &egrave; molto simile alla gestione articoli e le schermate possono essere  personalizzate nello stesso modo."
+msgstr "La gestione delle pagine &egrave; molto simile alla gestione articoli e le schermate possono essere personalizzate nello stesso modo."
 
 #: wp-admin/edit-form-advanced.php:323 wp-admin/edit.php:307
 msgid "Pages are similar to posts in that they have a title, body text, and associated metadata, but they are different in that they are not part of the chronological blog stream, kind of like permanent posts. Pages are not categorized or tagged, but can have a hierarchy. You can nest pages under other pages by making one the &#8220;Parent&#8221; of the other, creating a group of pages."
-msgstr "La pagine sono simili agli articoli nel senso che hanno un titolo, un corpo e dei metadati associati, ma la differenza &egrave; che non entrano nel flusso cronologico del blog. Sono una specie di articoli permanenti. Le pagine non sono categorizzate o taggate, ma possono avere una gerarchia. &Egrave; possibile annidare una pagina dentro un&#8217;altra rendendo una  &#8220;genitore&#8221; dell&#8217;altra, creando in effetti un gruppo di pagine."
+msgstr "La pagine sono simili agli articoli nel senso che hanno un titolo, un corpo e dei metadati associati, ma la differenza &egrave; che non entrano nel flusso cronologico del blog. Sono una specie di articoli permanenti. Le pagine non sono categorizzate o taggate, ma possono avere una gerarchia. &Egrave; possibile annidare una pagina dentro un&#8217;altra rendendo una &#8220;genitore&#8221; dell&#8217;altra, creando in effetti un gruppo di pagine."
 
 #: wp-admin/edit-comments.php:204
 msgid "Many people take advantage of keyboard shortcuts to moderate their comments more quickly. Use the link to the side to learn more."
@@ -11389,12 +11389,12 @@ msgstr "Puoi trovare temi aggiuntivi per il tuo sito utilizzando il browser/inst
 #. translators: %s: WordPress Plugin Directory URL.
 #: wp-admin/plugins.php:550
 msgid "If you would like to see more plugins to choose from, click on the &#8220;Add New&#8221; button and you will be able to browse or search for additional plugins from the <a href=\"%s\">WordPress Plugin Directory</a>. Plugins in the WordPress Plugin Directory are designed and developed by third parties, and are compatible with the license WordPress uses. Oh, and they&#8217;re free!"
-msgstr "Se desideri visualizzare più plugin tra cui scegliere, fai clic sul pulsante \"Aggiungi nuovo\"  e potrai sfogliare o cercare nuovi plugin nella <a href=\"%s\">Directory dei plugin di WordPress.org</a>. I plugin presenti nella directory dei plugin di WordPress sono progettati e sviluppati da terze parti, e sono compatibili con la licenza che utilizza WordPress. Oh, e sono gratuiti!"
+msgstr "Se desideri visualizzare più plugin tra cui scegliere, fai clic sul pulsante \"Aggiungi nuovo\" e potrai sfogliare o cercare nuovi plugin nella <a href=\"%s\">Directory dei plugin di WordPress.org</a>. I plugin presenti nella directory dei plugin di WordPress sono progettati e sviluppati da terze parti, e sono compatibili con la licenza che utilizza WordPress. Oh, e sono gratuiti!"
 
 #. translators: %s: MAX_FILE_SIZE
 #: wp-admin/includes/file.php:875
 msgid "The uploaded file exceeds the %s directive that was specified in the HTML form."
-msgstr "Il file caricato eccede la direttiva %s  che è stata indicata nel modulo HTML."
+msgstr "Il file caricato eccede la direttiva %s che è stata indicata nel modulo HTML."
 
 #: wp-admin/credits.php:142
 msgid "External Libraries"
@@ -11919,7 +11919,7 @@ msgstr "È possibile decidere cosa deve essere visualizzato nella pagina princip
 
 #: wp-admin/options-permalink.php:54
 msgid "The Optional fields let you customize the &#8220;category&#8221; and &#8220;tag&#8221; base names that will appear in archive URLs. For example, the page listing all posts in the &#8220;Uncategorized&#8221; category could be <code>/topics/uncategorized</code> instead of <code>/category/uncategorized</code>."
-msgstr "Le impostazioni aggiuntive permettono di personalizzare le strutture dei permalink delle &#8220;categorie&#8221; e dei  &#8220;tag&#8221; utilizzando degli argomenti come base che appariranno negli indirizzi nell'archivio. Per esempio la pagina che visualizza tutti gli articoli nella categoria &#8220;senza categoria&#8221; potrebbe essere <code>/topics/senza-categoria</code> invece di  <code>/categoria/senza-categoria</code>."
+msgstr "I campi Facoltativi permettono di personalizzare il nome di base delle &#8220;categorie&#8221; e dei &#8220;tag&#8221; che appariranno negli URL degli archivi. Per esempio la pagina che visualizza tutti gli articoli nella categoria &#8220;senza categoria&#8221; potrebbe essere <code>/argomenti/senza-categoria</code> invece di <code>/categoria/senza-categoria</code>."
 
 #. translators: 1: %category%, 2: %tag%
 #: wp-admin/options-permalink.php:42
@@ -12145,7 +12145,7 @@ msgstr "Dopo aver effettuato le modifiche, fai clic su aggiorna file."
 
 #: wp-admin/theme-editor.php:31
 msgid "Begin by choosing a theme to edit from the dropdown menu and clicking the Select button. A list then appears of the theme&#8217;s template files. Clicking once on any file name causes the file to appear in the large Editor box."
-msgstr "Comincia selezionando  un tema da modificare dal menu a discesa e fai clic sul pulsante Seleziona. Verrà mostrato l'elenco di tutti i file del tema. Facendo clic una volta sul nome di uno dei file, questo verrà aperto nell'editor dei temi."
+msgstr "Comincia selezionando un tema da modificare dal menu a discesa e fai clic sul pulsante Seleziona. Verrà mostrato l'elenco di tutti i file del tema. Facendo clic una volta sul nome di uno dei file, questo verrà aperto nell'editor dei temi."
 
 #: wp-admin/theme-editor.php:30
 msgid "You can use the theme file editor to edit the individual CSS and PHP files which make up your theme."
@@ -12414,12 +12414,12 @@ msgstr "Nessun elemento."
 #. translators: %s: Asterisk symbol (*).
 #: wp-admin/includes/schema.php:1125
 msgid "To use a subdomain configuration, you must have a wildcard entry in your DNS. This usually means adding a %s hostname record pointing at your web server in your DNS configuration tool."
-msgstr "Per utilizzare la configurazione con i sottodomini devi inserire una wildcard nel DNS. Normalmente significa aggiungere un record nome host %s  che punti al web server negli strumenti di configurazione dei DNS."
+msgstr "Per utilizzare la configurazione con i sottodomini devi inserire una voce wildcard nel DNS. Normalmente significa aggiungere un record nome host %s che punti al web server negli strumenti di configurazione dei DNS."
 
 #. translators: %s: Host name.
 #: wp-admin/includes/schema.php:1114
 msgid "The installer attempted to contact a random hostname (%s) on your domain."
-msgstr "L'installatore ha tentato di contattare un nome host a caso  %s nel tuo dominio."
+msgstr "L'installatore ha tentato di contattare un nome host a caso (%s) nel tuo dominio."
 
 #: wp-admin/nav-menus.php:284
 msgid "The menu item has been successfully deleted."
@@ -13607,7 +13607,7 @@ msgstr "Quando un commento contiene una qualsiasi di queste parole, nel testo, n
 
 #: wp-admin/options-discussion.php:227
 msgid "When a comment contains any of these words in its content, author name, URL, email, IP address, or browser&#8217;s user agent string, it will be held in the <a href=\"edit-comments.php?comment_status=moderated\">moderation queue</a>. One word or IP address per line. It will match inside words, so &#8220;press&#8221; will match &#8220;WordPress&#8221;."
-msgstr "Quando un commento contiene una di queste parole, nel testo, nel nome, nell'URL, nella email, nell'indirizzo IP o nello user agent del browser, verrà messo in <a href=\"edit-comments.php?comment_status=moderated\">coda di moderazione</a>. Inserisci una singola parola o indirizzo IP per ciascuna riga. Verranno cercate corrispondenze anche all'interno delle parole, quindi &#8220;press&#8221;  troverà una corrispondenza in &#8220;WordPress&#8221;."
+msgstr "Quando un commento contiene una di queste parole, nel testo, nel nome, nell'URL, nella email, nell'indirizzo IP o nello user agent del browser, verrà messo in <a href=\"edit-comments.php?comment_status=moderated\">coda di moderazione</a>. Inserisci una singola parola o indirizzo IP per ciascuna riga. Verranno cercate corrispondenze anche all'interno delle parole, quindi &#8220;press&#8221; troverà una corrispondenza in &#8220;WordPress&#8221;."
 
 #. translators: %s: Number of links.
 #: wp-admin/options-discussion.php:221
@@ -14121,6 +14121,11 @@ msgstr "Metti questo articolo in evidenza"
 msgid "Not Sticky"
 msgstr "Non in evidenza"
 
+#: wp-admin/includes/class-wp-posts-list-table.php:1959
+#: wp-admin/includes/class-wp-posts-list-table.php:1962
+msgid "Sticky"
+msgstr "In evidenza"
+
 #: wp-admin/includes/class-wp-posts-list-table.php:1921
 msgid "Allow Pings"
 msgstr "Permetti i ping"
@@ -14597,7 +14602,7 @@ msgstr "Anteprima modifiche"
 
 #: wp-admin/includes/media.php:2961
 msgid "Link text, e.g. &#8220;Ransom Demands (PDF)&#8221;"
-msgstr "Testo link, es.  &#8220;Richiesta di riscatto (PDF)&#8221;"
+msgstr "Testo link, es. &#8220;Richiesta di riscatto (PDF)&#8221;"
 
 #: wp-admin/includes/media.php:2992
 msgid "Link to image"

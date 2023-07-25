@@ -2,7 +2,7 @@
 /**
  * Cache class
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 4.1.2
  */

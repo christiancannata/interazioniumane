@@ -127,6 +127,11 @@ class WooSEA_google_shopping {
 					"feed_name" => "g:loyalty_points",
 					"format" => "optional",
 				),
+                                "Auto pricing min price" => array(
+                                        "name" => "auto_pricing_min_price",
+                                        "feed_name" => "g:auto_pricing_min_price",
+                                        "format" => "optional",
+                                ),
 			),
 			"Product category" => array(
 				"Google product category" => array(
@@ -139,7 +144,7 @@ class WooSEA_google_shopping {
 					"name" => "product_type",
 					"feed_name" => "g:product_type",
 					"format" => "required",
-					"woo_suggest" => "raw_categories",
+					"woo_suggest" => "category_path",
 				),
 			),
 			"Product identifiers" => array(
@@ -421,8 +426,18 @@ class WooSEA_google_shopping {
 					"feed_name" => "g:consumer_datasheet",
 					"format" => "optional",
 				),
-				"Consumer notice" => array(
-					"name" => "consumer_notice",
+				"Consumer notice 1" => array(
+					"name" => "consumer_notice_1",
+					"feed_name" => "g:consumer_notice",
+					"format" => "optional",
+				),
+				"Consumer notice 2" => array(
+					"name" => "consumer_notice_2",
+					"feed_name" => "g:consumer_notice",
+					"format" => "optional",
+				),
+				"Consumer notice 3" => array(
+					"name" => "consumer_notice_3",
 					"feed_name" => "g:consumer_notice",
 					"format" => "optional",
 				),
@@ -436,8 +451,53 @@ class WooSEA_google_shopping {
 					"feed_name" => "g:shopping_ads_excluded_country",
 					"format" => "optional",
 				),
-				"Product detail" => array(
-					"name" => "product_detail",
+				"Product detail 1" => array(
+					"name" => "product_detail_1",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 2" => array(
+					"name" => "product_detail_2",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 3" => array(
+					"name" => "product_detail_3",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 4" => array(
+					"name" => "product_detail_4",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 5" => array(
+					"name" => "product_detail_5",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 6" => array(
+					"name" => "product_detail_6",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 7" => array(
+					"name" => "product_detail_7",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 8" => array(
+					"name" => "product_detail_8",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 9" => array(
+					"name" => "product_detail_9",
+					"feed_name" => "g:product_detail",
+					"format" => "optional",
+				),
+				"Product detail 10" => array(
+					"name" => "product_detail_10",
 					"feed_name" => "g:product_detail",
 					"format" => "optional",
 				),

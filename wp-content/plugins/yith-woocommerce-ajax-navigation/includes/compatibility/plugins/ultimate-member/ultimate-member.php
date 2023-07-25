@@ -2,7 +2,7 @@
 /**
  * Ultimate member plugin support
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Compatibility
  * @version 4.0.0
  */
@@ -23,7 +23,6 @@ if ( ! function_exists( 'yith_wcan_ultimate_member_support' ) ) {
 	 *
 	 * @return void
 	 * @since  3.0.9
-	 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 	 */
 	function yith_wcan_ultimate_member_support() {
 		global $ultimatemember;

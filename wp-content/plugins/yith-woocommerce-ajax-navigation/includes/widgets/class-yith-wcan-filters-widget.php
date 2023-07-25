@@ -2,7 +2,7 @@
 /**
  * Filter preset widget
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Widgets
  * @version 4.0.0
  */
@@ -28,7 +28,6 @@ if ( ! class_exists( 'YITH_WCAN_Filters_Widget' ) ) {
 		 *
 		 * @return void
 		 * @since 4.0.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function __construct() {
 			parent::__construct( self::ID_BASE, _x( 'YITH AJAX Filters Preset', '[ADMIN] Name of the preset widget', 'yith-woocommerce-ajax-navigation' ) );
@@ -41,7 +40,6 @@ if ( ! class_exists( 'YITH_WCAN_Filters_Widget' ) ) {
 		 *
 		 * @return void
 		 * @since 4.0.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function form( $instance ) {
 			$presets = YITH_WCAN_Preset_Factory::list_presets();
@@ -78,7 +76,6 @@ if ( ! class_exists( 'YITH_WCAN_Filters_Widget' ) ) {
 		 *
 		 * @return array New instance.
 		 * @since 4.0.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function update( $new_instance, $old_instance ) {
 			$instance = $old_instance;
@@ -101,7 +98,6 @@ if ( ! class_exists( 'YITH_WCAN_Filters_Widget' ) ) {
 		 *
 		 * @return void
 		 * @since 4.0.0
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function widget( $args, $instance ) {
 			$title       = ! empty( $instance['title'] ) ? $instance['title'] : '';

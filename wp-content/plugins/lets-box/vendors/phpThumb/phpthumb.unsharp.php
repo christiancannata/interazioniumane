@@ -44,6 +44,10 @@ Any suggenstions for improvement of the algorithm, especially regarding the spee
 and the roundoff errors in the Gaussian blur process, are welcome.
 */
 
+if (!defined('LETSBOX_VERSION')) {
+    exit; // Direct access not permitted
+}
+
 class phpUnsharpMask {
 
 	public static function applyUnsharpMask(&$img, $amount, $radius, $threshold) {

@@ -13,7 +13,7 @@ return apply_filters(
 		'seo' => array_merge(
 			array(
 				'seo_section_start' => array(
-					'name' => _x( 'SEO', '[ADMIN] Seo settings page', 'yith-woocommerce-ajax-navigation' ),
+					'name' => _x( 'SEO settings', '[ADMIN] Seo settings page', 'yith-woocommerce-ajax-navigation' ),
 					'type' => 'title',
 					'desc' => '',
 					'id'   => 'yith_wcan_seo_settings',

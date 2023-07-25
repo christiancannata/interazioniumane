@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -15,6 +15,9 @@ class License
 
     public static function init()
     {
+        // Health Check test
+        add_filter('site_status_tests', [__CLASS__, 'add_health_tests']);
+
         add_action('wp_ajax_letsbox-license', [__CLASS__, 'ajax_call']);
 
         if (isset($_REQUEST['purchase_code'], $_REQUEST['plugin_id']) && ('8204640' === (string) $_REQUEST['plugin_id'])) {
@@ -164,6 +167,68 @@ class License
         }
 
         delete_site_option('wpcp_license_'.$license_code);
+    }
+
+    public static function add_health_tests($tests)
+    {
+        $tests['direct']['wpcp_license_server'] = [
+            'label' => __('Communication WP Cloud Plugin license server'),
+            'test' => [__CLASS__, 'test_license_server'],
+        ];
+
+        return $tests;
+    }
+
+    public static function test_license_server()
+    {
+        $result = [
+            'label' => __('The WP Cloud Plugins are able to communicate with their licence server.', 'wpcloudplugins'),
+            'status' => 'good',
+            'badge' => [
+                'label' => 'WP Cloud Plugins',
+                'color' => 'green',
+            ],
+            'description' => sprintf(
+                '<p>%s</p>',
+                __('To use the WP Cloud Plugins, you need a valid licence. This licence is validated from time to time using the licence server.', 'wpcloudplugins')
+            ),
+            'actions' => '',
+            'test' => 'wpcp_license_server',
+        ];
+
+        $error = false;
+
+        try {
+            $response = wp_remote_get('https://www.wpcloudplugins.com/updates/');
+        } catch (\Exception $ex) {
+            $error = true;
+            $message = $ex->getMessage();
+        }
+
+        if (is_wp_error($response)) {
+            $error = true;
+            $message = $response->get_error_message();
+        }
+
+        if ($error) {
+            $result['status'] = 'critical';
+            $result['label'] = __('WP Cloud Plugins cannot communicate with the licence server', 'wpcloudplugins');
+            $result['badge']['color'] = 'red';
+            $result['description'] = sprintf(
+                '<p>%s</p><h3>Error information</h3><code>%s</code>',
+                __('Your website cannot establish a secure connection with the licensing server. This will cause their plugins to stop working because the licence cannot be validated.', 'wpcloudplugins'),
+                htmlentities($message, ENT_QUOTES | ENT_HTML401)
+            );
+            $result['actions'] = sprintf(
+                '<p><a href="%s" target="_blank">%s <span class="dashicons dashicons-external"> </span></a> - <a href="%s" target="_blank">%s <span class="dashicons dashicons-external"</a></p>',
+                esc_url('https://www.google.com/search?q=WordPress+wp_remote_get+'.urlencode(htmlentities($message, ENT_QUOTES | ENT_HTML401))),
+                __('Find a solution'),
+                esc_url('https://florisdeleeuwnl.zendesk.com/hc/en-us/articles/201845893'),
+                __('Contact Support')
+            );
+        }
+
+        return $result;
     }
 
     private static function _revoke()

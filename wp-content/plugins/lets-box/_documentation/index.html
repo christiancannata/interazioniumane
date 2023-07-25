@@ -206,7 +206,7 @@
 
                   </li>
                   <li><a href="#vulnerabilities">Vulnerabilities</a></li>
-                  <li><a href="#releasenotes">Changelog (version 2.7.3)</a></li>
+                  <li><a href="#releasenotes">Changelog (version 2.8.3)</a></li>
 
                 </ul>
               </div>
@@ -1580,6 +1580,16 @@ $data = json_decode($req_raw_body, true);
                             want the module to display the folder <code>/{Start
                               Folder}/{%user_login%}</code>. Each user will get their own folder named with the user
                             login.
+
+                            <br /><br />
+                            <div class="alert alert-warning">
+                              <div class="container-fluid">
+                                <div class="alert-icon">
+                                  <i class="material-icons">warning</i>
+                                </div>
+                                Leave out the <code>{</code> <code>}</code> characters in the final placeholders: <code>%usermeta_{key}%</code> is <code>%usermeta_my_custom_key%</code>.
+                              </div>
+                            </div>
                           </td>
                         </tr>
                         <tr>
@@ -3686,6 +3696,104 @@ $data = json_decode($req_raw_body, true);
                   <br />
 
                   <p>
+                    <span class="label label-primary">Version 2.8.3</span> <span class="label label-secondary">18 July 2023</span>
+                    <br /><br />
+
+                    <strong>Bug fixes:</strong>
+                    <ul>
+                      <li>Search function not always returning search results.</li>
+                      <li>Existing descriptions not editable in Gallery module.</li>
+                      <li>Remove URL anchor in deeplinks used in the <code>%file_deeplink_url%</code> placeholder.</li>
+                      <li><u>Beaver Builder</u>
+                        <ul>
+                          <li>Module configurator not opening</li>
+                        </ul>
+                      </li>
+                    </ul>
+
+                    <hr />
+                  </p>
+
+                  <p>
+                    <span class="label label-primary">Version 2.8.2</span> <span class="label label-secondary">24 May 2023</span>
+                    <br /><br />
+
+                    <strong>New Features, Settings and Integrations:</strong>
+                    <ul>
+                      <li>Added 'Events per user' report section to show the logged events per user in the selected time period.</li>
+                    </ul>
+
+                    <strong>Bug fixes:</strong>
+                    <ul>
+                      <li>Actions buttons not accessible in 'Flat Dark' Lightbox skin.</li>
+                    </ul>
+
+                    <strong>Improvements:</strong>
+                    <ul>
+                      <li>The 'Show file size' and 'Show last modified date' settings are now respected by the metadata content displayed by the description buttons (i)</li>
+                    </ul>
+
+                    <hr />
+                  </p>
+
+                  <p>
+                    <span class="label label-primary">Version 2.8.1</span> <span class="label label-secondary">24 May 2023</span>
+                    <br /><br />
+
+                    <strong>Bug fixes:</strong>
+                    <ul>
+                      <li>Extracting email addresses from Private Folder names for email notifications did not work for addresses with a <code>-</code> in the domain name.</li>
+                      <li>Individual file statistics showing incorrect totals because these were filtered by the main period range selector.</li>
+                    </ul>
+
+                    <strong>Improvements:</strong>
+                    <ul>
+                      <li>Made the headers of the Select and Embed modals sticky.</li>
+                    </ul>
+
+                    <hr />
+                  </p>
+
+                  <p>
+                    <span class="label label-primary">Version 2.8</span> <span class="label label-secondary">15 May 2023</span>
+                    <br /><br />
+
+                    <strong>New Features, Settings and Integrations:</strong>
+                    <ul>
+                      <li>Added preview/lightbox functionality for slider module.</li>
+                    </ul>
+
+                    <strong>Bug fixes:</strong>
+                    <ul>
+                      <li>Embed functionality incorrectly allowed you to select folders.</li>
+                      <li>AJAX requests from the modules are not always cached properly, leading to reduced performance of the plugin on sites with high traffic.</li>
+                      <li><u>WooCommerce</u>
+                        <ul>
+                          <li>Placeholders for product variations did not work, which could cause the module to crash on products with upload integration enabled.</li>
+                        </ul>
+                      </li>
+                    </ul>
+
+                    <strong>Improvements:</strong>
+                    <ul>
+                      <li>Media Player with the autoplay functionality enabled now always shows the volume status if it is muted.</li>
+                      <li>If multiple modules are added to the page, only add the localised strings for the media player once.</li>
+                      <li>If using reCaptcha integration, only verify user if not logged in.</li>
+                      <li>Added a WordPress health check to see if the site can establish a secure connection with API servers.</li>
+                    </ul>
+
+                    <strong>Code library updates:</strong>
+                    <ul>
+                      <li>Chart.js to v4.3</li>
+                      <li>DataTables to v1.13.4</li>
+                      <li>ReCaptcha to v1.3.0</li>
+                      <li>Tagify to v4.17.8</li>
+                      <li>PhpThumb to v1.7.20-202212091316</li>
+                    </ul>
+                    <hr />
+                  </p>
+
+                  <p>
                     <span class="label label-primary">Version 2.7.3</span> <span class="label label-secondary">2 May 2023</span>
                     <br /><br />
 
@@ -3714,7 +3822,7 @@ $data = json_decode($req_raw_body, true);
 
                     <hr />
                   </p>
-                  
+
                   <p>
                     <span class="label label-primary">Version 2.7.2</span> <span class="label label-secondary">5 April 2023</span>
                     <br /><br />

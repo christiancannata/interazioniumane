@@ -2,21 +2,23 @@
 # This file is distributed under the same license as the Themes - Twenty Nineteen package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2021-06-18 13:22:48+0000\n"
+"PO-Revision-Date: 2023-04-14 12:45:55+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: GlotPress/3.0.0-alpha.2\n"
+"X-Generator: GlotPress/4.0.0-alpha.4\n"
 "Language: it\n"
 "Project-Id-Version: Themes - Twenty Nineteen\n"
 
 #. Description of the theme
+#, gp-priority: high
 msgid "Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you'll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it's built to be beautiful on all screen sizes."
 msgstr "Il nostro tema predefinito 2019 è progettato per mettere in risalto la potenza dell'editor dei blocchi. Esso mostra stili personalizzati per tutti i blocchi di default ed è stato sviluppato in modo che quello che vedi nell'editor dei blocchi sarà quello che vedrai nel tuo sito web. Twenty Nineteen è progettato per adattarsi ad un'ampia gamma di siti web, sia che tu abbia un blog di foto, che tu stia lanciando un nuovo business o che tu stia supportando un'attività non-profit. Presenta ampi spazi bianchi e moderne intestazioni senza grazie abbinate a un classico corpo del testo con grazie, è stato sviluppato per essere bello sugli schermi di ogni dimensione."
 
 #. Theme Name of the theme
 #: inc/block-patterns.php:20
+#, gp-priority: high
 msgid "Twenty Nineteen"
 msgstr "Twenty Nineteen"
 
@@ -143,7 +145,7 @@ msgstr "Rappresentiamo attività e imprenditori dal 2014"
 msgid "About"
 msgstr "Chi siamo"
 
-#: classes/class-twentynineteen-walker-comment.php:98
+#: classes/class-twentynineteen-walker-comment.php:97
 msgid "Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved."
 msgstr "Il tuo commento è in attesa di moderazione. Questa è un'anteprima, il tuo commento sarà visibile dopo esser stato approvato."
 
@@ -160,27 +162,27 @@ msgstr "Blu"
 msgid "<span class=\"meta-nav\">Published in</span><span class=\"post-title\">%s</span>"
 msgstr "<span class=\"meta-nav\">Pubblicato in</span><span class=\"post-title\">%s</span>"
 
-#: image.php:87
+#: image.php:89
 msgctxt "Parent post link"
 msgid "<span class=\"meta-nav\">Published in</span><br><span class=\"post-title\">%title</span>"
 msgstr "<span class=\"meta-nav\">Pubblicato in</span><br><span class=\"post-title\">%title</span>"
 
-#: template-parts/content/content.php:18
 #: template-parts/content/content-excerpt.php:18
+#: template-parts/content/content.php:18
 msgctxt "post"
 msgid "Featured"
 msgstr "Post in evidenza"
 
 #. translators: %s: WordPress version.
-#: inc/back-compat.php:40 inc/back-compat.php:55 inc/back-compat.php:76
+#: inc/back-compat.php:43 inc/back-compat.php:60 inc/back-compat.php:83
 msgid "Twenty Nineteen requires at least WordPress version 4.7. You are running version %s. Please upgrade and try again."
 msgstr "Twenty Nineteen richiede almeno la versione 4.7 di WordPress. Stai usando la versione %s. Aggiornala e riprova."
 
-#: inc/template-functions.php:143
+#: inc/template-functions.php:144
 msgid "Back"
 msgstr "Indietro"
 
-#: inc/template-functions.php:136
+#: inc/template-functions.php:137
 msgid "More"
 msgstr "Di più"
 
@@ -246,24 +248,26 @@ msgstr "S"
 msgid "Small"
 msgstr "Piccolo"
 
-#: functions.php:60 footer.php:37
+#: footer.php:37 functions.php:60
 msgid "Footer Menu"
 msgstr "Menu nel footer"
 
-#: image.php:70
+#. translators: Hidden accessibility text.
+#: image.php:72
 msgctxt "Used before full size attachment link."
 msgid "Full size"
 msgstr "A dimensione piena"
 
-#: image.php:56
+#. translators: Hidden accessibility text.
+#: image.php:57
 msgid "Page"
 msgstr "Pagina"
 
-#: functions.php:196
+#: functions.php:210
 msgid "Add widgets here to appear in your footer."
 msgstr "Aggiungi i widget qui per farli apparire nel tuo footer."
 
-#: template-parts/footer/footer-widgets.php:12 functions.php:194
+#: functions.php:208 template-parts/footer/footer-widgets.php:13
 msgid "Footer"
 msgstr "Footer"
 
@@ -282,12 +286,12 @@ msgid_plural "%d Comments"
 msgstr[0] "%d commento"
 msgstr[1] "%d commenti"
 
-#: template-parts/post/author-bio.php:26
+#: template-parts/post/author-bio.php:27
 msgid "View more posts"
 msgstr "Visualizza più articoli"
 
 #. translators: %s: Post author.
-#: template-parts/post/author-bio.php:17
+#: template-parts/post/author-bio.php:18
 msgid "Published by %s"
 msgstr "Pubblicato da %s"
 
@@ -296,15 +300,14 @@ msgid "Top Menu"
 msgstr "Top menu"
 
 #. translators: %s: Post title. Only visible to screen readers.
-#. translators: %s: Post title.
+#: functions.php:239 template-parts/content/content-single.php:27
 #: template-parts/content/content.php:36
-#: template-parts/content/content-single.php:27 functions.php:225
 msgid "Continue reading<span class=\"screen-reader-text\"> \"%s\"</span>"
 msgstr "Leggi tutto<span class=\"screen-reader-text\"> \"%s\"</span>"
 
+#: image.php:52 template-parts/content/content-page.php:27
+#: template-parts/content/content-single.php:40
 #: template-parts/content/content.php:49
-#: template-parts/content/content-page.php:27
-#: template-parts/content/content-single.php:40 image.php:52
 msgid "Pages:"
 msgstr "Pagine:"
 
@@ -325,15 +328,17 @@ msgstr "Pronto a pubblicare il tuo primo articolo? <a href=\"%s\">Inizia da qui<
 msgid "Nothing Found"
 msgstr "Nessun risultato"
 
-#: single.php:42
+#. translators: Hidden accessibility text.
+#: single.php:44
 msgid "Previous post:"
 msgstr "Articolo precedente:"
 
-#: single.php:41
+#: single.php:42
 msgid "Previous Post"
 msgstr "Articolo precedente"
 
-#: single.php:39
+#. translators: Hidden accessibility text.
+#: single.php:40
 msgid "Next post:"
 msgstr "Articolo successivo:"
 
@@ -353,25 +358,28 @@ msgstr "Articoli meno recenti"
 msgid "Newer posts"
 msgstr "Articoli più recenti"
 
-#: inc/template-tags.php:104
+#. translators: Hidden accessibility text.
+#: inc/template-tags.php:105
 msgid "Tags:"
 msgstr "Tag:"
 
-#: inc/template-tags.php:92
+#. translators: Hidden accessibility text.
+#: inc/template-tags.php:93
 msgid "Posted in"
 msgstr "Pubblicato in"
 
 #. translators: Used between list items, there is a space after the comma.
-#: inc/template-tags.php:86 inc/template-tags.php:98
+#: functions.php:195
 msgid ", "
 msgstr ", "
 
 #. translators: %s: Post title. Only visible to screen readers.
-#: inc/template-tags.php:63
+#: inc/template-tags.php:64
 msgid "Leave a comment<span class=\"screen-reader-text\"> on %s</span>"
 msgstr "Lascia un commento<span class=\"screen-reader-text\"> su %s</span>"
 
-#: inc/template-tags.php:46
+#. translators: Hidden accessibility text.
+#: inc/template-tags.php:47
 msgid "Posted by"
 msgstr "Pubblicato da"
 
@@ -423,16 +431,17 @@ msgid "Category Archives: "
 msgstr "Archivi della categoria:"
 
 #. translators: %s: Post title. Only visible to screen readers.
-#: template-parts/content/content-page.php:41
-#: template-parts/header/entry-header.php:32 inc/template-tags.php:120
+#: inc/template-tags.php:121 template-parts/content/content-page.php:41
+#: template-parts/header/entry-header.php:34
 msgid "Edit <span class=\"screen-reader-text\">%s</span>"
 msgstr "Modifica <span class=\"screen-reader-text\">%s</span>"
 
-#: header.php:25
+#. translators: Hidden accessibility text.
+#: header.php:28
 msgid "Skip to content"
 msgstr "Salta al contenuto"
 
-#: template-parts/header/site-branding.php:46 functions.php:61
+#: functions.php:61 template-parts/header/site-branding.php:46
 msgid "Social Links Menu"
 msgstr "Menu link ai social"
 
@@ -443,9 +452,9 @@ msgstr "Principale"
 #. translators: %s: WordPress.
 #: footer.php:28
 msgid "Proudly powered by %s."
-msgstr "Proudly powered by %s"
+msgstr "Proudly powered by %s."
 
-#: comments.php:116
+#: comments.php:115
 msgid "Comments are closed."
 msgstr "I commenti sono chiusi"
 
@@ -475,7 +484,7 @@ msgctxt "comments title"
 msgid "One reply on &ldquo;%s&rdquo;"
 msgstr "Una risposta su &ldquo;%s&rdquo;"
 
-#: comments.php:35 comments.php:105 comments.php:107
+#: comments.php:35 comments.php:105
 msgid "Leave a comment"
 msgstr "Lascia un commento"
 
@@ -483,11 +492,11 @@ msgstr "Lascia un commento"
 msgid "Join the Conversation"
 msgstr "Unisciti alla discussione"
 
-#: classes/class-twentynineteen-walker-comment.php:96
+#: classes/class-twentynineteen-walker-comment.php:95
 msgid "Your comment is awaiting moderation."
 msgstr "Il tuo commento è in attesa di moderazione."
 
-#: classes/class-twentynineteen-walker-comment.php:89
+#: classes/class-twentynineteen-walker-comment.php:88
 msgid "Edit"
 msgstr "Modifica"
 
@@ -510,14 +519,17 @@ msgid "Oops! That page can&rsquo;t be found."
 msgstr "Oops! La pagina non è stata trovata."
 
 #. Theme URI of the theme
+#, gp-priority: low
 msgid "https://wordpress.org/themes/twentynineteen/"
 msgstr "https://wordpress.org/themes/twentynineteen/"
 
 #. Author of the theme
+#, gp-priority: low
 msgid "the WordPress team"
 msgstr "Team di WordPress"
 
 #. Author URI of the theme
 #: footer.php:25
+#, gp-priority: low
 msgid "https://wordpress.org/"
 msgstr "https://it.wordpress.org/"

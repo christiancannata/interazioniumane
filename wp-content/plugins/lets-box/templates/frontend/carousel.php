@@ -74,7 +74,12 @@ $description_position = Processor::instance()->get_shortcode_option('description
                       <i class="eva eva-download eva-lg"></i>
                     </a>
                   </div>
-                  <?php }?>
+                  <?php }
+                  if (User::can_preview()) { ?>
+                  <div class="entry-info-button entry_action_view" title="<?php esc_html_e('Preview', 'wpcloudplugins'); ?>" tabindex="0">
+                    <i class="eva eva-eye-outline eva-lg"></i>
+                  </div>
+                  <?php } ?>
                 </li>          
                 <!-- End Actions --->    
               </ul>  

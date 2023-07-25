@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -187,7 +187,7 @@ class Events
         }
 
         $period = null;
-        if (isset($_REQUEST['periodstart'], $_REQUEST['periodend'])) {
+        if (!empty($_REQUEST['periodstart']) && !empty($_REQUEST['periodend'])) {
             $period = [
                 'start' => $_REQUEST['periodstart'].' 00:00:00',
                 'end' => $_REQUEST['periodend'].' 23:59:00',
@@ -226,6 +226,11 @@ class Events
 
             case 'topuploads':
                 $data = $this->get_top_uploads($period);
+
+                break;
+
+            case 'users-log':
+                $data = $this->get_users_log([], $period);
 
                 break;
 
@@ -302,7 +307,6 @@ class Events
     /**
      * Start the download for entry with $id.
      *
-     * @param string $id
      * @param mixed  $entry_id
      * @param string $account_id
      */
@@ -323,8 +327,7 @@ class Events
      *
      * @global $wpdb
      *
-     * @param string $where
-     * @param mixed  $period
+     * @param mixed $period
      *
      * @return array
      */
@@ -752,6 +755,120 @@ class Events
         $groupBy = '`user_id`';
 
         return $this->get_results($columns, $where, $groupBy, true, '', '');
+    }
+
+    /**
+     * Get the users events filtered via Datatables requests.
+     *
+     * @global $wpdb
+     *
+     * @param mixed      $filter_events
+     * @param null|mixed $period
+     *
+     * @return array
+     */
+    public function get_users_log($filter_events = [], $period = null)
+    {
+        $columns = [
+            [
+                'db' => 'MAX(`user_id`)', 'dt' => 'icon', 'field' => 'icon', 'as' => 'icon', 'formatter' => function ($value, $row) {
+                    if (0 == $value) {
+                        return LETSBOX_ROOTPATH.'/css/images/usericon.png';
+                    }
+                    $user = get_userdata($value);
+
+                    if (false === $user) {
+                        return LETSBOX_ROOTPATH.'/css/images/usericon.png';
+                    }
+
+                    $display_gravatar = get_avatar_url($user->user_email, 32);
+                    if (false === $display_gravatar) {
+                        // Gravatar is disabled, show default image.
+                        $display_gravatar = LETSBOX_ROOTPATH.'/css/images/usericon.png';
+                    }
+
+                    return $display_gravatar;
+                },
+            ],
+            [
+                'db' => 'MAX(`user_id`)', 'dt' => 'user_id', 'field' => 'user_id', 'as' => 'user_id',
+            ],
+            [
+                'db' => 'MAX(`user_id`)', 'dt' => 'user_display_name', 'field' => 'user_id', 'as' => 'user_id', 'formatter' => function ($value, $row) {
+                    if (0 == $value) {
+                        return esc_html__('Visitors', 'wpcloudplugins');
+                    }
+
+                    $wp_user = get_userdata($value);
+
+                    if (false === $wp_user) {
+                        return esc_html__('Visitor').' #'.$value.' ('.esc_html__('Deleted').')';
+                    }
+
+                    return $wp_user->display_name;
+                },
+            ],
+            [
+                'db' => 'MAX(`user_id`)', 'dt' => 'user_name', 'field' => 'user_id', 'as' => 'user_id', 'formatter' => function ($value, $row) {
+                    if (0 == $value) {
+                        return esc_html__('Visitors', 'wpcloudplugins');
+                    }
+
+                    $wp_user = get_userdata($value);
+
+                    if (false === $wp_user) {
+                        return ' #'.$value.' ('.esc_html__('Deleted').')';
+                    }
+
+                    return $wp_user->user_login;
+                },
+            ],
+            [
+                'db' => 'COUNT(CASE WHEN `type` = "letsbox_previewed_entry" then 1 ELSE NULL END)', 'dt' => 'previews', 'field' => 'previews', 'as' => 'previews',
+            ],
+            [
+                'db' => 'COUNT(CASE WHEN `type` = "letsbox_downloaded_entry" then 1 ELSE NULL END)', 'dt' => 'downloads', 'field' => 'downloads', 'as' => 'downloads',
+            ], [
+                'db' => 'COUNT(CASE WHEN `type` = "letsbox_uploaded_entry" then 1 ELSE NULL END)', 'dt' => 'uploads', 'field' => 'uploads', 'as' => 'uploads',
+            ],
+        ];
+
+        $where = "`plugin` = 'lets-box' AND `user_id` != '0'";
+
+        global $wpdb;
+        if (!empty($_REQUEST['detail']) && !empty($_REQUEST['id'])) {
+            switch ($_REQUEST['detail']) {
+                case 'user':
+                    $sql = ' AND `user_id` = %s ';
+
+                    break;
+
+                case 'entry':
+                    $sql = ' AND `entry_id` = %s ';
+
+                    break;
+            }
+            $where .= $wpdb->prepare($sql, [$_REQUEST['id']]);
+        }
+
+        if (!empty($filter_events)) {
+            $where .= ' AND `type` IN ("'.implode('","', $filter_events).'") ';
+        }
+
+        if (!empty($period)) {
+            if (is_int($period) || 1 === count($period)) {
+                // If $period is an interval (e.g. when sending summary email
+                $sql = ' AND (`datetime` BETWEEN DATE_SUB(NOW(), INTERVAL %d second) AND NOW())';
+                $where .= $wpdb->prepare($sql, [$period]);
+            } else {
+                $sql = ' AND (`datetime` BETWEEN %s AND %s )';
+                $where .= $wpdb->prepare($sql, [$period['start'], $period['end']]);
+            }
+        }
+
+        $groupBy = '`user_id`';
+
+        return $this->get_results($columns, $where, $groupBy);
     }
 
     /**

@@ -1,11 +1,11 @@
 === Place Order Without Payment for WooCommerce ===
-Contributors: nitin247, freemius
+Contributors: nitin247
 Donate link: https://nitin247.com/buy-me-a-coffee
 Tags: Place order without payment, Checkout without payment,Woocommerce complete orders without payment, Order without payment, Checkout without payment in woocommerce, Disable payment functionality, Woocommerce payment disable, cart without payment, direct place order
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 2.3
-Version: 2.3
+Stable tag: 2.5.2
+Version: 2.5.2
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -14,14 +14,22 @@ Place Order Without Payment for WooCommerce will allow users to place orders dir
 
 == Description ==
 
-Place Order Without Payment for WooCommerce will allow users to place orders directly.
-This plugin will customize checkout page and offers to direct place order without payment.
+The "Place Order Without Payment for WooCommerce" plugin provides a seamless solution for allowing customers to place orders on your WooCommerce store without the need for immediate payment. This plugin is particularly useful for scenarios such as pre-orders, pay-on-delivery services, or collecting order information for further processing.
 
-Enabling the "Place Order Without Payment" feature in WooCommerce can be a useful option for stores that offer payment options such as cash on delivery or for customers who wish to pay at a later date. 
-By following the simple steps outlined below, you can easily enable this feature and provide your customers with more flexibility when it comes to making payments.
+By following our easy installation and setup instructions, you can enhance your customer experience by providing them with the flexibility to place orders without the pressure of immediate payment. With this plugin, you can streamline your order fulfillment process while maintaining control over payment collection.
+
+Key Features:
+
+* Enable a "Place Order Without Payment" option for your WooCommerce store.
+* Customize the plugin settings to align with your business requirements.
+* Collect essential order details from customers during the checkout process.
+* Improve customer satisfaction and engagement by accommodating different payment preferences.
+* Whether you are running a limited-time pre-order campaign or providing the convenience of pay-on-delivery services, the "Place Order Without Payment for WooCommerce" plugin empowers you to create a smooth and user-friendly ordering process for your customers.
 
 After Installing this plugin, Payment system will be removed from checkout page of woocommerce and users can directly place order without payment.
 
+Click here to discover the 5 simple steps to create a place order without payment on your online store
+<a href="https://nitin247.com/5-steps-to-create-place-order-without-payment/" target="_blank">5 Easy Steps to Create a Place Order Without Payment for WooCommerce</a>
 
 **Plugin Features**
 
@@ -38,6 +46,8 @@ After Installing this plugin, Payment system will be removed from checkout page 
 6- Fully Tested with latest wordpress and woocommerce versions.
 
 7- Tested upto PHP 8.1
+
+8- Compatible with WooCommerce Min Max Quantities
 
 
 **PRO Features**
@@ -61,10 +71,13 @@ e.g.
 
 1. Upload `wc-place-order-without-payment` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. You are done. If required you can change the settings from plugin settings.
+3. Navigate to the plugin settings page Dashboard > Place Order to configure the plugin according to your requirements.
 
 
 == Screenshots ==
+
+1. Screenshot of the plugin settings page.
+2. Screenshot of Quote Only settings.
 
 == Frequently Asked Questions ==
  
@@ -84,6 +97,14 @@ Yes, this can be done by going to the settings page and choosing default status 
 = What is Quote Only feature? =
 On Checkout page when clicked it collapses payment methods, ignores shipping and pushes order through without payment or shipping simply as a Quote Request.
 
+== License ==
+This plugin is released under the GPLv3 or later. You can find the full license text in the `LICENSE` file included with this plugin.
+
+== Support ==
+For support or any inquiries, please contact us at <a href="mailto:nitin247@outlook.com">nitin247@outlook.com</a> or create a suppport request on our <a href="https://nitin247.com/support">Support Page</a>.
+
+Enjoy using the Place order without payment plugin!
+
 == Changelog ==
 
 ** V 1.0 **
@@ -96,3 +117,16 @@ Changed default order status to processing instead of pending.
 Security vulnerability fix
 ** V 2.3 **
 Complete plugin rewrite ( OOP ) with new features.
+** V 2.4 **
+Added Free Product compatibility for cart & checkout page.
+** V 2.5 **
+Security vulnerability fix.
+** V 2.5.1 **
+Updated setting to show shipping fields in FREE version.
+** V 2.5.2 **
+Added setting to enable / disable standard Add to Cart.
+
+== Upgrade Notice ==
+
+= 2.5.2 = 
+Enable / disable standard Add to Cart .

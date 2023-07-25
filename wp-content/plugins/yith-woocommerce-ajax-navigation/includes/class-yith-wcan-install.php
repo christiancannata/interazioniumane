@@ -2,7 +2,7 @@
 /**
  * Manage install, and performs all post update operations
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 4.0.0
  */

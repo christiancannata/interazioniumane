@@ -140,7 +140,7 @@ $z-index: 1001; // value is this high since modal must be on top of Proteo's sti
 	display: inline-block;
 	margin: 0 5px 10px;
 	vertical-align: top;
-	width: calc(#{calc(100 / $columns_number)}% - 10px);
+	width: calc(#{100 / $columns_number}% - 10px);
 }
 
 @mixin columns {

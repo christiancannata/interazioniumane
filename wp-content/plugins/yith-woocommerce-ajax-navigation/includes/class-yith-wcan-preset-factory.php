@@ -4,7 +4,7 @@
  *
  * Defines a couple of static methods to allow easy access to Preset classes
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Presets
  * @version 4.0
  */
@@ -24,7 +24,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Factory' ) ) {
 		 * @param string|int|YITH_WCAN_Preset $preset  Preset id or slug.
 		 *
 		 * @return YITH_WCAN_Preset|bool Preset object or false on failure
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function get_preset( $preset ) {
 			try {
@@ -41,7 +40,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Factory' ) ) {
 		 * @param array $args Same parameters allowed for {@see get_presets}.
 		 *
 		 * @return int Count
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function count_presets( $args = array() ) {
 			$args = apply_filters( 'yith_wcan_presets_count_query_args', $args );
@@ -70,7 +68,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Factory' ) ) {
 		 * ].
 		 *
 		 * @return YITH_WCAN_Preset[]|bool List of matching presets or false on failure
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function get_presets( $args = array() ) {
 			$args = apply_filters( 'yith_wcan_preset_query_args', $args );
@@ -88,7 +85,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Factory' ) ) {
 		 * Queries database, to retrieve all presets matching arguments passed
 		 *
 		 * @return array|bool List of preset_id => preset_name, or false on failure.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function list_presets() {
 			try {

@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Product Feed PRO for WooCommerce
- * Version:     12.6.1
+ * Version:     12.7.8
  * Plugin URI:  https://www.adtribes.io/support/?utm_source=wpadmin&utm_medium=plugin&utm_campaign=woosea_product_feed_pro
  * Description: Configure and maintain your WooCommerce product feeds for Google Shopping, Catalog managers, Remarketing, Bing, Skroutz, Yandex, Comparison shopping websites and over a 100 channels more.
  * Author:      AdTribes.io
@@ -17,7 +17,7 @@
  * Domain Path: /languages
  *
  * WC requires at least: 4.4
- * WC tested up to: 7.7
+ * WC tested up to: 7.8
  *
  * Product Feed PRO for WooCommerce is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ if (!defined('ABSPATH')) {
  * Plugin versionnumber, please do not override.
  * Define some constants
  */
-define( 'WOOCOMMERCESEA_PLUGIN_VERSION', '12.6.1' );
+define( 'WOOCOMMERCESEA_PLUGIN_VERSION', '12.7.8' );
 define( 'WOOCOMMERCESEA_PLUGIN_NAME', 'woocommerce-product-feed-pro' );
 define( 'WOOCOMMERCESEA_PLUGIN_NAME_SHORT', 'woo-product-feed-pro' );
 
@@ -158,14 +158,13 @@ require plugin_dir_path(__FILE__) . 'classes/class-admin-notifications.php';
 require plugin_dir_path(__FILE__) . 'classes/class-update-channel.php';
 require plugin_dir_path(__FILE__) . 'classes/class-attributes.php';
 require plugin_dir_path(__FILE__) . 'classes/class-google-remarketing.php';
+require plugin_dir_path(__FILE__) . 'classes/class-caching.php';
 
 /**
  * Add links to the plugin page
  */
 function woosea_plugin_action_links($links, $file) {
-	static $this_plugin;
- 
-    	if (!$this_plugin) {
+    	if (!isset($this_plugin)) {
         	$this_plugin = plugin_basename(__FILE__);
     	}
  
@@ -862,35 +861,6 @@ function woosea_getelite_active_notification(){
 	}	
 }
 add_action( 'wp_ajax_woosea_getelite_active_notification', 'woosea_getelite_active_notification' );
-
-/**
- * Request our plugin users to write a review
- **/
-//function woosea_request_review(){
-//	// Only request for a review when:
-//	// Plugin activation has been > 1 week
-//	// Active projects > 0
-//
-//	$cron_projects = get_option( 'cron_projects' );
-//	if(!empty( $cron_projects )){
-//		$nr_projects = count($cron_projects);
-//		$first_activation = get_option ( 'woosea_first_activation' );
-//
-//
-//		$notification_interaction = get_option( 'woosea_review_interaction' );
-//		$current_time = time();
-//		$show_after = 604800; // Show only after one week
-//		$is_active = $current_time-$first_activation;
-//		$page = sanitize_text_field(basename($_SERVER['REQUEST_URI']));
-//
-//		if(($nr_projects > 0) AND ($is_active > $show_after) AND ($notification_interaction != "yes")){
-//			echo '<div class="notice notice-info review-notification">';
-//			echo '<table><tr><td></td><td><font color="green" style="font-weight:normal";><p>Hey, I noticed you have been using our plugin, <u>Product Feed PRO for WooCommerce by AdTribes.io</u>, for over a week now and have created product feed projects with it - that\'s awesome! Could you please do Eva and me a BIG favor and give it a 5-star rating on WordPress? Just to help us spread the word and boost our motivation. We would greatly appreciate if you would do so :)<br/>~ Adtribes.io support team<br><ul><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="https://wordpress.org/support/plugin/woo-product-feed-pro/reviews?rate=5#new-post" target="_blank" class="dismiss-review-notification">Ok, you deserve it</a></li><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="#" class="dismiss-review-notification">Nope, maybe later</a></li><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="#" class="dismiss-review-notification">I already did</a></li></ul></p></font></td></tr></table>';
-//			echo '</div>';	
-//		}
-//	}
-//}
-//add_action('admin_notices', 'woosea_request_review');
 
 /**
  * Add some JS and mark-up code on every front-end page in order to get the conversion tracking to work
@@ -2239,6 +2209,10 @@ add_action( 'wp_ajax_woosea_project_copy', 'woosea_project_copy' );
 function woosea_project_refresh(){
 	check_ajax_referer( 'woosea_ajax_nonce', 'security' );
 
+     	// Force garbage collection dump
+       	gc_enable();
+       	gc_collect_cycles();
+
 	$project_hash = sanitize_text_field($_POST['project_hash']);
         $feed_config = get_option( 'cron_projects' );
 	
@@ -2246,7 +2220,58 @@ function woosea_project_refresh(){
 	$allowed_roles = array( 'administrator','editor','author' );
 
 	if ( array_intersect( $allowed_roles, $user->roles ) ) {
-        	foreach ( $feed_config as $key => $val ) {
+	
+	        // Make sure content of feeds is not being cached
+
+        	// Make sure feeds are not being cached
+        	$no_caching = new WooSEA_Caching();
+
+        	// LiteSpeed Caching
+        	if (class_exists( 'LiteSpeed\Core' ) || defined( 'LSCWP_DIR' ) ) {
+                	$no_caching->litespeed_cache();
+        	}
+
+        	// WP Fastest Caching
+        	if (class_exists( 'WpFastestCache' ) ) {
+                	$no_caching->wp_fastest_cache();
+        	}
+
+        	// WP Super Caching
+        	if (function_exists( 'wpsc_init' ) ) {
+                	$no_caching->wp_super_cache();
+        	}
+
+        	// Breeze Caching
+        	if (class_exists( 'Breeze_Admin' ) ) {
+                	$no_caching->breeze_cache();
+        	}
+
+        	// WP Optimize Caching
+        	if (class_exists( 'WP_Optimize' ) ) {
+                	$no_caching->wp_optimize_cache();
+        	}
+
+        	// Cache Enabler
+        	if (class_exists( 'Cache_Enabler' ) ) {
+                	$no_caching->cache_enabler_cache();
+        	}
+
+        	// Swift Performance Lite
+        	if (class_exists( 'Swift_Performance_Lite' ) ) {
+                	$no_caching->swift_performance_cache();
+        	}
+
+        	// Comet Cache
+        	if (is_plugin_active( 'comet-cache/comet-cache.php' ) ) {
+                	$no_caching->comet_cache();
+        	}
+
+        	// HyperCache
+        	if (class_exists( 'HyperCache' ) ) {
+                	$no_caching->hyper_cache();
+        	}		
+
+		foreach ( $feed_config as $key => $val ) {
                 	if (isset($val['project_hash']) AND ($val['project_hash'] == $project_hash)){
         			$batch_project = "batch_project_".$project_hash;
 				if (!get_option( $batch_project )){
@@ -2357,11 +2382,10 @@ add_action( 'wp_ajax_woosea_project_status', 'woosea_project_status' );
 function woosea_review_notification() {
 	// Update review notification status
         check_ajax_referer( 'woosea_ajax_nonce', 'security' );
-
         $user = wp_get_current_user();
         $allowed_roles = array( 'administrator','editor','author' );
 
-        if ( array_intersect( $allowed_roles, $user->roles ) ) {
+	if ( array_intersect( $allowed_roles, $user->roles ) ) {
         	update_option( 'woosea_review_interaction', 'yes', 'yes');
 	}	
 }
@@ -4571,6 +4595,56 @@ function woosea_create_all_feeds(){
  	// Only update the feed(s) when such a change occured
 	$products_changes = "no"; // default value
 	$products_changes = get_option('woosea_allow_update');
+
+	// Make sure content of feeds is not being cached
+
+	// Make sure feeds are not being cached
+	$no_caching = new WooSEA_Caching();
+	
+	// LiteSpeed Caching
+	if (class_exists( 'LiteSpeed\Core' ) || defined( 'LSCWP_DIR' ) ) {
+		$no_caching->litespeed_cache();
+	}
+
+	// WP Fastest Caching
+	if (class_exists( 'WpFastestCache' ) ) {
+		$no_caching->wp_fastest_cache();
+	}	
+
+	// WP Super Caching
+	if (function_exists( 'wpsc_init' ) ) {
+		$no_caching->wp_super_cache();
+	}
+
+	// Breeze Caching
+	if (class_exists( 'Breeze_Admin' ) ) {
+		$no_caching->breeze_cache();
+	}
+
+	// WP Optimize Caching
+	if (class_exists( 'WP_Optimize' ) ) {
+		$no_caching->wp_optimize_cache();
+	}
+
+	// Cache Enabler
+	if (class_exists( 'Cache_Enabler' ) ) {
+		$no_caching->cache_enabler_cache();
+	}
+
+	// Swift Performance Lite
+	if (class_exists( 'Swift_Performance_Lite' ) ) {
+		$no_caching->swift_performance_cache();
+	}
+
+	// Comet Cache
+	if (is_plugin_active( 'comet-cache/comet-cache.php' ) ) {
+		$no_caching->comet_cache();
+	}
+
+	// HyperCache
+	if (class_exists( 'HyperCache' ) ) {
+		$no_caching->hyper_cache();
+	}
 
 	if(!empty($feed_config)){	
 		foreach ( $feed_config as $key => $val ) {

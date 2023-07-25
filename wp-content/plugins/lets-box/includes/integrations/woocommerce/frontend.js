@@ -89,11 +89,11 @@ jQuery(document).ready(function ($) {
                     this.options.str_close_title +
                     '" onclick="modal_action.close();"><i class="eva eva-close eva-lg" aria-hidden="true"></i></a></div>'
             );
-            var modalbody = $('<div class="letsbox-modal-body" tabindex="0" style="height: 100%; padding:0;"></div>');
+            var modalbody = $('<div class="letsbox-modal-body" tabindex="0"></div>');
             var modaldialog = $(
-                '<div id="letsbox-modal-action" class="LetsBox letsbox-modal ' +
+                '<div id="letsbox-modal-action" class="LetsBox letsbox-modal wpcp-woocommerce-upload-container ' +
                     this.options.content_skin +
-                    '"><div class="modal-dialog" style="max-width: 80vw;"><div class="modal-content" style="max-height: 90%;"></div></div></div>'
+                    '"><div class="modal-dialog"><div class="modal-content"></div></div></div>'
             );
 
             $('body').append(modaldialog);

@@ -2,7 +2,7 @@
 /**
  * Filter Presets Table class
  *
- * @author  Your Inspiration Themes
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Tables
  * @version 1.0.0
  */
@@ -28,10 +28,26 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 			// Set parent defaults.
 			parent::__construct(
 				array(
-					'singular' => 'affiliate',
-					'plural'   => 'affiliates',
+					'singular' => 'preset',
+					'plural'   => 'presets',
 					'ajax'     => false,
 				)
+			);
+		}
+
+		/**
+		 * Gets a list of CSS classes for the WP_List_Table table tag.
+		 *
+		 * @return string[] Array of CSS classes for the table tag.
+		 * @since 1.0.0
+		 */
+		protected function get_table_classes() {
+
+			return array(
+				'widefat',
+				'fixed',
+				'striped',
+				'yith-plugin-fw__classic-table',
 			);
 		}
 
@@ -74,7 +90,8 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 		 * @param YITH_WCAN_Preset $item Current item.
 		 */
 		public function column_shortcode( $item ) {
-			echo sprintf( '<span class="copy-on-click"><input type="text" readonly value="[yith_wcan_filters slug=&quot;%s&quot;]"/></span>', esc_attr( $item->get_slug() ) );
+			$shortcode = sprintf( '[yith_wcan_filters slug=&quot;%s&quot;]', esc_attr( $item->get_slug() ) );
+			yith_plugin_fw_copy_to_clipboard( $shortcode );
 		}
 
 		/**
@@ -84,10 +101,10 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 		 */
 		public function column_actions( $item ) {
 			$available_actions = array(
-				'change_status',
 				'delete',
 				'clone',
 				'edit',
+				'change_status',
 			);
 
 			foreach ( $available_actions as $action ) {
@@ -129,10 +146,15 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 		 * @param YITH_WCAN_Preset $item Current item.
 		 */
 		public function action_edit( $item ) {
-			echo sprintf(
-				'<a class="show-on-hover edit" href="%s" title="%s"><i class="yith-icon yith-icon-edit"></i></a>',
-				esc_url( $item->get_admin_edit_url() ),
-				esc_html_x( 'Edit this preset', '[Admin] Preset edit action label', 'yith-woocommerce-ajax-navigation' )
+			yith_plugin_fw_get_component(
+				array(
+					'type'   => 'action-button',
+					'title'  => esc_html_x( 'Edit this preset', '[Admin] Preset edit action label', 'yith-woocommerce-ajax-navigation' ),
+					'action' => 'edit',
+					'icon'   => 'edit',
+					'url'    => esc_url( $item->get_admin_edit_url() ),
+					'class'  => 'show-on-hover edit',
+				)
 			);
 		}
 
@@ -142,10 +164,15 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 		 * @param YITH_WCAN_Preset $item Current item.
 		 */
 		public function action_clone( $item ) {
-			echo sprintf(
-				'<a class="show-on-hover clone" href="%s" title="%s"><i class="yith-icon yith-icon-clone"></i></a>',
-				esc_url( $item->get_admin_clone_url() ),
-				esc_html_x( 'Clone this preset', '[Admin] Preset clone action label', 'yith-woocommerce-ajax-navigation' )
+			yith_plugin_fw_get_component(
+				array(
+					'type'   => 'action-button',
+					'title'  => esc_html_x( 'Clone this preset', '[Admin] Preset clone action label', 'yith-woocommerce-ajax-navigation' ),
+					'action' => 'clone',
+					'icon'   => 'clone',
+					'url'    => esc_url( $item->get_admin_clone_url() ),
+					'class'  => 'show-on-hover clone',
+				)
 			);
 		}
 
@@ -155,12 +182,23 @@ if ( ! class_exists( 'YITH_WCAN_Filter_Presets_Table' ) ) {
 		 * @param YITH_WCAN_Preset $item Current item.
 		 */
 		public function action_delete( $item ) {
-			echo sprintf(
-				'<a class="show-on-hover delete" href="%s" title="%s" onclick="return confirm(\'%s\');"><i class="yith-icon yith-icon-trash"></i></a>',
-				esc_url( $item->get_admin_delete_url() ),
-				esc_attr_x( 'Delete this preset', '[Admin] Preset delete action label', 'yith-woocommerce-ajax-navigation' ),
-				esc_attr_x( 'Are you sure you want to delete this preset?', '[Admin] Preset delete confirm label', 'yith-woocommerce-ajax-navigation' )
+			yith_plugin_fw_get_component(
+				array(
+					'title'  => __( 'Delete', 'yith-woocommerce-waiting-list' ),
+					'class'  => 'yith-require-confirmation-modal action__trash',
+					'type'   => 'action-button',
+					'action' => 'delete',
+					'icon'   => 'trash',
+					'url'    => esc_url( $item->get_admin_delete_url() ),
+					'data'   => array(
+						'title'    => esc_attr_x( 'Delete this preset', '[Admin] Preset delete action label', 'yith-woocommerce-ajax-navigation' ),
+						'message'  => nl2br( __( "This item will be removed from the list.\nDo you wish to continue?", 'yith-woocommerce-waiting-list' ) ),
+						'action'   => 'delete',
+
+					),
+				)
 			);
+
 		}
 
 		/**

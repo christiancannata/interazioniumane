@@ -2,7 +2,7 @@
 /**
  * Filters Preset shortcode
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Templates\Shortcodes
  * @version 4.0.0
  */

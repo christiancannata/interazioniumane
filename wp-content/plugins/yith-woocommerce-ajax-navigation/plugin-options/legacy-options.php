@@ -2,7 +2,7 @@
 /**
  * Legacy options
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Options
  * @version 4.0.0
  */

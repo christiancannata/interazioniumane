@@ -1,6 +1,6 @@
 === Lets-Box ===
 Requires at least: 5.3
-Tested up to: 6.2
+Tested up to: 6.2.2
 Requires PHP: 7.4
 
 Say hello to the most popular WordPress Box plugin! LetsBox is a user-friendly, highly customizable, innovative Box integration plugin for WordPress that displays your Box files in a beautiful way. No coding skills required!
