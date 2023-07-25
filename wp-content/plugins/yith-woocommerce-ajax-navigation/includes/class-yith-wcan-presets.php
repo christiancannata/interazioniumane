@@ -2,7 +2,7 @@
 /**
  * Manage presets, register CPT and offers utility to retrieve them
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Presets
  * @version 4.0.0
  */
@@ -44,7 +44,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Constructor method for this class
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function __construct() {
 			// register post type.
@@ -78,7 +77,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Return post type slug
 		 *
 		 * @return string
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function get_post_type() {
 			return apply_filters( 'yith_wcan_presets_post_type', $this->post_type );
@@ -88,7 +86,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Register post type for presets
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function register_post_type() {
 			$post_type_labels = array(
@@ -114,7 +111,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * @param array $data_stores Array of available data stores.
 		 *
 		 * @return array Filtered array of data stores.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function register_data_stores( $data_stores ) {
 			$data_stores['filter_preset']  = 'YITH_WCAN_Preset_Data_Store';
@@ -129,7 +125,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Prints upgrade note anchor on preset panel
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function show_upgrade_note_anchor() {
 			if ( ! get_option( 'yith_wcan_upgrade_note_status', 0 ) ) {
@@ -143,7 +138,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Prints upgrade note modal on preset panel
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function show_upgrade_note_modal() {
 			if ( ! get_option( 'yith_wcan_upgrade_note_status', 0 ) ) {
@@ -168,7 +162,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * @param array  $params Array of params.
 		 *
 		 * @return string Filtered url.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function add_new_preset_url( $url, $params ) {
 			if ( ! isset( $params['post_type'] ) || $this->get_post_type() !== $params['post_type'] ) {
@@ -190,7 +183,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Redirects then to preset edit page
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function save_preset() {
 			$preset_id  = isset( $_POST['id'] ) ? (int) $_POST['id'] : false;
@@ -269,7 +261,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Redirects then to Presets list
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function clone_preset() {
 			$preset     = isset( $_GET['preset'] ) ? (int) $_GET['preset'] : false;
@@ -303,7 +294,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Redirects then to Presets list
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function delete_preset() {
 			$preset     = isset( $_GET['preset'] ) ? (int) $_GET['preset'] : false;
@@ -336,7 +326,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Hide upgrade note when user dismiss the modal
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function hide_upgrade_note() {
 			$return_url = YITH_WCAN()->admin->get_panel_url();
@@ -603,7 +592,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * @param array $filter Data from request.
 		 *
 		 * @return array Cleared data.
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		protected function clear_preset_filter( $filter ) {
 			// set missing information.
@@ -661,7 +649,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Load more filters for a specific preset
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function load_more_filters() {
 			check_ajax_referer( 'load_more_filters' );
@@ -696,7 +683,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Change preset status when correct ajax call is invoked
 		 *
 		 * @return void
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function change_preset_status() {
 			check_ajax_referer( 'change_preset_status' );
@@ -795,7 +781,6 @@ if ( ! class_exists( 'YITH_WCAN_Presets' ) ) {
 		 * Return single instance for this class
 		 *
 		 * @return YITH_WCAN_Presets
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function instance() {
 			if ( is_null( self::$instance ) ) {
@@ -813,7 +798,6 @@ if ( ! function_exists( 'YITH_WCAN_Presets' ) ) {
 	 *
 	 * @return YITH_WCAN_Presets
 	 * @since 4.0.0
-	 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 	 */
 	function YITH_WCAN_Presets() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 		return YITH_WCAN_Presets::instance();

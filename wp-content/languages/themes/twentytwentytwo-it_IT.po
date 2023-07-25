@@ -2,22 +2,73 @@
 # This file is distributed under the same license as the Themes - Twenty Twenty-Two package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-01-27 18:04:24+0000\n"
+"PO-Revision-Date: 2023-04-11 11:45:43+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: GlotPress/3.0.0-alpha.2\n"
+"X-Generator: GlotPress/4.0.0-alpha.4\n"
 "Language: it\n"
 "Project-Id-Version: Themes - Twenty Twenty-Two\n"
 
 #. Description of the theme
-msgid "Built on a solidly designed foundation, Twenty Twenty-Two embraces the idea that everyone deserves a truly unique website. The theme’s subtle styles are inspired by the diversity and versatility of birds: its typography is lightweight yet strong, its color palette is drawn from nature, and its layout elements sit gently on the page. The true richness of Twenty Twenty-Two lies in its opportunity for customization. The theme is built to take advantage of the Full Site Editing features introduced in WordPress 5.9, which means that colors, typography, and the layout of every single page on your site can be customized to suit your vision. It also includes dozens of block patterns, opening the door to a wide range of professionally designed layouts in just a few clicks. Whether you’re building a single-page website, a blog, a business website, or a portfolio, Twenty Twenty-Two will help you create a site that is uniquely yours."
-msgstr "Sviluppato su solide fondamenta ben progettate, Twenty Twenty-Two abbraccia l'idea che tutti meritano un sito web davvero unico. Gli stili tenui del tema si ispirano alla diversità e alla versatilità degli uccelli: la tipografia è leggera, ma decisa, la tavolozza dei colori richiama la natura e gli elementi del layout si distribuiscono con delicatezza nella pagina. La vera ricchezza di Twenty Twenty-Two sta nelle sue possibilità di personalizzazione. Il tema è stato sviluppato per sfruttare le funzionalità del Full Site Editing introdotte con WordPress 5.9, il che significa che i colori, la tipografia e il layout di ogni singola pagina del tuo sito possono essere personalizzati per adattarsi alla tua immaginazione. Include anche dozzine di modelli di blocchi, per darti un'ampia gamma di layout professionali tramite pochi clic. Che tu stia costruendo un sito a pagina singola, un blog, un sito commerciale o un portfolio, Twenty Twenty-Two ti aiuterà a creare un sito che sarà veramente tuo."
+#, gp-priority: high
+msgid "Built on a solidly designed foundation, Twenty Twenty-Two embraces the idea that everyone deserves a truly unique website. The theme’s subtle styles are inspired by the diversity and versatility of birds: its typography is lightweight yet strong, its color palette is drawn from nature, and its layout elements sit gently on the page. The true richness of Twenty Twenty-Two lies in its opportunity for customization. The theme is built to take advantage of the Site Editor features introduced in WordPress 5.9, which means that colors, typography, and the layout of every single page on your site can be customized to suit your vision. It also includes dozens of block patterns, opening the door to a wide range of professionally designed layouts in just a few clicks. Whether you’re building a single-page website, a blog, a business website, or a portfolio, Twenty Twenty-Two will help you create a site that is uniquely yours."
+msgstr "Sviluppato su solide fondamenta ben progettate, Twenty Twenty-Two abbraccia l'idea che tutti meritano un sito web davvero unico. Gli stili tenui del tema si ispirano alla diversità e alla versatilità degli uccelli: la tipografia è leggera, ma decisa, la tavolozza dei colori richiama la natura e gli elementi del layout si distribuiscono con delicatezza nella pagina. La vera ricchezza di Twenty Twenty-Two sta nelle sue possibilità di personalizzazione. Il tema è stato sviluppato per sfruttare le funzionalità del Full Site Editing introdotte con WordPress 5.9, il che significa che i colori, la tipografia e il layout di ogni singola pagina del tuo sito possono essere personalizzati per adattarsi alla tua immaginazione. Include anche dozzine di pattern di blocchi, per darti un'ampia gamma di layout professionali tramite pochi clic. Che tu stia costruendo un sito a pagina singola, un blog, un sito commerciale o un portfolio, Twenty Twenty-Two ti aiuterà a creare un sito che sarà veramente tuo."
 
 #. Theme Name of the theme
+#, gp-priority: high
 msgid "Twenty Twenty-Two"
 msgstr "Twenty Twenty-Two"
+
+#: styles/swiss.json
+msgctxt "Duotone name"
+msgid "Default filter"
+msgstr "Filtro predefinito"
+
+#: styles/swiss.json
+msgctxt "Font family name"
+msgid "Inter"
+msgstr "Inter"
+
+#: styles/swiss.json
+msgctxt "Style variation name"
+msgid "Swiss"
+msgstr "Svizzero"
+
+#: styles/pink.json
+msgctxt "Font family name"
+msgid "IBM Plex Mono"
+msgstr "IBM Plex Mono"
+
+#: styles/pink.json
+msgctxt "Font family name"
+msgid "IBM Plex Sans"
+msgstr "IBM Plex Sans"
+
+#: styles/pink.json
+msgctxt "Style variation name"
+msgid "Pink"
+msgstr "Rosa"
+
+#: styles/blue.json
+msgctxt "Font family name"
+msgid "DM Sans"
+msgstr "DM Sans"
+
+#: styles/blue.json
+msgctxt "Style variation name"
+msgid "Blue"
+msgstr "Blu"
+
+#: inc/patterns/hidden-404.php:14
+msgid "Search"
+msgstr "Cerca"
+
+#: inc/patterns/hidden-404.php:14
+msgctxt "label"
+msgid "Search"
+msgstr "Cerca"
 
 #: theme.json
 msgctxt "Template part name"
@@ -129,27 +180,27 @@ msgctxt "Gradient name"
 msgid "Vertical secondary to tertiary"
 msgstr "In verticale dal secondario al terziario"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Tertiary"
 msgstr "Terziario"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Secondary"
 msgstr "Secondario"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Primary"
 msgstr "Primario"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Background"
 msgstr "Sfondo"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Foreground"
 msgstr "Primo piano"
@@ -242,7 +293,7 @@ msgstr "Ti diamo il benvenuto"
 
 #: inc/patterns/page-layout-two-columns.php:10
 msgid "<em>Goldfinch </em><br><em>&amp; Sparrow</em>"
-msgstr "<em>Cardellino </em><br><em>e passero</em>"
+msgstr "<em>Cardellino</em><br><em>e passero</em>"
 
 #: inc/patterns/page-layout-two-columns.php:6
 msgid "Page layout with two columns"
@@ -254,7 +305,7 @@ msgstr "Ehi ciao. Il mio nome è Angelo e hai trovato il mio blog. Scrivo di una
 
 #: inc/patterns/page-layout-image-text-and-video.php:42
 msgid "An illustration of a bird in flight"
-msgstr "Un'illustrazione di un uccello in volo"
+msgstr "Un'illustrazione di un pettirosso in volo"
 
 #: inc/patterns/page-layout-image-text-and-video.php:21
 msgid "Screening"
@@ -316,7 +367,7 @@ msgstr "Emery<br>Driscoll"
 
 #: inc/patterns/page-about-media-right.php:9
 msgid "An image of a bird flying"
-msgstr "Un'immagine di un uccello in volo"
+msgstr "Un'immagine di un pettirosso in volo"
 
 #: inc/patterns/page-about-media-right.php:6
 msgid "About page with media on the right"
@@ -337,7 +388,7 @@ msgstr "Doug"
 #: inc/patterns/page-about-media-left.php:9
 #: inc/patterns/page-sidebar-poster.php:26
 msgid "Image of a bird on a branch"
-msgstr "Immagine di un uccello su un ramo"
+msgstr "Immagine di un pettirosso su un ramo"
 
 #: inc/patterns/page-about-media-left.php:6
 msgid "About page with media on the left"
@@ -387,7 +438,7 @@ msgstr "Un guaio di colibrì"
 #: inc/patterns/page-about-links-dark.php:13
 #: inc/patterns/page-about-links.php:10
 msgid "Logo featuring a flying bird"
-msgstr "Logo che include un uccello in volo"
+msgstr "Logo che include un pettirosso in volo"
 
 #: inc/patterns/page-about-links-dark.php:6
 msgid "About page links (dark)"
@@ -423,7 +474,7 @@ msgstr "Acquista le mie opere"
 
 #: inc/patterns/hidden-bird.php:9 inc/patterns/hidden-heading-and-bird.php:10
 msgid "Heading and bird image"
-msgstr "Intestazione e immagine di uccello"
+msgstr "Intestazione e immagine di un pettirosso"
 
 #: inc/patterns/hidden-404.php:12
 msgid "This page could not be found. Maybe try a search?"
@@ -451,16 +502,13 @@ msgid "Title and button header"
 msgstr "Header con titolo e pulsante"
 
 #: inc/patterns/header-text-only-with-tagline-black-background.php:6
-msgid "Text-only header with tagline and black background"
-msgstr "Header solo testuale con il motto e lo sfondo nero"
-
-#: inc/patterns/header-text-only-salmon-background.php:6
-msgid "Text-only header with salmon background"
-msgstr "Header solo testuale con il motto e lo sfondo salmone"
+msgid "Text-only header with tagline and background"
+msgstr "Header solo testuale con il motto e lo sfondo"
 
 #: inc/patterns/header-text-only-green-background.php:6
-msgid "Text-only header with green background"
-msgstr "Header solo testuale con il motto e lo sfondo verde"
+#: inc/patterns/header-text-only-salmon-background.php:6
+msgid "Text-only header with background"
+msgstr "Header solo testuale con sfondo"
 
 #: inc/patterns/header-stacked.php:6
 msgid "Logo and navigation header"
@@ -471,16 +519,16 @@ msgid "Small header with dark background"
 msgstr "Header piccolo con sfondo scuro"
 
 #: inc/patterns/header-logo-navigation-social-black-background.php:6
-msgid "Logo, navigation, and social links header with black background"
-msgstr "Header con logo, navigazione e link ai social con sfondo nero"
+msgid "Logo, navigation, and social links header with background"
+msgstr "Header con logo, navigazione e link ai social con sfondo"
 
 #: inc/patterns/header-logo-navigation-offset-tagline.php:6
 msgid "Logo, navigation, and offset tagline Header"
 msgstr "Header con logo, navigazione e motto sfalsato"
 
 #: inc/patterns/header-logo-navigation-gray-background.php:6
-msgid "Logo and navigation header with gray background"
-msgstr "Header con logo e navigazione con sfondo grigio"
+msgid "Logo and navigation header with background"
+msgstr "Header con logo e navigazione con sfondo"
 
 #: inc/patterns/header-large-dark.php:24
 #: inc/patterns/hidden-heading-and-bird.php:14
@@ -493,7 +541,7 @@ msgstr "Header grande con sfondo scuro"
 
 #: inc/patterns/header-image-background.php:11
 msgid "Illustration of a flying bird"
-msgstr "Illustrazione di un uccello in volo"
+msgstr "Illustrazione di un pettirosso in volo"
 
 #: inc/patterns/header-image-background.php:6
 msgid "Header with image background"
@@ -508,16 +556,16 @@ msgid "Default header"
 msgstr "Header predefinito"
 
 #: inc/patterns/header-centered-title-navigation-social.php:6
-msgid "Centered header with navigation, social links, and salmon background"
-msgstr "Header centrato con navigazione, link ai social e sfondo salmone"
+msgid "Centered header with navigation, social links, and background"
+msgstr "Header centrato con navigazione, link ai social e sfondo"
 
 #: inc/patterns/header-centered-logo.php:6
 msgid "Header with centered logo"
 msgstr "Header con logo centrato"
 
 #: inc/patterns/header-centered-logo-black-background.php:6
-msgid "Header with centered logo and black background"
-msgstr "Header con logo centrato e sfondo nero"
+msgid "Header with centered logo and background"
+msgstr "Header con logo centrato e sfondo"
 
 #: inc/patterns/general-wide-image-intro-buttons.php:31
 msgid "Learn More"
@@ -534,7 +582,7 @@ msgstr "Immagine larga con introduzione e pulsanti"
 #: inc/patterns/general-video-trailer.php:16
 #: inc/patterns/general-wide-image-intro-buttons.php:22
 msgid "A film about hobbyist bird watchers, a catalog of different birds, paired with the noises they make. Each bird is listed by their scientific name so things seem more official."
-msgstr "Un film sugli appassionati di bird watching, un catalogo con differenti uccelli, abbinati agli suoni che emettono. Ogni uccello è elencato col suo nome scientifico così tutto sembra più ufficiale."
+msgstr "Un film sugli appassionati di bird watching, un catalogo con differenti volatili, abbinati ai versi che emettono. Ogni volatile è elencato col suo nome scientifico così tutto sembra più ufficiale."
 
 #: inc/patterns/general-video-trailer.php:12
 #: inc/patterns/page-layout-image-text-and-video.php:49
@@ -586,11 +634,11 @@ msgstr "PROIEZIONE"
 #: inc/patterns/header-large-dark.php:29 inc/patterns/header-small-dark.php:25
 #: inc/patterns/hidden-bird.php:12 inc/patterns/hidden-heading-and-bird.php:19
 msgid "Illustration of a bird flying."
-msgstr "Illustrazione di un uccello che vola."
+msgstr "Illustrazione di un pettirosso che vola."
 
 #: inc/patterns/general-two-images-text.php:11
 msgid "Illustration of a bird sitting on a branch."
-msgstr "Illustrazione di un uccello posato su di un ramo."
+msgstr "Illustrazione di un pettirosso posato su di un ramo."
 
 #: inc/patterns/general-two-images-text.php:6
 msgid "Two images with text"
@@ -716,7 +764,7 @@ msgstr "Elenco degli eventi"
 #: inc/patterns/general-layered-images-with-duotone.php:10
 #: inc/patterns/page-sidebar-blog-posts-right.php:58
 msgid "Illustration of a flying bird."
-msgstr "Illustrazione di un uccello che vola."
+msgstr "Illustrazione di un pettirosso che vola."
 
 #: inc/patterns/general-layered-images-with-duotone.php:9
 #: inc/patterns/header-image-background-overlay.php:11
@@ -746,7 +794,7 @@ msgstr "Un lungo elenco di nomi"
 
 #: inc/patterns/general-image-with-caption.php:15
 msgid "A beautiful bird featuring a surprising set of color feathers."
-msgstr "Un magnifico uccello con un sorprendente piumaggio colorato."
+msgstr "Un magnifico volatile con un sorprendente piumaggio colorato."
 
 #: inc/patterns/general-image-with-caption.php:11
 msgid "Hummingbird"
@@ -875,14 +923,17 @@ msgstr "Footer"
 msgid "Featured"
 msgstr "In evidenza"
 
+#. Theme URI of the theme
+#, gp-priority: low
+msgid "https://wordpress.org/themes/twentytwentytwo/"
+msgstr "https://wordpress.org/themes/twentytwentytwo/"
+
 #. Author URI of the theme
+#, gp-priority: low
 msgid "https://wordpress.org/"
 msgstr "https://wordpress.org/"
 
 #. Author of the theme
+#, gp-priority: low
 msgid "the WordPress team"
-msgstr "the WordPress team"
-
-#. Theme URI of the theme
-msgid "https://github.com/wordpress/twentytwentytwo/"
-msgstr "https://github.com/wordpress/twentytwentytwo/"
+msgstr "il team di WordPress"

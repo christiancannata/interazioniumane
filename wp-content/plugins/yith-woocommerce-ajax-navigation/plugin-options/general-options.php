@@ -12,11 +12,12 @@ return apply_filters(
 	array(
 
 		'general' => array(
-			'general_section_start' => array(
-				'name' => _x( 'General settings', '[ADMIN] General settings page', 'yith-woocommerce-ajax-navigation' ),
+
+			'reset_section_start' => array(
+				'name' => _x( 'Reset button', '[ADMIN] General settings page', 'yith-woocommerce-ajax-navigation' ),
 				'type' => 'title',
 				'desc' => '',
-				'id'   => 'yith_wcan_general_settings',
+				'id'   => 'yith_wcan_reset_settings',
 			),
 
 			'show_reset'            => array(
@@ -46,9 +47,9 @@ return apply_filters(
 				),
 			),
 
-			'general_section_end'   => array(
+			'reset_section_end'   => array(
 				'type' => 'sectionend',
-				'id'   => 'yith_wcan_general_settings',
+				'id'   => 'yith_wcan_reset_settings',
 			),
 
 		),

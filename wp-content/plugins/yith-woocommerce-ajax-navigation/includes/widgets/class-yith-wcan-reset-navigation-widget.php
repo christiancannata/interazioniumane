@@ -2,7 +2,7 @@
 /**
  * Reset button widget
  *
- * @author  Your Inspiration Themes
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Widgets
  * @version 1.3.2
  */
@@ -40,7 +40,6 @@ if ( ! class_exists( 'YITH_WCAN_Reset_Navigation_Widget' ) ) {
 			 * Deprecated Filters Map
 			 *
 			 * @param mixed|array $deprecated_filters_map Array of deprecated filters
-			 * @author Andrea Grillo <andrea.grillo@yithemes.com>
 			 * @since 3.11.7
 			 * @ return void
 			 */

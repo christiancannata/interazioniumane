@@ -4,7 +4,7 @@
  *
  * Defines all the shortcodes supported by the plugin, and additional functions to support external compose
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 4.0
  */

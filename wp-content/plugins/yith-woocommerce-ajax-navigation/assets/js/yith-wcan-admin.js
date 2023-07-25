@@ -288,4 +288,31 @@ jQuery( function ( $ ) {
 			.find( '.yith_wcan_tag_list_checkbox' )
 			.attr( 'checked', false );
 	} );
+
+	$( document )
+		.find( '.yith-add-button' )
+		.appendTo( '.yith-plugin-fw__panel__content__page__title' );
+
+	$( document ).on(
+		'click',
+		'.yith-require-confirmation-modal.action__trash',
+		function ( e ) {
+			e.preventDefault();
+			e.stopPropagation();
+			const title = $( this ).data( 'title' ),
+				message = $( this ).data( 'message' ),
+				url = $( this )
+					.find( '.yith-plugin-fw__action-button__link' )
+					.attr( 'href' );
+			// eslint-disable-next-line no-undef
+			yith.ui.confirm( {
+				closeAfterConfirm: false,
+				title,
+				message,
+				onConfirm() {
+					window.location.href = url;
+				},
+			} );
+		}
+	);
 } );

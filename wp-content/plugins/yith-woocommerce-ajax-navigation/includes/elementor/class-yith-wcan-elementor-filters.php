@@ -2,7 +2,7 @@
 /**
  * Filter Preset widget for Elementor
  *
- * @author Your Inspiration Themes
+ * @author YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Elementor
  * @version 4.0.0
  */

@@ -4,7 +4,7 @@
  *
  * Filters WooCommerce query, to show only products matching selection
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 4.0.0
  */
@@ -1293,7 +1293,6 @@ if ( ! class_exists( 'YITH_WCAN_Query' ) ) {
 		 * Query class Instance
 		 *
 		 * @return YITH_WCAN_Query Query class instance
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public static function instance() {
 			if ( is_null( static::$instance ) ) {

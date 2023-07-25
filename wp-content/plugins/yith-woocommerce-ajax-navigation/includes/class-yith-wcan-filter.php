@@ -5,7 +5,7 @@
  * Offers method to read and set properties of the single filter
  * Subclasses may define methods specific to a certain type of filter, and output for the filter
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 4.0.0
  */

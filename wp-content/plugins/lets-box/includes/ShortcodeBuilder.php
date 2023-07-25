@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -356,14 +356,14 @@ class ShortcodeBuilder
                         'default' => true,
                         'type' => 'checkbox',
                         'toggle_container' => '#previewrole_panel',
-                        'modules' => ['files', 'search'],
+                        'modules' => ['files', 'search', 'carousel'],
                     ],
                     'previewrole_panel' => [
                         'title' => '',
                         'description' => '',
                         'type' => 'toggle_container',
                         'indent' => true,
-                        'modules' => ['files', 'search'],
+                        'modules' => ['files', 'search', 'carousel'],
                         'fields' => [
                             'previewinline' => [
                                 'title' => esc_html__('Inline Preview', 'wpcloudplugins'),
@@ -378,7 +378,7 @@ class ShortcodeBuilder
                                 'description' => esc_html__('Select which roles or users should be able to perform this action via the module.', 'wpcloudplugins'),
                                 'default' => ['all'],
                                 'type' => 'user_selectbox',
-                                'modules' => ['files', 'search'],
+                                'modules' => ['files', 'search', 'carousel'],
                             ],
                         ],
                     ],
@@ -471,7 +471,7 @@ class ShortcodeBuilder
                                 'default' => ['all'],
                                 'type' => 'user_selectbox',
                                 'modules' => ['files', 'gallery'],
-                            ],                             
+                            ],
                             'searchcontents' => [
                                 'title' => esc_html__('Full-Text search', 'wpcloudplugins'),
                                 'description' => esc_html__('Search in file content, descriptions, tags and other metadata.', 'wpcloudplugins'),
@@ -1028,7 +1028,7 @@ class ShortcodeBuilder
                         'default' => true,
                         'type' => 'checkbox',
                         'toggle_container' => '#playlist_panel',
-                        'modules' => ['audio', 'video'],                       
+                        'modules' => ['audio', 'video'],
                     ],
                     'playlist_panel' => [
                         'title' => '',
@@ -1047,9 +1047,9 @@ class ShortcodeBuilder
                                     'list' => ['title' => esc_html__('List View', 'wpcloudplugins')],
                                 ],
                                 'notice_class' => 'info',
-                                'notice' => esc_html__('Older media player skins do not support some of the settings.', 'wpcloudplugins'),                                
+                                'notice' => esc_html__('Older media player skins do not support some of the settings.', 'wpcloudplugins'),
                                 'modules' => ['audio', 'video'],
-                            ],                            
+                            ],
                             'showplaylistonstart' => [
                                 'title' => esc_html__('Playlist open on start', 'wpcloudplugins'),
                                 'description' => esc_html__('Display the playlist directly when the module is rendered.', 'wpcloudplugins'),
@@ -1378,7 +1378,7 @@ class ShortcodeBuilder
                 'title' => esc_html__('Lightbox', 'wpcloudplugins'),
                 'description' => '',
                 'type' => 'panel',
-                'modules' => ['files', 'gallery', 'search'],
+                'modules' => ['files', 'gallery', 'search', 'carousel'],
                 'accordion' => true,
                 'fields' => [
                     'lightboxthumbs' => [
@@ -1386,21 +1386,21 @@ class ShortcodeBuilder
                         'description' => esc_html__('Show thumbnails of the files inside the Lightbox.', 'wpcloudplugins'),
                         'default' => true,
                         'type' => 'checkbox',
-                        'modules' => ['files', 'gallery', 'search'],
+                        'modules' => ['files', 'gallery', 'search', 'carousel'],
                     ],
                     'lightboxnavigation' => [
                         'title' => esc_html__('Navigation', 'wpcloudplugins'),
                         'description' => esc_html__('Navigate through your documents in the inline preview. Disable when each document should be shown individually without navigation arrows.', 'wpcloudplugins'),
                         'default' => true,
                         'type' => 'checkbox',
-                        'modules' => ['files', 'gallery', 'search'],
+                        'modules' => ['files', 'gallery', 'search', 'carousel'],
                     ],
                     'lightbox_open' => [
                         'title' => esc_html__('Open Lightbox on page load', 'wpcloudplugins'),
                         'description' => esc_html__('Automatically open the lightbox immediately after the module has loaded the content. Can be useful if you want the slideshow to start in full screen when the page opens.', 'wpcloudplugins'),
                         'default' => false,
                         'type' => 'checkbox',
-                        'modules' => ['gallery'],
+                        'modules' => ['gallery', 'carousel'],
                     ],
                     'slideshow' => [
                         'title' => esc_html__('Enable Slideshow', 'wpcloudplugins'),
@@ -1408,7 +1408,7 @@ class ShortcodeBuilder
                         'default' => false,
                         'type' => 'checkbox',
                         'toggle_container' => '#slideshow_panel',
-                        'modules' => ['gallery'],
+                        'modules' => ['gallery', 'carousel'],
                     ],
                     'slideshow_panel' => [
                         'title' => '',

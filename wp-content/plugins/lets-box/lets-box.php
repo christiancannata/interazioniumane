@@ -3,7 +3,7 @@
  * Plugin Name: WP Cloud Plugin Lets-Box (BOX)
  * Plugin URI: https://www.wpcloudplugins.com/plugins/lets-box-wordpress-plugin-for-box/
  * Description: Say hello to the most popular WordPress BOX plugin! Start using the Cloud even more efficiently by integrating it on your website.
- * Version: 2.7.3
+ * Version: 2.8.3
  * Author: WP Cloud Plugins
  * Author URI: https://www.wpcloudplugins.com
  * Text Domain: wpcloudplugins
@@ -15,7 +15,7 @@
 namespace TheLion\LetsBox;
 
 // SYSTEM SETTINGS
-define('LETSBOX_VERSION', '2.7.3');
+define('LETSBOX_VERSION', '2.8.3');
 define('LETSBOX_ROOTPATH', plugins_url('', __FILE__));
 define('LETSBOX_ROOTDIR', __DIR__);
 define('LETSBOX_SLUG', dirname(plugin_basename(__FILE__)).'/lets-box.php');
@@ -825,7 +825,7 @@ class Core
 
         $version = LETSBOX_VERSION;
 
-        if (!is_admin() && '' !== $this->settings['recaptcha_sitekey']) {
+        if (!is_user_logged_in() && '' !== $this->settings['recaptcha_sitekey']) {
             $url = add_query_arg(
                 [
                     'render' => $this->settings['recaptcha_sitekey'],
@@ -881,7 +881,7 @@ class Core
             'cookie_domain' => COOKIE_DOMAIN,
             'is_mobile' => wp_is_mobile(),
             'is_rtl' => is_rtl(),
-            'recaptcha' => is_admin() || (isset($_REQUEST['elementor-preview'])) ? '' : $this->settings['recaptcha_sitekey'],
+            'recaptcha' => is_user_logged_in() || (isset($_REQUEST['elementor-preview'])) ? '' : $this->settings['recaptcha_sitekey'],
             'shortlinks' => 'None' === $this->settings['shortlinks'] ? false : $this->settings['shortlinks'],
             'remember_last_location' => 'Yes' === $this->settings['remember_last_location'],
             'content_skin' => $this->settings['colors']['style'],

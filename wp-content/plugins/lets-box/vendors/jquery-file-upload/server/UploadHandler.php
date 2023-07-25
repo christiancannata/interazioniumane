@@ -12,9 +12,9 @@
 
 class WPCP_UploadHandler
 {
-    const IMAGETYPE_GIF = 'image/gif';
-    const IMAGETYPE_JPEG = 'image/jpeg';
-    const IMAGETYPE_PNG = 'image/png';
+    public const IMAGETYPE_GIF = 'image/gif';
+    public const IMAGETYPE_JPEG = 'image/jpeg';
+    public const IMAGETYPE_PNG = 'image/png';
 
     protected $options;
 
@@ -80,7 +80,7 @@ class WPCP_UploadHandler
                     .'://'
                     .parse_url($this->get_server_var('HTTP_REFERER'), PHP_URL_HOST)
                     .'/', // Trailing slash to not match subdomains by mistake
-                    '/' // preg_quote delimiter param
+                '/' // preg_quote delimiter param
             ).'/',
             // Enable to provide file downloads via GET requests to the PHP script:
             //     1. Set to 1 to download files via readfile method through PHP
@@ -171,8 +171,8 @@ class WPCP_UploadHandler
                     // Make sure that this directory doesn't allow execution of files if you
                     // don't pose any restrictions on the type of uploaded files, e.g. by
                     // copying the .htaccess file from the files directory for Apache:
-                    //'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/thumb/',
-                    //'upload_url' => $this->get_full_url().'/thumb/',
+                    // 'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/thumb/',
+                    // 'upload_url' => $this->get_full_url().'/thumb/',
                     // Uncomment the following to force the max
                     // dimensions and e.g. create square thumbnails:
                     // 'auto_orient' => true,
@@ -1689,7 +1689,7 @@ class WPCP_UploadHandler
             .implode(', ', $this->options['access_control_allow_headers']));
     }
 
-    protected function basename($filepath, $suffix = null)
+    protected function basename($filepath, $suffix = '')
     {
         $splited = preg_split('/\//', rtrim($filepath, '/ '));
 

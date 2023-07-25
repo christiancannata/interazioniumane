@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -25,7 +25,7 @@ class Upload
     {
         do_action('letsbox_upload_pre_process', Processor::instance());
 
-        foreach ($_REQUEST['files']  as $hash => $file) {
+        foreach ($_REQUEST['files'] as $hash => $file) {
             if (!empty($file['path'])) {
                 $this->create_folder_structure($file['path']);
             }

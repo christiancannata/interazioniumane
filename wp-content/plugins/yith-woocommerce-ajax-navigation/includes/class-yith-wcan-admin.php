@@ -174,9 +174,25 @@ if ( ! class_exists( 'YITH_WCAN_Admin' ) ) {
 			}
 
 			$admin_tabs = array(
-				'filter-preset' => _x( 'Filter presets', '[Admin] tab name', 'yith-woocommerce-ajax-navigation' ),
-				'general'       => _x( 'General settings', '[Admin] tab name', 'yith-woocommerce-ajax-navigation' ),
-				'seo'           => _x( 'SEO', '[Admin] tab name', 'yith-woocommerce-ajax-navigation' ),
+				'filter-preset' => array(
+					'title'       => _x( 'Filter presets', '[Admin] tab name', 'yith-woocommerce-ajax-navigation' ),
+					'icon'        => '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path>
+</svg>',
+					'description' => esc_html__( 'The list of all filter sets created and configured for your shop.', 'yith-woocommerce-ajax-navigation' ),
+				),
+				'general'       => array(
+					'title'       => _x( 'General options', '[Admin] tab name', 'yith-woocommerce-ajax-navigation' ),
+					'description' => _x( 'Configure the general settings of the plugin', '[Admin] tab description', 'yith-woocommerce-ajax-navigation' ),
+					'icon'        => 'settings',
+				),
+				'seo'           => array(
+					'title'       => _x( 'SEO', '[Admin] tab name', 'yith-woocommerce-ajax-navigation' ),
+					'description' => _x( 'Configure options to optimize SEO indexing on any page that includes filters.', '[Admin] Tab description', 'yith-woocommerce-ajax-navigation' ),
+					'icon'        => '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+</svg>',
+				),
 			);
 
 			if ( isset( $_GET['tab'] ) && 'legacy' === $_GET['tab'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -225,6 +241,7 @@ if ( ! class_exists( 'YITH_WCAN_Admin' ) ) {
 				array(
 					'create_menu_page'   => true,
 					'parent_slug'        => '',
+					'ui_version'         => 2,
 					'page_title'         => 'YITH WooCommerce Ajax Product Filter',
 					'menu_title'         => 'Ajax Product Filter',
 					'plugin_description' => _x( 'It allows your users to find the product they are looking for as quickly as possible.', '[Admin] Plugin description', 'yith-woocommerce-ajax-navigation' ),

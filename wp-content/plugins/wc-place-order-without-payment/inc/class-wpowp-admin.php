@@ -39,6 +39,8 @@ if ( ! class_exists( 'WPOWP_Admin' ) ) {
 				'skip_cart'                        => false,
 				'order_status'                     => 'processing', // Default order status after place order
 				'add_cart_text'                    => __( 'Buy Now', WPOWP_TEXT_DOMAIN ),
+				'free_product_on_cart'             => false,
+				'free_product_on_checkout'         => false,
 				'free_product'                     => false,
 				'free_product_text'                => __( 'FREE', WPOWP_TEXT_DOMAIN ),
 				'quote_only'                       => false,
@@ -47,6 +49,7 @@ if ( ! class_exists( 'WPOWP_Admin' ) ) {
 				'remove_shipping'                  => false,
 				'remove_privacy_policy_text'       => false,
 				'remove_checkout_terms_conditions' => false,
+				'standard_add_cart'                => false,
 
 			);
 		}

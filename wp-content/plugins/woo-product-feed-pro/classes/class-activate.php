@@ -404,8 +404,8 @@ class WooSEA_Activation {
             			"Pricerunner" => array (
                         		"channel_hash" => md5("Pricerunner.dk"),
                         		"name" => "Pricerunner.dk",
-					"fields" => "google_shopping",
-					"taxonomy" => "google_shopping",
+					"fields" => "pricerunner",
+					"taxonomy" => "none",
 					"utm_source" => "Pricerunner.dk",
                         		"type" => "Comparison shopping engine" ),
              			"Shopalike" => array (
@@ -567,8 +567,8 @@ class WooSEA_Activation {
    				"Pricerunner.fr" => array (
                         		"channel_hash" => md5("Pricerunner.fr"),
                         		"name" => "Pricerunner.fr",
-					"fields" => "google_shopping",
-					"taxonomy" => "google_shopping",
+					"fields" => "pricerunner",
+					"taxonomy" => "none",
 					"utm_source" => "Pricerunner.fr",
                         		"type" => "Comparison shopping engine" ),
     				"ShopAlike.fr" => array (
@@ -839,8 +839,8 @@ class WooSEA_Activation {
 				"Pricerunner.de" => array (
                         		"channel_hash" => md5("Pricerunner.de"),
                         		"name" => "Pricerunner.de",
-					"fields" => "google_shopping",
-					"taxonomy" => "google_shopping",
+					"fields" => "pricerunner",
+					"taxonomy" => "none",
 					"utm_source" => "Pricerunner.de",
                         		"type" => "Comparison shopping engine" ),
 				"Rakuten.de" => array (
@@ -1358,6 +1358,7 @@ class WooSEA_Activation {
 					"utm_source" => "Kuantokusta.pt",
                         		"type" => "Comparison shopping engine" ),
  			),
+			"Puerto Rico" => array (),
 			"Qatar" => array (),
 			"Reunion" => array (),
 			"Romania" => array (
@@ -1521,8 +1522,8 @@ class WooSEA_Activation {
                 		"Pricerunner" => array (
                         		"channel_hash" => md5("Pricerunner.se"),
                         		"name" => "Pricerunner.se",
-					"fields" => "google_shopping",
-					"taxonomy" => "google_shopping",
+					"fields" => "pricerunner",
+					"taxonomy" => "none",
 					"utm_source" => "Pricerunner.se",
                         		"type" => "Comparison shopping engine" ),
                               	"Miinto" => array (
@@ -1681,8 +1682,8 @@ class WooSEA_Activation {
         			"Pricerunner" => array (
                         		"channel_hash" => md5("Pricerunner.co.uk"),
                         		"name" => "Pricerunner.co.uk",
-					"fields" => "google_shopping",
-					"taxonomy" => "google_shopping",
+					"fields" => "pricerunner",
+					"taxonomy" => "none",
 					"utm_source" => "Pricerunner.co.uk",
                         		"type" => "Comparison shopping engine" ),
         			"Pricespy" => array (

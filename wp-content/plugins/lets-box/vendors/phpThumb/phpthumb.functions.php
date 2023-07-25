@@ -12,6 +12,10 @@ namespace TheLion\LetsBox;
 //                                                         ///
 //////////////////////////////////////////////////////////////
 
+if (!defined('LETSBOX_VERSION')) {
+    exit; // Direct access not permitted
+}
+
 class phpthumb_functions {
 
 	public static function is_windows() {

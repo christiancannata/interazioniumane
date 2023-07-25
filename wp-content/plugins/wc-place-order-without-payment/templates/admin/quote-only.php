@@ -25,7 +25,7 @@ if ( $wpowp_fs->is_paying() ) {
 						<label for="wpowp_quote_only">
 							<input name="wpowp_quote_only" type="hidden" value="no" />
 							<input name="wpowp_quote_only" type="checkbox" id="wpowp_quote_only" value="yes"
-							<?php echo ( true === wc_string_to_bool( $option['quote_only'] ) ) ? 'checked' : ''; ?> />
+							<?php echo ( true === filter_var( $option['quote_only'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
 							<p><?php esc_html_e( '( Enable Quote Only )', WPOWP_TEXT_DOMAIN ); ?></p>
 						</label>
 					</fieldset>
@@ -52,7 +52,7 @@ if ( $wpowp_fs->is_paying() ) {
 						</legend>
 						<label for="wpowp_quote_button_text">
 							<input name="wpowp_quote_button_text" type="text" id="wpowp_quote_button_text" value="<?php echo esc_attr( $option['quote_button_text'] ); ?>"
-							<?php echo ( true === wc_string_to_bool( $option['quote_only'] ) ) ? 'checked' : ''; ?> />
+							<?php echo ( true === filter_var( $option['quote_only'], FILTER_VALIDATE_BOOLEAN ) ) ? 'checked' : ''; ?> />
 							<p><?php esc_html_e( '( Text for Quote button )', WPOWP_TEXT_DOMAIN ); ?></p>
 						</label>
 					</fieldset>
@@ -102,7 +102,7 @@ if ( $wpowp_fs->is_not_paying() ) {
 			</tr>	
 		</tbody>
 	</table>	
-	<div><label><?php esc_html_e('When clicked it collapses payment methods. Ignores shipping and pushes order through without payment or shipping simply as a quote request.',WPOWP_TEXT_DOMAIN);?></label></div>		
+	<div><label><?php esc_html_e( 'When clicked it collapses payment methods. Ignores shipping and pushes order through without payment or shipping simply as a quote request.', WPOWP_TEXT_DOMAIN ); ?></label></div>		
 				
 <?php } ?>
 

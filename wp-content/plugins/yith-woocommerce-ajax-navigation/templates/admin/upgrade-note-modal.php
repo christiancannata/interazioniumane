@@ -2,7 +2,7 @@
 /**
  * Preset filters list - Upgrade note
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Templates\Admin
  * @version 4.0.0
  */

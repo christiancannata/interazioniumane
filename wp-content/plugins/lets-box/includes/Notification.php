@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -515,7 +515,7 @@ class Notification
                 'focus_id' => $entry->get_id(),
             ]);
 
-            $deeplink_url = Helpers::get_page_url().'?wpcp_link='.base64_encode($deeplink);
+            $deeplink_url = Helpers::get_page_url(true).'?wpcp_link='.base64_encode($deeplink);
 
             $fileline = strtr($this->_update_depricated_placeholders($this->entry_list), [
                 '%file_name%' => $entry->get_name(),

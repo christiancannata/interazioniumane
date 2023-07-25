@@ -25,6 +25,16 @@ class FL_WPCP_LetsBox_Module extends \FLBuilderModule
     {
         return file_get_contents($icon);
     }
+
+    public function enqueue_scripts(){
+
+        \TheLion\LetsBox\Core::instance()->load_scripts();
+        \TheLion\LetsBox\Core::instance()->load_styles();
+
+        wp_enqueue_script('WPCloudplugin.Libraries');
+        wp_enqueue_script('LetsBox.ShortcodeBuilder');
+        wp_enqueue_style('LetsBox');
+    }
 }
 
 // Register the module and its form settings.

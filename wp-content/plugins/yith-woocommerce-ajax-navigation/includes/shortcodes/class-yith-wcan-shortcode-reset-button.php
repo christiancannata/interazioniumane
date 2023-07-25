@@ -4,7 +4,7 @@
  *
  * Defines shortcode that output Reset Filters button
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\Shortcodes
  * @version 4.0
  */

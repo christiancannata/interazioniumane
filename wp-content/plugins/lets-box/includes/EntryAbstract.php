@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -202,7 +202,7 @@ abstract class EntryAbstract
 
     public function get_last_edited()
     {
-        return $this->last_edited;
+        return apply_filters('letsbox_entry_get_last_edited', $this->last_edited, $this);
     }
 
     public function get_last_edited_str($short = true)
@@ -218,7 +218,7 @@ abstract class EntryAbstract
         if (false === $short) {
             $this->last_edited_str = date_i18n(get_option('date_format').' '.get_option('time_format'), strtotime($localtime));
 
-            return apply_filters('letsbox_entry_get_last_edited_str', $this->last_edited_str, $localtime, $short);
+            return apply_filters('letsbox_entry_get_last_edited_str', $this->last_edited_str, $localtime, $short, $this);
         }
 
         if ($timestamp > ($now - 86400)) {
@@ -234,7 +234,7 @@ abstract class EntryAbstract
 
         $this->last_edited_str = $str;
 
-        return apply_filters('letsbox_entry_get_last_edited_str', $this->last_edited_str, $localtime, $short);
+        return apply_filters('letsbox_entry_get_last_edited_str', $this->last_edited_str, $localtime, $short, $this);
     }
 
     public function set_last_edited($last_edited)

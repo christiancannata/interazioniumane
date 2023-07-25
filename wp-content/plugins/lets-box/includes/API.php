@@ -6,7 +6,7 @@
  * You can use the API using WPCP_BOX_API::get_entry(...)
  *
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -938,7 +938,7 @@ class API
  * API_Exception Class.
  *
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com

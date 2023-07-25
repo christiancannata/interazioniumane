@@ -132,10 +132,10 @@ $nonce = wp_create_nonce( 'woosea_ajax_nonce' );
 						<strong><?php _e( 'Would you like to get more out of your product feeds? Upgrade to the Elite version of the plugin and you will get:', 'woo-product-feed-pro' );?></strong><br/></br/>
 						<span class="dashicons dashicons-yes"></span><?php _e( 'Priority support - we will help you to get your product feed(s) up-and-running;', 'woo-product-feed-pro' );?><br/>
 						<span class="dashicons dashicons-yes"></span><?php _e( 'GTIN, Brand, MPN, EAN, Condition and more fields for your product feeds', 'woo-product-feed-pro' );?> [<a href="https://adtribes.io/add-gtin-mpn-upc-ean-product-condition-optimised-title-and-brand-attributes/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=adding%20fields" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
-						<span class="dashicons dashicons-yes"></span><?php _e( 'Enhanched structured data on your product pages: more products approved in your Google Merchant Center', 'woo-product-feed-pro' );?> [<a href="https://adtribes.io/woocommerce-structured-data-bug/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=structured%20data%20bug" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
+						<span class="dashicons dashicons-yes"></span><?php _e( 'Solve Googe Shopping price mismatch product disapprovals', 'woo-product-feed-pro' );?> [<a href="https://adtribes.io/woocommerce-structured-data-bug/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=structured%20data%20bug" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
 						<span class="dashicons dashicons-yes"></span><?php _e( 'Advanced product data manipulation','woo-product-feed-pro' );?> [<a href="https://adtribes.io/feature-product-data-manipulation/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=product%20data%20manipulation" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
 						<span class="dashicons dashicons-yes"></span><?php _e( 'WPML support - including their currency switcher','woo-product-feed-pro' );?> [<a href="https://adtribes.io/wpml-support/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=wpml%20support" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
-						<span class="dashicons dashicons-yes"></span><?php _e( 'Aelia currency switcher support','woo-product-feed-pro' );?> [<a href="https://adtribes.io/aelia-currency-switcher-feature/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=aelia%20support" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
+						<span class="dashicons dashicons-yes"></span><?php _e( 'Aelia  & Curcy currency switcher support','woo-product-feed-pro' );?> [<a href="https://adtribes.io/aelia-currency-switcher-feature/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=aelia%20support" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
 						<span class="dashicons dashicons-yes"></span><?php _e( 'Polylang support','woo-product-feed-pro' );?> [<a href="https://adtribes.io/polylang-support-product-feeds/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=polylang%20support" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/>
 						<span class="dashicons dashicons-yes"></span><?php _e( 'Facebook pixel feature','woo-product-feed-pro' );?> [<a href="https://adtribes.io/facebook-pixel-feature/?utm_source=<?php print "$host";?>&utm_medium=manage-feed&utm_campaign=facebook pixel feature" target="_blank"><?php _e( 'Read more','woo-product-feed-pro' );?></a>];<br/><br/>
  						<?php _e( 'Upgrade to the','woo-product-feed-pro' );?> <strong><a href="https://adtribes.io/pro-vs-elite/?utm_source=<?php print"$host";?>&utm_medium=manage-feed&utm_campaign=top-notification&utm_content=notification" target="_blank"><?php _e( 'Elite version of our plugin</a></strong> to get all these features.','woo-product-feed-pro' );?>
@@ -144,7 +144,6 @@ $nonce = wp_create_nonce( 'woosea_ajax_nonce' );
 				<?php
 				}
 			}
-
 
 			if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
 				?>				
@@ -160,7 +159,26 @@ $nonce = wp_create_nonce( 'woosea_ajax_nonce' );
 			// Double check if the woosea_cron_hook is there, when it is not create a new one
                 	if (!wp_next_scheduled( 'woosea_cron_hook' ) ) {
                         	wp_schedule_event ( time(), 'hourly', 'woosea_cron_hook');
-                	}
+			}
+
+			/**
+ 			* Request our plugin users to write a review
+ 			**/
+			if(!empty( $cron_projects )){
+                		$nr_projects = count($cron_projects);
+                		$first_activation = get_option ( 'woosea_first_activation' );
+                		$notification_interaction = get_option( 'woosea_review_interaction' );
+		                $current_time = time();
+                		$show_after = 604800; // Show only after one week
+               	 		$is_active = $current_time-$first_activation;
+                		$page = sanitize_text_field(basename($_SERVER['REQUEST_URI']));
+
+                		if(($nr_projects > 0) AND ($is_active > $show_after) AND ($notification_interaction != "yes")){
+                        		echo '<div class="notice notice-info review-notification">';
+                        		echo '<table><tr><td></td><td><font color="green" style="font-weight:normal";><p>Hey, I noticed you have been using our plugin, <u>Product Feed PRO for WooCommerce by AdTribes.io</u>, for over a week now and have created product feed projects with it - that\'s awesome! Could you please do our support volunteers and me a BIG favor and give it a <strong>5-star rating</strong> on WordPress? Just to help us spread the word and boost our motivation. We would greatly appreciate if you would do so :)<br/>~ Adtribes.io support team<br><ul><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="https://wordpress.org/support/plugin/woo-product-feed-pro/reviews?rate=5#new-post" target="_blank" class="dismiss-review-notification">Ok, you deserve it</a></li><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="#" class="dismiss-review-notification">Nope, maybe later</a></li><li><span class="ui-icon ui-icon-caret-1-e" style="display: inline-block;"></span><a href="#" class="dismiss-review-notification">I already did</a></li></ul></p></font></td></tr></table>';
+                        		echo '</div>';
+                		}
+        		}
 			?>
 
                         <div class="woo-product-feed-pro-form-style-2-heading"><?php _e( 'Manage feeds','woo-product-feed-pro' );?></div>

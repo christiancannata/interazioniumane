@@ -174,7 +174,7 @@ class WooCommerce_Uploads
         <div class="show_if_letsbox_upload_box">
             <h4><?php echo 'Box '.esc_html__('Upload Box Settings', 'wpcloudplugins'); ?></h4>
             <?php
-                                                                                                                      $default_box_title = esc_html__('Order #', 'woocommerce').' %wc_order_id% | %wc_product_name% -'.esc_html__('Upload documents', 'wpcloudplugins');
+                                                                                                                              $default_box_title = esc_html__('Order #', 'woocommerce').' %wc_order_id% | %wc_product_name% -'.esc_html__('Upload documents', 'wpcloudplugins');
         $box_title = get_post_meta($post->ID, 'letsbox_upload_box_title', true);
 
         woocommerce_wp_text_input(
@@ -508,7 +508,7 @@ class WooCommerce_Uploads
         $shortcode_params['wc_order_id'] = $order->get_id();
         $shortcode_params['wc_product_id'] = $originial_product->get_id();
         $shortcode_params['wc_item_id'] = $item->get_id();
-        $shortcode_params['maxheight'] = '300px';
+        $shortcode_params['maxheight'] = '40vh';
 
         // When Upload box isn't active, change it to a view only file browser
         if (false === $upload_active) {
@@ -544,6 +544,7 @@ class WooCommerce_Uploads
             echo "<a class='woocommerce-button button wpcp-wc-open-box'><i class='eva eva-attach-2 eva-lg'></i> ".(($is_admin_page) ? esc_html__('View documents', 'wpcloudplugins') : $box_button_text).'</a>';
 
             echo '<div class="woocommerce-order-upload-box" style="display:none;">';
+            echo '<div class="woocommerce-order-description-box">';
 
             do_action('letsbox_woocommerce_before_render_upload_field', $order, $originial_product, $this);
 
@@ -560,6 +561,8 @@ class WooCommerce_Uploads
 
                 return;
             }
+
+            echo '</div>';
 
             echo Processor::instance()->create_from_shortcode($shortcode_params);
 
@@ -737,10 +740,11 @@ class WooCommerce_Uploads
         }
 
         // List the uploads
+        $data = [];
+
         try {
             $folder = Client::instance()->get_folder();
             $children = Client::instance()->get_folder_recursive_filtered($folder['folder']);
-            $data = [];
 
             foreach ($children as $cached_node) {
                 if ($cached_node->get_entry()->is_dir()) {
@@ -750,7 +754,6 @@ class WooCommerce_Uploads
                 $data[$cached_node->get_id()] = trim($cached_node->get_path($processor->get_root_folder()), '/');
             }
         } catch (\Exception $ex) {
-            $data = [];
         }
 
         $data = \apply_filters('letsbox_woocommerce_uploaded_filelist', $data, $children, $item);

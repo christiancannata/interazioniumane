@@ -2,7 +2,7 @@
 /**
  * Filter Preset data store
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes\DataStore
  * @version 3.0.0
  */
@@ -44,7 +44,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 *
 		 * @param YITH_WCAN_Preset $data Filter preset object.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function create( &$data ) {
 			$id = wp_insert_post(
@@ -84,7 +83,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 *
 		 * @throws Exception If invalid product.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function read( &$data ) {
 
@@ -131,7 +129,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 *
 		 * @param YITH_WCAN_Preset $data Filter preset object.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function update( &$data ) {
 			$data->save_meta_data();
@@ -189,7 +186,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 * @param YITH_WCAN_Preset $data Filter preset object.
 		 * @param array            $args Array of args to pass to the delete method.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function delete( &$data, $args = array() ) {
 			$id = $data->get_id();
@@ -225,7 +221,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 *
 		 * @param YITH_WCAN_Preset $preset Filter preset object.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 */
 		public function clone( &$preset ) {
 			$new_preset = clone( $preset );
@@ -245,7 +240,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 * @param YITH_WCAN_Preset $preset Filter preset object.
 		 * @param bool             $force  Force update. Used during create.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 * @since 4.0.0
 		 */
 		protected function read_post_meta( &$preset, $force = false ) {
@@ -269,7 +263,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 * @param YITH_WCAN_Preset $preset Filter preset object.
 		 * @param bool             $force  Force update. Used during create.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 * @since 4.0.0
 		 */
 		protected function update_post_meta( &$preset, $force = false ) {
@@ -411,7 +404,6 @@ if ( ! class_exists( 'YITH_WCAN_Preset_Data_Store' ) ) {
 		 *
 		 * @param YITH_WCAN_Preset $preset Filter preset object.
 		 *
-		 * @author Antonio La Rocca <antonio.larocca@yithemes.com>
 		 * @since 4.0.0
 		 */
 		protected function clear_caches( &$preset ) {

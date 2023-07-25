@@ -4,7 +4,7 @@
  *
  * Defines a couple of static methods to allow easy access to Filter classes
  *
- * @author  YITH
+ * @author  YITH <plugins@yithemes.com>
  * @package YITH\AjaxProductFilter\Classes
  * @version 4.0
  */

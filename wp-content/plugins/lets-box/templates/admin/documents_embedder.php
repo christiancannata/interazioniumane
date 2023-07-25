@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -57,7 +57,7 @@ add_action('wp_print_styles', __NAMESPACE__.'\\remove_all_styles', 1000);
 <body class="wpcp-h-full">
     <div id="wpcp" class="wpcp-app hidden" dir="<?php echo is_rtl() ? 'rtl' : 'ltr'; ?>">
         <form action="#" data-callback="<?php echo isset($_REQUEST['callback']) ? $_REQUEST['callback'] : ''; ?>">
-            <nav class="bg-brand-color-900 shadow">
+            <nav class="bg-brand-color-900 shadow sticky top-0 z-50">
                 <div class="mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
                         <div class="flex">

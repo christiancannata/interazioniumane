@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -1129,7 +1129,7 @@ class Processor
             case 'carousel':
                 $this->load_scripts('carousel');
 
-                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox carousel jsdisabled' data-list='carousel' data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."'>";
+                echo "<div id='LetsBox-{$this->listtoken}' class='wpcp-module LetsBox carousel jsdisabled' data-list='carousel' data-token='{$this->listtoken}' data-account-id='{$dataaccountid}' data-id='".$dataid."' data-path='".base64_encode(json_encode($this->_folderPath))."' data-sort='".$this->options['sort_field'].':'.$this->options['sort_order']."' data-org-id='".$dataid."' data-org-path='".base64_encode(json_encode($this->_folderPath))."' data-source='".md5($this->options['account'].$this->options['root'].$this->options['mode'])."' data-slideshow='".$this->options['slideshow']."' data-lightboxnav='".$this->options['lightbox_navigation']."' data-lightboxthumbs='{$this->options['lightbox_thumbnails']}' data-lightboxopen='{$this->options['lightbox_open']}'>";
 
                 include sprintf('%s/templates/frontend/carousel.php', LETSBOX_ROOTDIR);
                 echo '</div>';
@@ -1528,16 +1528,16 @@ class Processor
         return $success;
     }
 
-  public function get_network_setting($key, $default = null)
-  {
-      $network_settings = get_site_option('letsbox_network_settings', []);
+    public function get_network_setting($key, $default = null)
+    {
+        $network_settings = get_site_option('letsbox_network_settings', []);
 
-      if (!isset($network_settings[$key])) {
-          return $default;
-      }
+        if (!isset($network_settings[$key])) {
+            return $default;
+        }
 
-      return $network_settings[$key];
-  }
+        return $network_settings[$key];
+    }
 
     public function set_network_setting($key, $value)
     {
@@ -1818,6 +1818,8 @@ class Processor
 
             case 'carousel':
                 wp_enqueue_script('LetsBox.Carousel');
+                wp_enqueue_style('ilightbox');
+                wp_enqueue_style('ilightbox-skin-letsbox');
 
                 break;
 

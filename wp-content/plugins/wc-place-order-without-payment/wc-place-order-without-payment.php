@@ -16,7 +16,7 @@
  * Plugin Name:       Place Order Without Payment for WooCommerce
  * Plugin URI:        https://wordpress.org/plugins/wc-place-order-without-payment/
  * Description:       Place Order Without Payment for WooCommerce will allow users to place orders directly.This plugin will customize checkout page and offers to direct place order without payment.
- * Version:           2.3
+ * Version:           2.5.2
  * Author:            Nitin Prakash
  * Author URI:        https://nitin247.com/
  * License:           GPL-2.0+
@@ -27,7 +27,7 @@
  * Requires at least: 5.0
  * Tested up to: 6.2
  * WC requires at least: 5.0
- * WC tested up to: 7.6
+ * WC tested up to: 7.8
  */
 // If this file is called directly, abort.
 namespace WPOWP;
@@ -36,7 +36,7 @@ defined( 'WPOWP_FILE' ) or define( 'WPOWP_FILE', __FILE__ );
 defined( 'WPOWP_BASE' ) or define( 'WPOWP_BASE', plugin_basename( WPOWP_FILE ) );
 defined( 'WPOWP_DIR' ) or define( 'WPOWP_DIR', plugin_dir_path( WPOWP_FILE ) );
 defined( 'WPOWP_URL' ) or define( 'WPOWP_URL', plugins_url( '/', WPOWP_FILE ) );
-defined( 'WPOWP_VERSION' ) or define( 'WPOWP_VERSION', '2.3' );
+defined( 'WPOWP_VERSION' ) or define( 'WPOWP_VERSION', '2.5.2' );
 defined( 'WPOWP_TEXT_DOMAIN' ) or define( 'WPOWP_TEXT_DOMAIN', 'wpowp' );
 defined( 'WPOWP_NAME' ) or define( 'WPOWP_NAME', __( 'Place Order Without Payment', WPOWP_TEXT_DOMAIN ) );
 defined( 'WPOWP_SHORT_NAME' ) or define( 'WPOWP_SHORT_NAME', __( 'Place Order', WPOWP_TEXT_DOMAIN ) );
@@ -158,6 +158,9 @@ if ( !class_exists( 'WPOWP\\WPOWP_Loader' ) ) {
          */
         public function action_links( $links )
         {
+            if ( wpowp_fs()->is_not_paying() ) {
+                $links = array_merge( array( '<a target="blank" href="' . esc_url( 'https://nitin247.com/buy-me-a-coffe' ) . '">' . __( 'Donate', 'wpowp' ) . '</a>' ), $links );
+            }
             $links = array_merge( array( '<a target="blank" href="' . esc_url( admin_url( 'admin.php?page=wpowp-settings&tab=settings' ) ) . '">' . __( 'Settings', 'wpowp' ) . '</a>', '<a target="blank" href="' . esc_url( 'https://nitin247.com/support/' ) . '">' . __( 'Plugin Support', 'wpowp' ) . '</a>' ), $links );
             return $links;
         }
@@ -258,17 +261,17 @@ if ( !class_exists( 'WPOWP\\WPOWP_Loader' ) ) {
             add_filter( 'woocommerce_available_payment_gateways', '__return_empty_array' );
             // Conditionally remove shipping rates
             
-            if ( true === wc_string_to_bool( $remove_shipping ) ) {
+            if ( true === filter_var( $remove_shipping, FILTER_VALIDATE_BOOLEAN ) ) {
                 add_filter( 'woocommerce_package_rates', '__return_empty_array' );
                 add_filter( 'woocommerce_cart_needs_shipping', '__return_false' );
             }
             
             // Remove checkout privacy text
-            if ( true === wc_string_to_bool( $remove_privacy_policy_text ) ) {
+            if ( true === filter_var( $remove_privacy_policy_text, FILTER_VALIDATE_BOOLEAN ) ) {
                 remove_action( 'woocommerce_checkout_terms_and_conditions', 'wc_checkout_privacy_policy_text', 20 );
             }
             // Remove checkout terms and condition
-            if ( true === wc_string_to_bool( $remove_checkout_terms_conditions ) ) {
+            if ( true === filter_var( $remove_checkout_terms_conditions, FILTER_VALIDATE_BOOLEAN ) ) {
                 remove_action( 'woocommerce_checkout_terms_and_conditions', 'wc_terms_and_conditions_page_content', 30 );
             }
         }

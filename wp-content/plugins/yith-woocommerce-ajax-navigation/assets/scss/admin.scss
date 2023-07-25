@@ -35,7 +35,7 @@ $item_row_hover_border: #c4cfd3;
 @mixin show_on_hover {
 	align-items: center;
 	background: #fff;
-	box-shadow: 0px 2px 7px rgb(170 198 222 / 50%);
+	box-shadow: 0px 2px 7px rgba(170, 198, 222, 50%);
 	border-radius: 100%;
 	color: #20659d;
 	display: flex;
@@ -111,11 +111,10 @@ $item_row_hover_border: #c4cfd3;
 #yith_wcan_panel_filter-preset {
 	position: relative;
 
-	// submit buttons
-	p.submit,
-	#plugin-fw-wc-reset{
-		display: none;
+	#plugin-fw-wc{
+		padding-top: 0;
 	}
+
 
 	// empty state
 	.yith-wcan-admin-no-post {
@@ -145,95 +144,114 @@ $item_row_hover_border: #c4cfd3;
 		}
 	}
 
-	// preset table
-	.yith-plugin-fw-list-table-container {
-		border: none;
-		padding: 0;
-
-		.tablenav.top {
-			display: none;
+	.yith-plugin-fw__panel__content__page__title{
+		.yith-add-button{
+			font-size: 13px;
+			margin-left: 15px;
 		}
+	}
 
-		table.wp-list-table {
+	.yith-plugin-fw__panel__option--list-table{
+		max-width: none;
+
+		// preset table
+		.yith-plugin-fw-list-table-container {
 			border: none;
-			border-collapse: separate;
-			border-spacing: 0 25px;
-			box-shadow: none;
-			margin-top: 30px;
+			padding: 0;
 
-			tfoot {
+			.tablenav.top {
 				display: none;
 			}
 
-			thead tr th {
+			table.wp-list-table {
 				border: none;
-				padding: 0 25px;
-			}
+				border-collapse: separate;
+				border-spacing: 0 25px;
+				box-shadow: none;
+				margin-top: 30px;
 
-			tbody {
-				tr {
-					@include item_row;
+				tfoot {
+					display: none;
+				}
 
-					td {
-						&.name a {
-							color: #434343;
+				thead tr th {
+					border: none;
+					padding: 0 25px;
+				}
 
-							&:hover {
-								color: #20659d;
-							}
-						}
+				tbody {
+					tr {
+						@include item_row;
 
-						&.shortcode .copy-on-click {
-							cursor: pointer;
-							display: inline-block;
-							position: relative;
+						td {
+							&.name a {
+								color: #434343;
 
-							input {
-								background: #f1f1f1;
-								color: #999;
-								border: 1px dashed #ccc;
-								cursor: pointer;
-							}
-
-							&:after {
-								color: #9d9d9d;
-								content: '\f101';
-								font-family: 'yith-icon';
-								font-size: 14px;
-								position: absolute;
-								right: 15px;
-								top: 10px;
-							}
-						}
-
-						&.actions {
-							overflow: hidden;
-
-							a {
-								float: right;
-
-								&.show-on-hover {
-									@include show_on_hover;
+								&:hover {
+									color: #20659d;
 								}
 							}
 
-							.yith-plugin-fw-onoff-container {
-								float: right;
-								margin: 5px 0;
+							&.shortcode .copy-on-click {
+								cursor: pointer;
+								display: inline-block;
+								position: relative;
+
+								input {
+									background: #f1f1f1;
+									color: #999;
+									border: 1px dashed #ccc;
+									cursor: pointer;
+								}
+
+								&:after {
+									color: #9d9d9d;
+									content: '\f101';
+									font-family: 'yith-icon';
+									font-size: 14px;
+									position: absolute;
+									right: 15px;
+									top: 10px;
+								}
+							}
+
+							&.actions {
+								overflow: hidden;
+
+								a {
+									float: right;
+
+									&.show-on-hover {
+										@include show_on_hover;
+									}
+								}
+
+								.yith-plugin-fw-onoff-container {
+									float: right;
+									margin: 5px 0;
+								}
 							}
 						}
-					}
 
-					&:hover td {
-						&.actions a.show-on-hover {
-							opacity: 1;
-							transform: none;
+						&:hover td {
+							&.actions a.show-on-hover {
+								opacity: 1;
+								transform: none;
+							}
 						}
 					}
 				}
 			}
+
+			.tablenav-pages{
+				.displaying-num{
+					display: none;
+				}
+			}
 		}
 	}
+
+
 }
 
 /* === Upgrade Note Modal === */
@@ -325,16 +343,15 @@ $item_row_hover_border: #c4cfd3;
 
 	// wrapper
 	.yit-admin-panel-content-wrap {
-		background-color: #fff;
-		border: 1px solid #d8d8d8;
-		border-top: none;
-		padding: 35px 20px;
+
+		form{
+			padding: 0!important;
+		}
 	}
 
 	// view all link
 	.view-all-presets {
 		display: block;
-		margin-bottom: 30px;
 	}
 
 	// page title
@@ -344,16 +361,6 @@ $item_row_hover_border: #c4cfd3;
 		margin: 15px 0;
 	}
 
-	// preset settings form
-	.form-table {
-		margin: 0 -20px;
-		border: none!important;
-
-		td, th {
-			margin: 0 -20px;
-			border: none!important;
-		}
-	}
 
 	// toggle rows
 	h4 {
@@ -583,8 +590,7 @@ $item_row_hover_border: #c4cfd3;
 									background: #fff;
 									border-radius: 50%;
 									color: #a5a5a5;
-									content: "close";
-									font-family: 'Material Icons';
+									content: "×";
 									height: 1.4em;
 									left: 0px;
 									line-height: 1.4em;
@@ -787,7 +793,4 @@ label.yith-wcan-reset-table{
 		}
 	}
 
-	.yith-plugin-fw-radio__row small {
-		max-width: 40%;
-	}
 }

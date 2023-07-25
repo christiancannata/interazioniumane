@@ -1,8 +1,7 @@
 <?php
 /**
- *
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -58,6 +57,9 @@ class CacheRequest
         if (empty($request)) {
             $request = $_REQUEST;
         }
+
+        // Remove the nonce which is different everytime
+        unset($request['_ajax_nonce']);
 
         $this->_user_identifier = $this->_set_user_identifier();
         $encoded = json_encode($request);

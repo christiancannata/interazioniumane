@@ -43,21 +43,33 @@ if ( ! class_exists( 'WPOWP_Front' ) ) {
 
 			if ( ! empty( $settings ) && is_array( $settings ) ) {
 
-				$skip_cart = $settings['skip_cart'];
+				$skip_cart = $settings['skip_cart'];				
 
-				if ( true === wc_string_to_bool( $skip_cart ) ) {
+				// SKip Cart functionality
+				if ( true === filter_var( $skip_cart, FILTER_VALIDATE_BOOLEAN ) ) {
 					add_filter( 'woocommerce_add_to_cart_redirect', array( $this, 'skip_cart' ) );
-
-					add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'cart_btntext' ) );
-					add_filter( 'woocommerce_product_add_to_cart_text', array( $this, 'cart_btntext' ) );
 					add_filter( 'wc_add_to_cart_message_html', '__return_empty_string' );
-
 					add_filter( 'option_woocommerce_enable_ajax_add_to_cart', '__return_false' );
-					add_filter( 'woocommerce_get_price_html', array( $this, 'free_product' ), 9999, 2 );
+					add_filter( 'woocommerce_get_price_html', array( $this, 'free_product' ), 10, 2 );
 				}
 
-				if ( true === wc_string_to_bool( $settings['free_product'] ) ) {
-					add_filter( 'woocommerce_get_price_html', array( $this, 'free_product' ), 9999, 2 );
+				if ( false === filter_var( $settings['standard_add_cart'], FILTER_VALIDATE_BOOLEAN ) ) {
+					add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'cart_btntext' ) );
+					add_filter( 'woocommerce_product_add_to_cart_text', array( $this, 'cart_btntext' ) );
+				}
+
+				if ( true === filter_var( $settings['free_product'], FILTER_VALIDATE_BOOLEAN ) ) {
+					add_filter( 'woocommerce_get_price_html', array( $this, 'free_product' ), 10, 2 );
+
+					if ( true === filter_var( $settings['free_product_on_cart'], FILTER_VALIDATE_BOOLEAN ) ) {
+						// Cart and minicart
+						add_filter( 'woocommerce_cart_item_price', array( $this, 'cart_item_price_html' ), 10, 3 );
+					}
+
+					if ( true === filter_var( $settings['free_product_on_checkout'], FILTER_VALIDATE_BOOLEAN ) ) {
+						// Cart and Checkout
+						add_filter( 'woocommerce_cart_item_subtotal', array( $this, 'checkout_item_subtotal_html' ), 10, 3 );
+					}
 				}
 			}
 
@@ -92,9 +104,8 @@ if ( ! class_exists( 'WPOWP_Front' ) ) {
 		 * @return string
 		 */
 		public function cart_btntext() {
-			return ( true === wc_string_to_bool( $this->settings['skip_cart'] ) ) ? $this->settings['add_cart_text'] : '';
+			return ( false === filter_var( $this->settings['standard_add_cart'], FILTER_VALIDATE_BOOLEAN ) ) ? $this->settings['add_cart_text'] : '';
 		}
-
 
 		/**
 		 * Free Product
@@ -130,6 +141,36 @@ if ( ! class_exists( 'WPOWP_Front' ) ) {
 			}
 
 			return $price;
+		}
+
+		/**
+		 * Free Product
+		 *
+		 * @param  string $price_html
+		 * @param  object $cart_item
+		 * @param  object $cart_item_key
+		 * @return $price
+		 */
+		function cart_item_price_html( $price_html, $cart_item, $cart_item_key ) { // phpcs:ignore
+			if ( 0 === absint( $cart_item['data']->get_price() ) ) {
+				return '<span class="woocommerce-Price-amount amount">' . $this->settings['free_product_text'] . '</span>';
+			}
+			return $price_html;
+		}
+
+		/**
+		 * Free Product
+		 *
+		 * @param  string $subtotal_html
+		 * @param  object $cart_item
+		 * @param  object $cart_item_key
+		 * @return $price
+		 */
+		function checkout_item_subtotal_html( $subtotal_html, $cart_item, $cart_item_key ) { // phpcs:ignore
+			if ( 0 === absint( $cart_item['data']->get_price() ) ) {
+				return '<span class="woocommerce-Price-amount amount">' . $this->settings['free_product_text'] . '</span>';
+			}
+			return $subtotal_html;
 		}
 
 		/**

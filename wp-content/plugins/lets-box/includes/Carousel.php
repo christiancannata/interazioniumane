@@ -1,7 +1,7 @@
 <?php
 /**
  * @author WP Cloud Plugins
- * @copyright Copyright (c) 2022, WP Cloud Plugins
+ * @copyright Copyright (c) 2023, WP Cloud Plugins
  *
  * @since       2.0
  * @see https://www.wpcloudplugins.com
@@ -70,6 +70,9 @@ class Carousel
         }
 
         foreach ($images as $entry) {
+            $download_url = User::can_download() ? LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.urlencode($entry->get_id()).'&account_id='.$this->_folder['folder']->get_account_id().'&dl=1&listtoken='.Processor::instance()->get_listtoken() : null;
+            $lightbox_url = User::can_preview() ? (('boxthumbnail' === Processor::instance()->get_setting('loadimages') || false === User::can_download()) ? Client::instance()->get_thumbnail($entry, true, 1024, 768, false, true) : $download_url) : null;
+
             $data[] = [
                 'id' => $entry->get_id(),
                 'name' => htmlspecialchars($entry->get_basename(), ENT_COMPAT | ENT_HTML401 | ENT_QUOTES, 'UTF-8'),
@@ -78,9 +81,10 @@ class Carousel
                 'last_edited_time' => $entry->get_last_edited(),
                 'last_edited_time_str' => $entry->get_last_edited_str(),
                 'url' => Client::instance()->get_thumbnail($entry, true, 1024, 768, false, true),
-                'description' => nl2br($entry->get_description()),
+                'description' => htmlentities(nl2br($entry->get_description(), ENT_QUOTES | ENT_HTML401)),
                 'preloaded' => false,
-                'download_url' => User::can_download() ? LETSBOX_ADMIN_URL.'?action=letsbox-download&id='.urlencode($entry->get_id()).'&account_id='.$this->_folder['folder']->get_account_id().'&dl=1&listtoken='.Processor::instance()->get_listtoken() : null,
+                'download_url' => $download_url,
+                'lightbox_link' => $lightbox_url,
             ];
         }
 
