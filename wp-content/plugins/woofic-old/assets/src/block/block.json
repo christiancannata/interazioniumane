@@ -1,9 +1,0 @@
-{
-	"apiVersion": 2,
-	"name": "woofic/block-name",
-	"title": "block_name",
-	"category": "text",
-	"editorScript": "file:../../build/plugin-block.js",
-	"editorStyle": "file:../../build/plugin-block.css",
-	"style": "file:../../build/plugin-block.css"
-}

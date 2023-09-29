@@ -20,7 +20,6 @@ defined('ABSPATH') || exit;
 $moduloIscrizione = getModuloIscrizioneFromCart();
 $hasCandidatura = get_post_meta($moduloIscrizione, 'course_complete_subscription', true);
 ?>
-
 <?php if ($hasCandidatura): ?>
     <input type="hidden" class="hide-curriculum" value="1">
 <?php endif; ?>

@@ -75,7 +75,7 @@ defined( 'ABSPATH' ) || exit;
 				<?php if ( $order->get_payment_method_title() ) : ?>
 					<li class="woocommerce-order-overview__payment-method method">
 						<?php esc_html_e( 'Payment method:', 'woocommerce' ); ?>
-						<strong><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></strong>
+						<strong><?php echo $order->get_payment_method_title() ; ?></strong>
 					</li>
 				<?php endif; ?>
 

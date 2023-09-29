@@ -1,6 +1,6 @@
 <?php
 
-$app_client_id = "49V34bAZi48zalpm4VJVpXdoUrFyIm5I";
+$app_client_id = "uDLsAoTsy573Kq3VjVVNbrqMhxor5bZw";
 
 $device_code_forwfic = get_option('wfic_device_code');
 

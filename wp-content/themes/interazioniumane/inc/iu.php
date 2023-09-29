@@ -381,3 +381,80 @@ function getModuloIscrizioneFromOrder($order)
 
     return $moduloIscrizione;
 }
+
+
+
+function action_woocommerce_email_before_order_table( $order, $sent_to_admin, $plain_text, $email ) {   
+    // Only for order processing email 
+    if($order->get_payment_method() == 'bacs'){
+            $order->set_payment_method_title('Bonifico Bancario');
+            $order->save();
+    }
+
+
+    if ( $email->id == 'customer_processing_order' ) {
+
+        
+        $modulo = getModuloIscrizioneFromOrder($order);
+
+        if($modulo){
+            $testoEmail = get_field('testo_email', $moduloIscrizione);
+            if(trim($testoEmail) != ''){
+                echo $testoEmail;
+            }
+        }
+
+
+    }    
+}
+add_action( 'woocommerce_email_before_order_table', 'action_woocommerce_email_before_order_table', 10, 4 );
+
+
+function wpb_hook_javascript_footer() {
+    ?>
+        <script>
+          jQuery(document).ready(function($){
+            $(document).on('change','input[name="riduzione"]',function(){
+                jQuery('body').trigger('update_checkout');
+            })
+          })
+        </script>
+    <?php
+}
+add_action('wp_footer', 'wpb_hook_javascript_footer');
+
+
+add_action( 'woocommerce_cart_calculate_fees', 'wpf_wc_add_cart_fees_by_product_meta' );
+if ( ! function_exists( 'wpf_wc_add_cart_fees_by_product_meta' ) ) {
+
+    function wpf_wc_add_cart_fees_by_product_meta( $cart ) {
+
+        $data = [];
+        parse_str($_POST['post_data'], $data);
+    
+
+        if(isset($data['riduzione']) && $data['riduzione']>0){
+
+                $post = get_post($data['riduzione']);
+
+                if( $post){
+
+                $total = $cart->subtotal_ex_tax;
+
+                $name      = $post->post_title;
+                $amountPercent    = floatval(get_field('sconto_in_percentuale',$post->ID));
+                $amountToRemove = ($total/100)*$amountPercent;
+                $taxable   = false;
+                $tax_class = '';
+
+                $cart->add_fee( $name, -$amountToRemove, $taxable, $tax_class );
+                }
+               
+
+        }
+       
+    }
+}
+
+
+

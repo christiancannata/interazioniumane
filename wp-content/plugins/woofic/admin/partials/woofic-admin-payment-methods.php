@@ -23,6 +23,7 @@
                         <thead>
                         <th>Metodo di pagamento WooCommerce</th>
                         <th>Metodo di pagamento FattureInCloud</th>
+                        <th>Conto</th>
                         </thead>
                         <tbody>
                         <?php foreach ($enabled_gateways as $payment): ?>
@@ -49,6 +50,27 @@
                                     </select>
 
                                 </td>
+
+                                <td>
+                                    <?php
+                                    if (empty($ficPaymentAccounts)): ?>
+                                        <div class="alert alert-danger">Nessun conto presente.</div>
+                                    <?php
+                                    endif;
+                                    ?>
+                                    <select autocomplete="off" name="payment_accounts[<?php echo $payment['id']; ?>]"
+                                            class="form-control">
+
+                                        <?php foreach ($ficPaymentAccounts as $paymentApi): ?>
+                                            <option value="<?php echo $paymentApi->getId() ?>"
+                                                <?php if ($paymentApi->getId() == $payment['payment_account_id']): ?> selected <?php endif; ?>
+                                            ><?php echo $paymentApi->getName() ?></option>
+                                        <?php endforeach; ?>
+
+                                    </select>
+
+                                </td>
+
                             </tr>
                         <?php endforeach; ?>
                         </tbody>

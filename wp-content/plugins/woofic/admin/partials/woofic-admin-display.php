@@ -47,7 +47,7 @@
         <?php else: ?>
             <?php
 
-            $app_client_id = "49V34bAZi48zalpm4VJVpXdoUrFyIm5I";
+            $app_client_id = "uDLsAoTsy573Kq3VjVVNbrqMhxor5bZw";
 
             $response = wp_remote_post('https://api-v2.fattureincloud.it/oauth/device', [
                 'body' => [
@@ -57,9 +57,9 @@
             ]);
 
             $result_decoded = json_decode($response['body'], true);
+
             $device_code_forwfic = $result_decoded['data']['device_code'];
             $wfic_user_code = $result_decoded['data']['user_code'];
-
 
             $accessToken = get_option('woofic_access_token');
 
@@ -106,7 +106,7 @@
         $accessToken = get_option('woofic_token', false);
         if (!$accessToken):
 
-            $app_client_id = "X2oRM6dkUdcd353SNTfWEC8c5XYqaAbd";
+            $app_client_id = "uDLsAoTsy573Kq3VjVVNbrqMhxor5bZw";
 
             $response = wp_remote_post('https://api-v2.fattureincloud.it/oauth/device', [
                 'body' => [
@@ -171,19 +171,21 @@
             $selectedCompany = get_option('woofic_company_id', null);
             if (!$selectedCompany) {
                 update_option('woofic_company_id', $companies[0]['id']);
+                $selectedCompany = $companies[0]['id'];
             }
 
             foreach ($companies as $company):
                 ?>
                 <label>
                     <input
+                            autocomplete="off"
                         <?php if ($selectedCompany == $company['id']): ?> checked <?php endif; ?>
                             type="radio" name="woofic_company_id" value="<?php echo $company['id']; ?>">
                     <?php echo $company['name']; ?>
                 </label>
             <?php endforeach; ?>
             <br><br>
-            <a href="/wp-admin/admin.php?logout=1&page=woofic" class="button-primary">Disconnetti
+            <a href="/wp-admin/admin.php?logout=1&page=woofic-dashboard" class="button-primary">Disconnetti
                 da
                 FattureInCloud</a>
         <?php endif; ?>

@@ -27,7 +27,7 @@
  * Requires at least: 5.0
  * Tested up to: 6.2
  * WC requires at least: 5.0
- * WC tested up to: 7.8
+ * WC tested up to: 7.9
  */
 // If this file is called directly, abort.
 namespace WPOWP;

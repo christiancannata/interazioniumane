@@ -50,7 +50,79 @@ if (!$checkout->is_registration_enabled() && $checkout->is_registration_required
 
     <?php endif; ?>
 
+
+ <?php 
+
+    global $woocommerce;
+
+    $canViewRiduzioni = false;
+
+    $items = $woocommerce->cart->get_cart();
+
+    foreach ($items as $item => $product) {
+        $earlyMode = get_field('in_early', $product['product_id']);
+        if(is_null($earlyMode ) || $earlyMode === false){
+            $canViewRiduzioni = true;
+        }
+    }
+
+    
+    if($canViewRiduzioni):
+   
+    $moduloIscrizione = null;
+    $riduzioniProduct = [];
+    foreach ($items as $item => $product) {
+        $riduzioni = get_field('riduzioni', $product['product_id']);
+        if (is_array($riduzioni) && !empty($riduzioni)) {
+            $riduzioniProduct = $riduzioni;
+        }
+    }
+
+    $riduzioniProduct = array_map(function($tmp){
+        $post = get_post($tmp);
+        if(!$post){
+            return null;
+        }
+        $post->riduzione = floatval(get_field('sconto_in_percentuale',$post->ID));
+        return $post;
+    },$riduzioniProduct );
+
+    ?>
+    <?php if(count($riduzioniProduct)> 0): ?>
+<div class="woocommerce-additional-fields">
+<h3 class="my-account--minititle" style="">Hai diritto a qualche riduzione?</h3>
+    
+    <div class="container-checkbox-riduzione">
+        <div>
+        <input type="radio" name="riduzione" value="0" checked>
+        </div>
+        <div>
+            <span>Non ho nessuna riduzione</span>
+        </div>
+    </div>
+    <?php foreach($riduzioniProduct as $riduzione): ?>
+    <div class="container-checkbox-riduzione">
+        <div>
+        <input type="radio" name="riduzione" value="<?php echo $riduzione->ID ?>">
+        </div>
+        <div>
+            <span><?php echo $riduzione->post_title; ?></span>
+        </div>
+    </div>
+
+<?php endforeach; ?>
+
+
+
+</div>
+
+<?php endif; ?>
+
+<?php endif; ?>
+
+
     <?php do_action('woocommerce_checkout_before_order_review_heading'); ?>
+
 
     <h3 id="order_review_heading"><?php esc_html_e('Your order', 'woocommerce'); ?></h3>
 
