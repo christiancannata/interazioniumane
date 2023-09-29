@@ -191,7 +191,7 @@ if ( post_password_required() ) {
 			<?php if(!get_field('sold_out_course')): ?>
 				<div class="course-fixed--button">
 					<?php if( str_contains($product->get_title(), 'II livello') ): ?>
-						<a href="<?php echo $product->add_to_cart_url(); ?>" class="dstr-button dstr-button-primary dstr-button-small" title="Iscriviti alle selezioni">Iscriviti alle selezioni</a>
+						<a href="<?php echo $product->add_to_cart_url(); ?>" class="dstr-button dstr-button-primary dstr-button-small" title="Iscriviti">Iscriviti</a>
 					<?php elseif(get_field('link_esterno')): ?>
 							<a href="<?php echo the_field('link_esterno_url'); ?>" target="_blank" class="dstr-button dstr-button-primary dstr-button-small" title="Iscriviti">Iscriviti</a>
 					<?php else: ?>
@@ -317,7 +317,7 @@ if ( post_password_required() ) {
 							<?php if(!get_field('sold_out_course')): ?>
 								<div class="course__hero--button">
 									<?php if( str_contains($product->get_title(), 'II livello') ): ?>
-										<a href="<?php echo $product->add_to_cart_url(); ?>" class="dstr-button dstr-button-primary" title="Iscriviti alle selezioni">Iscriviti alle selezioni</a>
+										<a href="<?php echo $product->add_to_cart_url(); ?>" class="dstr-button dstr-button-primary" title="Iscriviti">Iscriviti</a>
 									<?php elseif(get_field('link_esterno')): ?>
 									<a href="<?php echo the_field('link_esterno_url'); ?>" target="_blank" class="dstr-button dstr-button-primary" title="Iscriviti">Iscriviti</a>
 									<?php else: ?>
@@ -469,6 +469,19 @@ if ( post_password_required() ) {
 <div class="course__container">
 	<div class="typography-content">
 		<div class="entry-content">
+
+			<?php	if( have_rows('video_list') ):
+					echo '<div class="video_course_section">';
+						while( have_rows('video_list') ) : the_row();
+								$codice_youtube = get_sub_field('codice_youtube');
+								echo '<div class="video_course_section__box">';
+								echo '<div class="videoWrapper">';
+								echo $codice_youtube;
+								echo '</div>';
+								echo '</div>';
+						endwhile;
+						echo '</div>';
+					endif;?>
 
 			<?php if($course_overview): ?>
 				<div class="course__section">

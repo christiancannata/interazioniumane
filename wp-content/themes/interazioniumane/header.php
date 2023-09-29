@@ -212,6 +212,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		<div class="info_iu">
 			<span class="info_iu--button"><span class="icon-arrow-down"></span></span>
 			<h4 class="info_iu--title"><?php echo the_field('info_iu_title', 'option'); ?></h4>
-			<p class="info_iu--subtitle"><?php echo the_field('info_iu_subtitle', 'option'); ?></p>
+			<div class="info_iu--subtitle"><?php echo the_field('info_iu_subtitle', 'option'); ?></div>
 		</div>
 	<?php endif;?>
