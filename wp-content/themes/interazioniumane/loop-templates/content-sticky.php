@@ -129,10 +129,11 @@ $thumb_url = $thumb_url_array[0];
 			<?php if ( has_post_thumbnail() ): ?>
 				<div class="course__hero--image">
 					<div class="image-cover">
-
+						<?php if($start_date):?>
 						<div class="ehi-label hero--data-info">
 							Dal <?php echo $start_day . ' ' . $first_month . ' ' . $start_year;  ?>
 						</div>
+					<?php endif;?>
 						<div class="image-background" style="background-image:url('<?php the_post_thumbnail_url();?>');">
 							<img src="<?php echo get_template_directory_uri(); ?>/assets/img/elements/default.png" title="<?php the_title(); ?>" />
 						</div>

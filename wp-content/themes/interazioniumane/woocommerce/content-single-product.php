@@ -601,10 +601,11 @@ if ( post_password_required() ) {
 										echo '</div>';
 									endif;?>
 
-
+									<?php if($calendar_file):?>
 										<div class="calendar-download" style="margin-top:8px;">
 											<a class="arrow-link" href="<?php echo $calendar_file; ?>" title="Scarica il calendario" target="_blank" >Scarica il calendario</a>
 										</div>
+									<?php endif;?>
 
 						</div>
 
