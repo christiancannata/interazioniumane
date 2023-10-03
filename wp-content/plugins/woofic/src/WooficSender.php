@@ -63,7 +63,7 @@ class WooficSender
         if (!$type) {
             $type = 'INVOICE';
         }
-        
+
 
         $typeLabel = 'fattura';
         if ($type == 'RECEIPT') {
@@ -106,6 +106,17 @@ class WooficSender
         $pec = $order->get_meta('_billing_pec');
         $sdi = $order->get_meta('_billing_sdi');
         $taxCode = $order->get_meta('_billing_tax_code');
+        $fiscalCode = $order->get_meta('codice_fiscale');
+
+        $pecSecondary = $order->get_meta('email_pec');
+
+        if (!empty($pecSecondary)) {
+            $pec = $pecSecondary;
+        }
+
+        if (!empty($fiscalCode)) {
+            $taxCode = $fiscalCode;
+        }
 
         $companyName = $order->get_billing_company();
 
@@ -116,12 +127,25 @@ class WooficSender
         $country = WC()->countries->countries[$order->get_billing_country()];
 
         $entity = new Entity();
+
+        $ragioneSociale = $order->get_meta('ragione_sociale');
+        if ($ragioneSociale) {
+            $companyName = $ragioneSociale;
+        }
+
+        $email = $order->get_billing_email();
+        $emailSecondary = $order->get_meta('billing_email');
+        if ($emailSecondary) {
+            $email = $emailSecondary;
+        }
+
         $entity
             ->setName($companyName)
             ->setVatNumber($vatCode)
-            ->setEmail($order->get_billing_email())
+            ->setEmail($email)
             ->setCertifiedEmail($pec)
             ->setTaxCode($taxCode)
+            ->setVatNumber($taxCode)
             ->setAddressStreet($order->get_billing_address_1())
             ->setAddressPostalCode($order->get_billing_postcode())
             ->setAddressCity($order->get_billing_city())

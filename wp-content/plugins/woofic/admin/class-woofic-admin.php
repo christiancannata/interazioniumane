@@ -137,6 +137,7 @@ class Woofic_Admin
             'manage_options',
             'import-order',
             [$this, 'importOrder']);
+
     }
 
     public function add_metaboxes()
@@ -157,6 +158,9 @@ class Woofic_Admin
                         <br><br>
                         <a href="/wp-admin/admin.php?page=import-order&order_id=<?php echo $post->ID; ?>"
                            class="button import-fic button-primary" href="#">Aggiorna manualmente</a><br><br>
+
+                        <a href="/wp-admin/admin.php?page=import-order&delete=1&order_id=<?php echo $post->ID; ?>"
+                           class="button import-fic button-primary" href="#">Elimina associazione fattura</a>
                     <?php
                     else: ?>
                         <span>Non ancora importato</span><br><br>
@@ -215,6 +219,7 @@ class Woofic_Admin
                         'Authorization' => 'Basic ' . base64_encode(WOOFIC_ENDPOINT_USERNAME . ':' . WOOFIC_ENDPOINT_PASSWORD)
                     )
                 ]);
+
                 $response = json_decode(wp_remote_retrieve_body($responseActivation), true);
 
             }
@@ -464,7 +469,14 @@ class Woofic_Admin
     public function importOrder()
     {
 
+
         if ($_GET['order_id']) {
+
+            if (isset($_GET['delete'])) {
+                delete_post_meta($_GET['order_id'], 'woofic_invoice_id');
+                wp_redirect(wp_get_referer());
+                die();
+            }
 
             $order = wc_get_order($_GET['order_id']);
 

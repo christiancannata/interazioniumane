@@ -66,6 +66,7 @@
             $wooficLicenceKey = get_option('woofic_license_key');
             $wooficLicence = get_option('woofic_active_license');
 
+
             ?>
             <p>Correttamente collegato a Woofic</p>
             <br><br>
@@ -92,9 +93,7 @@
                     <td><?php echo (new \DateTime($wooficLicence['expiresAt']))->format("d-m-Y") ?></td>
                 </tr>
             </table><br><br>
-
-            <a href="/wp-admin/admin.php?logout_woofic=1&page=woofic" class="button-primary">Disconnetti
-                da
+            <a href="/wp-admin/admin.php?logout=1&page=woofic-dashboard" class="button-primary">Disconnetti da
                 WooFic</a>
         <?php endif; ?>
     </div>
